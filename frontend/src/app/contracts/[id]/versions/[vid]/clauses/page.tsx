@@ -370,7 +370,7 @@ function ClauseExplorerContent({
   const [detailError,   setDetailError]   = useState("");
 
   // Debounce text search
-  const qTimer = useRef<ReturnType<typeof setTimeout>>();
+  const qTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [debouncedQ, setDebouncedQ] = useState(filterQ);
   useEffect(() => {
     clearTimeout(qTimer.current);
