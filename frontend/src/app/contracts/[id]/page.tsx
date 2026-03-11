@@ -441,7 +441,7 @@ function HistoryTimeline({ history }: { history: HistoryOut }) {
     | { kind: "workflow"; event: WorkflowEventOut };
 
   const entries: TimelineEntry[] = [
-    { kind: "upload", ts: history.uploaded_at },
+    { kind: "upload" as const, ts: history.uploaded_at },
     ...history.analyses.map((a) => ({
       kind:   "analysis" as const,
       ts:     a.created_at,
