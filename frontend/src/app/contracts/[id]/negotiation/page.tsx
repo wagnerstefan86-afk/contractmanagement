@@ -21,21 +21,38 @@ function priorityBadge(priority: string) {
   return "badge badge--green";
 }
 
+interface RegulatoryBasisItem {
+  sr_id?: string;
+  framework?: string;
+  article?: string;
+  obligation?: string;
+  penalty?: string;
+  match_type?: string;
+  confidence?: number;
+  regulation?: string;
+}
+
+interface ClauseExcerpt {
+  clause_id?: string;
+  page?: number;
+  text?: string;
+}
+
 interface NegItem {
   negotiation_id?: string;
   action_id?: string;
-  topic?: string;
+  topic?: string | string[];
   priority?: string;
   affected_clauses?: string[];
   problem_summary?: string;
-  regulatory_basis?: string;
+  regulatory_basis?: string | RegulatoryBasisItem[];
   recommended_clause_text?: string;
   negotiation_argument?: string;
   fallback_option?: string;
   owner_role?: string;
   estimated_effort?: string;
   expected_risk_reduction?: string;
-  current_clause_excerpts?: string[];
+  current_clause_excerpts?: (string | ClauseExcerpt)[];
 }
 
 function NegCard({ item }: { item: NegItem }) {
@@ -49,7 +66,7 @@ function NegCard({ item }: { item: NegItem }) {
           <span className={priorityBadge(item.priority ?? "")}>{item.priority}</span>
           {item.owner_role && <span className="tag">{item.owner_role}</span>}
         </div>
-        <h3 className="neg-topic">{item.topic ?? "—"}</h3>
+        <h3 className="neg-topic">{Array.isArray(item.topic) ? item.topic.join(", ") : (item.topic ?? "—")}</h3>
         <p className="neg-summary">{item.problem_summary ?? ""}</p>
         <button className="btn btn-sm btn-ghost expand-btn">
           {expanded ? "▲ Less" : "▼ More"}
@@ -61,7 +78,22 @@ function NegCard({ item }: { item: NegItem }) {
           {item.regulatory_basis && (
             <div className="neg-section">
               <h4>Regulatory basis</h4>
-              <p>{item.regulatory_basis}</p>
+              {Array.isArray(item.regulatory_basis)
+                ? item.regulatory_basis.map((rb, i) => (
+                    <div key={i} className="reg-basis-item">
+                      {typeof rb === "object" ? (
+                        <>
+                          <p><strong>{rb.framework} — {rb.article}</strong></p>
+                          {rb.obligation && <p>{rb.obligation}</p>}
+                          {rb.penalty && <p className="penalty-note"><em>Penalty: {rb.penalty}</em></p>}
+                        </>
+                      ) : (
+                        <p>{rb}</p>
+                      )}
+                    </div>
+                  ))
+                : <p>{item.regulatory_basis}</p>
+              }
             </div>
           )}
 
@@ -69,7 +101,14 @@ function NegCard({ item }: { item: NegItem }) {
             <div className="neg-section">
               <h4>Current clause(s)</h4>
               {item.current_clause_excerpts.map((ex, i) => (
-                <blockquote key={i} className="clause-excerpt">{ex}</blockquote>
+                <blockquote key={i} className="clause-excerpt">
+                  {typeof ex === "object" ? (
+                    <>
+                      {ex.clause_id && <span className="clause-id">{ex.clause_id}{ex.page ? ` (p. ${ex.page})` : ""}: </span>}
+                      {ex.text}
+                    </>
+                  ) : ex}
+                </blockquote>
               ))}
             </div>
           )}
