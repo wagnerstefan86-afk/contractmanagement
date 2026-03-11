@@ -1,0 +1,6 @@
+{
+  "contract_id":      "CT-TEST-001",
+  "contract_type":    "SAAS",
+  "vendor_risk_tier": "HIGH",
+  "data_sensitivity": "HIGH"
+}

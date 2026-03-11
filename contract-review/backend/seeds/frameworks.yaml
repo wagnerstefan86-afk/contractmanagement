@@ -1,0 +1,49 @@
+# ============================================================================
+# frameworks.yaml — Compliance framework definitions
+# Seed file for the `frameworks` table.
+# All ids must match pattern ^[a-z0-9_]+$
+# ============================================================================
+
+frameworks:
+
+  - id: iso27001
+    name: "ISO/IEC 27001:2022"
+    version: "2022"
+    description: >
+      International standard for information security management systems (ISMS).
+      Annex A controls reorganised in 2022 edition into 4 themes:
+      Organizational, People, Physical, Technological.
+    authority: ISO
+    reference_url: "https://www.iso.org/standard/27001"
+    is_active: true
+
+  - id: dora
+    name: "Digital Operational Resilience Act"
+    version: "2022/2554"
+    description: >
+      EU regulation on digital operational resilience for the financial sector.
+      Applies to financial entities and their critical ICT third-party service providers.
+      Entered into force January 2023; applies from January 2025.
+    authority: EU
+    reference_url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32022R2554"
+    is_active: true
+
+  - id: nis2
+    name: "Network and Information Security Directive 2"
+    version: "2022/2555"
+    description: >
+      EU directive on cybersecurity measures for essential and important entities.
+      Expands scope of original NIS directive; transpositon deadline October 2024.
+    authority: EU
+    reference_url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32022L2555"
+    is_active: true
+
+  - id: gdpr
+    name: "General Data Protection Regulation"
+    version: "2016/679"
+    description: >
+      EU regulation on the protection of natural persons with regard to the processing
+      of personal data. Applies to all processors and controllers handling EU resident data.
+    authority: EU
+    reference_url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32016R0679"
+    is_active: true

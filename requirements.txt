@@ -1,0 +1,25 @@
+# Contract Analysis Platform — Python dependencies
+# Install with: pip install -r requirements.txt
+
+# ── Web framework ──────────────────────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+aiofiles>=23.2.1
+python-multipart>=0.0.9
+
+# ── Database (SQLite via SQLAlchemy — no server needed) ───────────────────────
+sqlalchemy>=2.0.0
+
+# ── Auth ──────────────────────────────────────────────────────────────────────
+passlib[bcrypt]>=1.7.4
+python-jose[cryptography]>=3.3.0
+bcrypt>=4.1.0
+
+# ── Contract ingestion (PDF / DOCX / plain text) ──────────────────────────────
+pdfminer.six>=20221105
+python-docx>=1.1.0
+regex>=2024.5.15
+
+# ── LLM providers (optional — only needed when LLM_ENABLED=true) ──────────────
+anthropic>=0.29.0
+openai>=1.35.0

@@ -1,0 +1,83 @@
+[
+  {
+    "sr_id": "SR-DORA-01",
+    "framework": "DORA",
+    "finding_type": "MISSING",
+    "severity": "HIGH",
+    "confidence": null,
+    "recommended_action": "Vertragsergänzung zwingend erforderlich: Einfügung einer eigenständigen Klausel 'ICT Risk Management Framework' gemäß DORA Art. 6–10 (EU) 2022/2554. Die Klausel muss die fünf Funktionsbereiche abdecken: (1) Identifikation kritischer ICT-Assets und Abhängigkeiten, (2) Schutzmaßnahmen und Zugangskontrolle, (3) Erkennung von Anomalien und Vorfällen, (4) Reaktions- und Wiederherstellungsplan mit definierten RTO/RPO, (5) Testverfahren inkl. TLPT (Threat-Led Penetration Testing) nach DORA Art. 26. Ohne diese Klausel ist der Vertrag für regulierte Finanzentitäten nicht DORA-konform. Eskalation an Legal & Compliance vor Vertragsunterzeichnung.",
+    "pages_to_review": [],
+    "layout_type": [],
+    "notes": [
+      "Keine Textstelle im gesamten Dokument adressiert ICT-Risikomanagement — kein partieller Match, kein Platzhalter, kein Verweis auf externe Policy.",
+      "DORA Art. 6 Abs. 1 verpflichtet Finanzunternehmen und ihre IKT-Drittanbieter explizit zu einem dokumentierten Rahmenwerk. Eine vertragliche Lücke begründet regulatorisches Haftungsrisiko gegenüber der zuständigen Aufsichtsbehörde (BaFin/EBA).",
+      "Empfohlene Musterdokumentation: ENISA DORA Implementation Guide v1.2, EBA/GL/2019/04 (IKT-Risikomanagement).",
+      "Da keine Seite im Dokument einen Treffer lieferte, ist eine Volldurchsicht (alle Seiten 1–12) durch den Prüfer erforderlich — es könnte eine unnummerierte Anlage oder ein Sideletter existieren."
+    ]
+  },
+  {
+    "sr_id": "SR-NIS2-01",
+    "framework": "NIS2",
+    "finding_type": "WEAK_MATCH",
+    "severity": "HIGH",
+    "confidence": 0.78,
+    "recommended_action": "Klauselüberarbeitung auf Seite 5 (bullet_list) erforderlich: Der bestehende Text muss um konkrete, NIS2-konforme Meldefristen gemäß Art. 23 Abs. 4 der Richtlinie (EU) 2022/2555 ergänzt werden. Empfohlene Formulierung: 'Der Anbieter übermittelt (i) eine Frühwarnung innerhalb von 24 Stunden nach Kenntnisnahme eines erheblichen Sicherheitsvorfalls, (ii) eine vollständige Vorfallsmeldung innerhalb von 72 Stunden nach Kenntnisnahme sowie (iii) einen abschließenden Bericht spätestens einen Monat nach Einreichung der Vorfallsmeldung.' Zusätzlich muss der Begriff 'erheblicher Sicherheitsvorfall' (significant incident) nach NIS2 Art. 23 Abs. 3 definiert oder auf die nationale Umsetzungsgesetzgebung verwiesen werden. Das bullet-format der Klausel begünstigt eine gezielte Ergänzung ohne Neustrukturierung des Abschnitts.",
+    "pages_to_review": [5],
+    "layout_type": ["bullet_list"],
+    "notes": [
+      "Seite 5 (bullet_list): Menschlicher Prüfer soll sicherstellen, dass alle Bulletpoints vollständig extrahiert wurden — das OCR/Parsing-Modell könnte untergeordnete Listenpunkte übersehen haben.",
+      "Der Begriff 'erhebliches Sicherheitsereignis' im Vertragstext entspricht nicht dem definierten NIS2-Schwellenwert (Art. 23 Abs. 3): Auswirkung auf ≥ 500 Nutzer oder Unterbrechung > 1h bei systemrelevanten Diensten.",
+      "Achtung: NIS2 gilt nicht direkt vertraglich, sondern über den nationalen Umsetzungsakt (Deutschland: NIS2UmsuCG). Klausel sollte auf die anwendbare nationale Norm verweisen.",
+      "Confidence 0.78 deutet auf semantische Ähnlichkeit hin, die bei einer NIS2-Compliance-Prüfung nicht ausreicht — juristisch ist Genauigkeit der Fristen nicht verhandelbar."
+    ]
+  },
+  {
+    "sr_id": "SR-GDPR-01",
+    "framework": "GDPR",
+    "finding_type": "WEAK_MATCH",
+    "severity": "MEDIUM",
+    "confidence": 0.65,
+    "recommended_action": "Zweistufiger Review-Prozess erforderlich: (1) OCR-Qualitätskorrektur — Originaldokument (Seite 7) muss durch einen menschlichen Prüfer im Klartext verifiziert werden, da die maschinenextrahierte Fassung Zeichenfehler aufweist (Confidence 0.65 unterschreitet den Akzeptanzschwellenwert von 0.75). Danach Stage-5-Rematching. (2) Inhaltliche Klauselschärfung — nach Textbereinigung sollte die Klausel alle betroffenenrelevanten Rechte gemäß DSGVO Art. 15–22 explizit enumieren: Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung (Art. 18), Datenübertragbarkeit (Art. 20), Widerspruch (Art. 21). Der Verweis auf 'applicable data protection law' ist durch 'Verordnung (EU) 2016/679 (DSGVO) sowie anwendbares nationales Datenschutzrecht' zu ersetzen.",
+    "pages_to_review": [7],
+    "layout_type": ["ocr_text"],
+    "notes": [
+      "Seite 7 (ocr_text): KRITISCH für menschlichen Prüfer — OCR-Fehler im juristisch relevanten Text sind rechtlich nicht hinnehmbar. Originalvertrag physisch oder als zertifiziertes PDF beiziehen.",
+      "Erkannte Zeichenfehler im extrahierten Text: 'Provid3r', 'sh4ll', 'supp0rt', 'subj3cts', 'acc3ss', 'eras[ure]', 'peri0d', 'pr0tection' — Fehlerrate ca. 12% der Kernwörter.",
+      "Datenübertragbarkeit (Art. 20 DSGVO) und Widerspruchsrecht (Art. 21 DSGVO) fehlen in der extrahierten Fassung vollständig — unklar ob im Original vorhanden oder echte Vertragslücke.",
+      "Für den Audit-Trail: Stage-5-Matching-Ergebnis vor OCR-Korrektur nicht als Compliance-Nachweis verwenden. Ergebnis als 'PENDING_HUMAN_REVIEW' kennzeichnen bis zur Verifikation.",
+      "Datenschutzbeauftragter (DSB) sollte GDPR-Klauseln unabhängig vom Matching-Ergebnis reviewen (Art. 38 Abs. 3 DSGVO)."
+    ]
+  },
+  {
+    "sr_id": "SR-ISO27001-01",
+    "framework": "ISO27001",
+    "finding_type": "COMPLIANT",
+    "severity": "LOW",
+    "confidence": 0.92,
+    "recommended_action": "Keine sofortige Maßnahme erforderlich. Für das nächste Jahres-Audit empfohlen: Nachweis erbringen, dass die referenzierte ISMS-Policy tatsächlich ISO/IEC 27001:2022 (nicht die veraltete 2013-Version) entspricht. Vertragliche Pflicht zur jährlichen Überprüfung und Bereitstellung auf Anfrage ist vorhanden und ausreichend.",
+    "pages_to_review": [],
+    "layout_type": ["paragraph"],
+    "notes": [
+      "Confidence 0.92 — starker Match. Klausel ist sprachlich präzise und referenziert explizit ISO/IEC 27001:2022.",
+      "Seite 3 (paragraph): Kein gesonderter Human-Review-Bedarf. Standardmäßige Qualitätssicherung im Jahresturnus ausreichend.",
+      "Empfehlung für nächste Vertragsrevision: Prüfen ob ein Annex mit aktuellem Zertifikatsnachweis (ISO 27001 Certificate of Compliance) als Vertragsanlage beigefügt werden sollte.",
+      "Kein Action-Item für aktuellen Compliance-Zyklus."
+    ]
+  },
+  {
+    "sr_id": "SR-ISO27001-02",
+    "framework": "ISO27001",
+    "finding_type": "COMPLIANT",
+    "severity": "LOW",
+    "confidence": 0.88,
+    "recommended_action": "Keine sofortige Maßnahme erforderlich. Empfehlung für das nächste DR-Audit: Sicherstellen, dass der jährliche DR-Test-Bericht dem Kunden tatsächlich zugestellt wird (nicht nur 'available on request') und dass die Testergebnisse gegen die vertraglich fixierten RTO (≤ 4h) und RPO (≤ 1h) validiert werden. Tabellenspalte 'Verification Method' sollte um eine Eskalationsmatrix bei SLA-Verletzung ergänzt werden.",
+    "pages_to_review": [10],
+    "layout_type": ["table"],
+    "notes": [
+      "Seite 10 (table): Menschlicher Prüfer sollte bei der Tabellendarstellung sicherstellen, dass alle Spalten korrekt geparst wurden — Tabellen-Parsing ist fehleranfälliger als Fließtext.",
+      "Confidence 0.88 — solider Match. Die drei Tabellenzeilen (RTO, RPO, DR-Test) decken die ISO 27001 Annex A.17 Anforderungen zur Betriebskontinuität strukturell ab.",
+      "Quarterly RPO-Verifikation via Backup-Logs ist positiv zu werten — geht über den ISO-27001-Mindeststandard hinaus.",
+      "Kein Action-Item für aktuellen Compliance-Zyklus. Für Folgeaudit: Nachweis des letzten DR-Tests anfordern."
+    ]
+  }
+]

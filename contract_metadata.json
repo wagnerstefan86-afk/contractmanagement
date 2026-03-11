@@ -1,0 +1,30 @@
+{
+  "contract_id": "CT-2026-001",
+  "contract_type": "DATA_PROCESSING",
+  "vendor_risk_tier": "CRITICAL",
+  "data_sensitivity": "PERSONAL_DATA",
+  "confidence": 0.81,
+  "_meta": {
+    "classification_source": "RULES_ONLY",
+    "chunks_processed": 15,
+    "text_length_chars": 7621,
+    "risk_tier_reason": "Vendor processes personal or special-category data — GDPR Art. 28 obligations apply",
+    "rule_based_result": {
+      "contract_type": "DATA_PROCESSING",
+      "vendor_risk_tier": "CRITICAL",
+      "data_sensitivity": "PERSONAL_DATA",
+      "confidence": 0.81
+    },
+    "llm_result": null,
+    "reasoning_signals": [
+      "[CLOUD_HOSTING] keyword hits: infrastructure, compute, storage, region, availability zone, data center",
+      "[CONFIDENTIAL] keyword hits: confidential, proprietary, trade secret, nda",
+      "[DATA_PROCESSING] keyword hits: data processor, data controller, processor, controller, gdpr art. 28, data processing agreement",
+      "[ICT_OUTSOURCING] keyword hits: financial entity, dora, ict, operational dependency, bafin, regulation (eu) 2022/2554",
+      "[INTERNAL] keyword hits: employee data, business information",
+      "[MSP] keyword hits: monitoring",
+      "[PERSONAL_DATA] keyword hits: personal data, data subject, name, email address, ip address, cookie",
+      "[SAAS] keyword hits: subscription, saas, uptime, tenant, per seat, annual subscription"
+    ]
+  }
+}

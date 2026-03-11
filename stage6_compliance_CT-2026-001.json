@@ -1,0 +1,442 @@
+{
+  "report_id": "RPT-CT-2026-001-20260310",
+  "contract_id": "CT-2026-001",
+  "generated_at": "2026-03-10T16:54:59.320325+00:00",
+  "stage": 6,
+  "org_profile": {
+    "organization_name": "FinanzBank AG",
+    "industry": "FINANCIAL_SERVICES",
+    "regulatory_frameworks": [
+      "ISO27001",
+      "DORA",
+      "NIS2",
+      "GDPR"
+    ],
+    "nis2_entity_type": "ESSENTIAL",
+    "is_regulated_financial_entity": true
+  },
+  "contract_metadata": {
+    "contract_id": "CT-2026-001",
+    "contract_type": "DATA_PROCESSING",
+    "vendor_risk_tier": "CRITICAL",
+    "data_sensitivity": "PERSONAL_DATA",
+    "classification_confidence": 0.81
+  },
+  "sr_compliance": {
+    "source_file": "clause_sr_matches.json",
+    "linkage_method": "clause_direct",
+    "frameworks_checked": [
+      "DORA",
+      "GDPR",
+      "ISO27001",
+      "NIS2"
+    ],
+    "total_srs_evaluated": 10,
+    "frameworks": {
+      "DORA": {
+        "total": 2,
+        "compliant": 1,
+        "weak_match": 1,
+        "missing": 0,
+        "coverage_percent": 100.0
+      },
+      "GDPR": {
+        "total": 4,
+        "compliant": 0,
+        "weak_match": 1,
+        "missing": 3,
+        "coverage_percent": 25.0
+      },
+      "ISO27001": {
+        "total": 2,
+        "compliant": 0,
+        "weak_match": 1,
+        "missing": 1,
+        "coverage_percent": 50.0
+      },
+      "NIS2": {
+        "total": 2,
+        "compliant": 1,
+        "weak_match": 0,
+        "missing": 1,
+        "coverage_percent": 50.0
+      }
+    },
+    "summary": {
+      "COMPLIANT": 2,
+      "WEAK_MATCH": 3,
+      "MISSING": 5
+    },
+    "findings": [
+      {
+        "source": "SR_COMPLIANCE",
+        "finding_type": "WEAK_MATCH",
+        "severity": "MEDIUM",
+        "framework": "DORA",
+        "sub_requirement_id": "SR-DORA-01",
+        "control_id": "DORA Art. 6-10",
+        "title": "ICT Risk Management Framework",
+        "confidence": 0.68,
+        "matched_clause_id": "CL-108",
+        "direct_matches": 0,
+        "partial_matches": 1,
+        "clause_count": 1,
+        "description": "Partial coverage of 'ICT Risk Management Framework' (best confidence 68% in clause CL-108). Clause may be insufficiently specific.",
+        "extracted_evidence": "all ICT-related regulatory reporting obligations on behalf of the Customer \u2026 concentration risk exposure in accordance with DORA Article 30"
+      },
+      {
+        "source": "SR_COMPLIANCE",
+        "finding_type": "MISSING",
+        "severity": "HIGH",
+        "framework": "GDPR",
+        "sub_requirement_id": "SR-GDPR-01",
+        "control_id": "GDPR Art. 12-22",
+        "title": "Data Subject Rights Handling",
+        "confidence": null,
+        "matched_clause_id": null,
+        "direct_matches": 0,
+        "partial_matches": 0,
+        "clause_count": 1,
+        "description": "No clause found covering 'Data Subject Rights Handling' (GDPR GDPR Art. 12-22). This sub-requirement is entirely absent from the contract.",
+        "extracted_evidence": ""
+      },
+      {
+        "source": "SR_COMPLIANCE",
+        "finding_type": "WEAK_MATCH",
+        "severity": "MEDIUM",
+        "framework": "GDPR",
+        "sub_requirement_id": "SR-GDPR-02",
+        "control_id": "GDPR Art. 28",
+        "title": "Data Processing Agreement (Art. 28)",
+        "confidence": 0.65,
+        "matched_clause_id": "CL-105",
+        "direct_matches": 0,
+        "partial_matches": 2,
+        "clause_count": 3,
+        "description": "Partial coverage of 'Data Processing Agreement (Art. 28)' (best confidence 65% in clause CL-105). Clause may be insufficiently specific.",
+        "extracted_evidence": "All data processing activities must conform to applicable requirements \u2026 data processing \u2026 processing"
+      },
+      {
+        "source": "SR_COMPLIANCE",
+        "finding_type": "MISSING",
+        "severity": "HIGH",
+        "framework": "GDPR",
+        "sub_requirement_id": "SR-GDPR-03",
+        "control_id": "GDPR Art. 44-49",
+        "title": "International Data Transfers",
+        "confidence": null,
+        "matched_clause_id": null,
+        "direct_matches": 0,
+        "partial_matches": 0,
+        "clause_count": 1,
+        "description": "No clause found covering 'International Data Transfers' (GDPR GDPR Art. 44-49). This sub-requirement is entirely absent from the contract.",
+        "extracted_evidence": ""
+      },
+      {
+        "source": "SR_COMPLIANCE",
+        "finding_type": "MISSING",
+        "severity": "HIGH",
+        "framework": "GDPR",
+        "sub_requirement_id": "SR-GDPR-04",
+        "control_id": "GDPR Art. 28(4)",
+        "title": "Subprocessor Management",
+        "confidence": null,
+        "matched_clause_id": null,
+        "direct_matches": 0,
+        "partial_matches": 0,
+        "clause_count": 1,
+        "description": "No clause found covering 'Subprocessor Management' (GDPR GDPR Art. 28(4)). This sub-requirement is entirely absent from the contract.",
+        "extracted_evidence": ""
+      },
+      {
+        "source": "SR_COMPLIANCE",
+        "finding_type": "MISSING",
+        "severity": "HIGH",
+        "framework": "ISO27001",
+        "sub_requirement_id": "SR-ISO27001-01",
+        "control_id": "ISO27001:2022 A.5.1",
+        "title": "Information Security Policy",
+        "confidence": null,
+        "matched_clause_id": null,
+        "direct_matches": 0,
+        "partial_matches": 0,
+        "clause_count": 1,
+        "description": "No clause found covering 'Information Security Policy' (ISO27001 ISO27001:2022 A.5.1). This sub-requirement is entirely absent from the contract.",
+        "extracted_evidence": ""
+      },
+      {
+        "source": "SR_COMPLIANCE",
+        "finding_type": "WEAK_MATCH",
+        "severity": "MEDIUM",
+        "framework": "ISO27001",
+        "sub_requirement_id": "SR-ISO27001-03",
+        "control_id": "ISO27001:2022 A.18.2",
+        "title": "Audit Rights",
+        "confidence": 0.78,
+        "matched_clause_id": "CL-104",
+        "direct_matches": 0,
+        "partial_matches": 1,
+        "clause_count": 1,
+        "description": "Partial coverage of 'Audit Rights' (best confidence 78% in clause CL-104). Clause may be insufficiently specific.",
+        "extracted_evidence": "The Customer shall be granted unlimited, unrestricted audit access to all Provider systems, networks, source code repositories"
+      },
+      {
+        "source": "SR_COMPLIANCE",
+        "finding_type": "MISSING",
+        "severity": "HIGH",
+        "framework": "NIS2",
+        "sub_requirement_id": "SR-NIS2-02",
+        "control_id": "NIS2 Art. 21(d)",
+        "title": "Supply Chain Security",
+        "confidence": null,
+        "matched_clause_id": null,
+        "direct_matches": 0,
+        "partial_matches": 0,
+        "clause_count": 1,
+        "description": "No clause found covering 'Supply Chain Security' (NIS2 NIS2 Art. 21(d)). This sub-requirement is entirely absent from the contract.",
+        "extracted_evidence": ""
+      }
+    ]
+  },
+  "obligation_analysis": {
+    "source_file": "stage4_5_obligation_analysis.json",
+    "total_clauses_analysed": 10,
+    "flagged_clauses": 8,
+    "valid_clauses": 2,
+    "by_assessment": {
+      "VALID": 2,
+      "SCOPE_UNDEFINED": 2,
+      "NON_TRANSFERABLE_REGULATION": 2,
+      "OPERATIONAL_RISK": 2,
+      "CUSTOMER_RESPONSIBILITY": 1,
+      "AMBIGUOUS_REQUIREMENT": 1
+    },
+    "high_risk_count": 3,
+    "findings": [
+      {
+        "source": "OBLIGATION_ANALYSIS",
+        "finding_type": "SCOPE_UNDEFINED",
+        "severity": "MEDIUM",
+        "clause_id": "CL-102",
+        "page": 3,
+        "layout_type": "paragraph",
+        "reason": "Pattern match: 'applicable\\s+(?:data\\s+protection\\s+)?law[s]?(?!\\s*(?:of|,\\s*(?:namely|including'",
+        "recommended_action": "Request the customer to name the exact laws, standards, and frameworks referenced. Replace generic terms such as 'applicable law' or 'relevant standards' with enumerated, specific references.",
+        "confidence": 0.7,
+        "analysis_source": "RULES"
+      },
+      {
+        "source": "OBLIGATION_ANALYSIS",
+        "finding_type": "NON_TRANSFERABLE_REGULATION",
+        "severity": "HIGH",
+        "clause_id": "CL-103",
+        "page": 4,
+        "layout_type": "paragraph",
+        "reason": "Pattern match: 'provider\\s+shall\\s+submit\\s+(?:major\\s+)?incident\\s+reports\\s+(?:directly\\s+)?to'",
+        "recommended_action": "Reject or renegotiate this clause. The customer cannot contractually transfer their own regulatory obligations to the service provider. Escalate to Legal before acceptance.",
+        "confidence": 0.7,
+        "analysis_source": "RULES"
+      },
+      {
+        "source": "OBLIGATION_ANALYSIS",
+        "finding_type": "OPERATIONAL_RISK",
+        "severity": "HIGH",
+        "clause_id": "CL-104",
+        "page": 5,
+        "layout_type": "bullet_list",
+        "reason": "Pattern match: 'real.?time\\s+(?:security\\s+)?(?:event\\s+)?(?:log\\s+)?(?:feed|stream|access|notif'",
+        "recommended_action": "Negotiate realistic, measurable obligations. Replace unrealistic deadlines, unlimited access rights, or undefined frequency requirements with specific, operationally feasible commitments and caps.",
+        "confidence": 0.7,
+        "analysis_source": "RULES"
+      },
+      {
+        "source": "OBLIGATION_ANALYSIS",
+        "finding_type": "SCOPE_UNDEFINED",
+        "severity": "MEDIUM",
+        "clause_id": "CL-105",
+        "page": 6,
+        "layout_type": "paragraph",
+        "reason": "Pattern match: '(?:relevant|applicable)\\s+(?:security\\s+)?(?:standards?|frameworks?|requirements'",
+        "recommended_action": "Request the customer to name the exact laws, standards, and frameworks referenced. Replace generic terms such as 'applicable law' or 'relevant standards' with enumerated, specific references.",
+        "confidence": 0.7,
+        "analysis_source": "RULES"
+      },
+      {
+        "source": "OBLIGATION_ANALYSIS",
+        "finding_type": "CUSTOMER_RESPONSIBILITY",
+        "severity": "MEDIUM",
+        "clause_id": "CL-106",
+        "page": 7,
+        "layout_type": "paragraph",
+        "reason": "Pattern match: 'provider\\s+shall\\s+(?:determine|decide|classify|assess)\\s+(?:the\\s+)?(?:sensitiv'",
+        "recommended_action": "Reject this obligation as misallocated. Data classification, DPIA execution, and legal basis determination are controller responsibilities under GDPR. Request removal from the provider obligation set.",
+        "confidence": 0.7,
+        "analysis_source": "RULES"
+      },
+      {
+        "source": "OBLIGATION_ANALYSIS",
+        "finding_type": "OPERATIONAL_RISK",
+        "severity": "MEDIUM",
+        "clause_id": "CL-107",
+        "page": 8,
+        "layout_type": "paragraph",
+        "reason": "Pattern match: 'immediately\\s+notif(?:y|ication)(?:\\s+all)?(?:\\s+affected)?\\s+parties'",
+        "recommended_action": "Negotiate realistic, measurable obligations. Replace unrealistic deadlines, unlimited access rights, or undefined frequency requirements with specific, operationally feasible commitments and caps.",
+        "confidence": 0.7,
+        "analysis_source": "RULES"
+      },
+      {
+        "source": "OBLIGATION_ANALYSIS",
+        "finding_type": "NON_TRANSFERABLE_REGULATION",
+        "severity": "HIGH",
+        "clause_id": "CL-108",
+        "page": 9,
+        "layout_type": "paragraph",
+        "reason": "Pattern match: 'provider\\s+shall\\s+(?:assume|take\\s+over|fulfil|submit|file|report\\s+to)\\s+(?:al'",
+        "recommended_action": "Reject or renegotiate this clause. The customer cannot contractually transfer their own regulatory obligations to the service provider. Escalate to Legal before acceptance.",
+        "confidence": 0.7,
+        "analysis_source": "RULES"
+      },
+      {
+        "source": "OBLIGATION_ANALYSIS",
+        "finding_type": "AMBIGUOUS_REQUIREMENT",
+        "severity": "MEDIUM",
+        "clause_id": "CL-109",
+        "page": 10,
+        "layout_type": "paragraph",
+        "reason": "Pattern match: '\\bindustry\\s+best\\s+practices?\\b'",
+        "recommended_action": "Request concrete, measurable criteria. Replace vague terms such as 'best efforts', 'appropriate measures', or 'state of the art' with defined metrics, named standards, or objective test criteria.",
+        "confidence": 0.7,
+        "analysis_source": "RULES"
+      }
+    ]
+  },
+  "overall_compliance": {
+    "overall_status": "HIGH_RISK",
+    "total_findings": 16,
+    "findings_by_severity": {
+      "HIGH": 8,
+      "MEDIUM": 8,
+      "LOW": 0
+    },
+    "blocking_findings_count": 8,
+    "blocking_findings": [
+      {
+        "source": "SR_COMPLIANCE",
+        "finding_type": "MISSING",
+        "severity": "HIGH",
+        "framework": "GDPR",
+        "sub_requirement_id": "SR-GDPR-01",
+        "control_id": "GDPR Art. 12-22",
+        "title": "Data Subject Rights Handling",
+        "confidence": null,
+        "matched_clause_id": null,
+        "direct_matches": 0,
+        "partial_matches": 0,
+        "clause_count": 1,
+        "description": "No clause found covering 'Data Subject Rights Handling' (GDPR GDPR Art. 12-22). This sub-requirement is entirely absent from the contract.",
+        "extracted_evidence": ""
+      },
+      {
+        "source": "SR_COMPLIANCE",
+        "finding_type": "MISSING",
+        "severity": "HIGH",
+        "framework": "GDPR",
+        "sub_requirement_id": "SR-GDPR-03",
+        "control_id": "GDPR Art. 44-49",
+        "title": "International Data Transfers",
+        "confidence": null,
+        "matched_clause_id": null,
+        "direct_matches": 0,
+        "partial_matches": 0,
+        "clause_count": 1,
+        "description": "No clause found covering 'International Data Transfers' (GDPR GDPR Art. 44-49). This sub-requirement is entirely absent from the contract.",
+        "extracted_evidence": ""
+      },
+      {
+        "source": "SR_COMPLIANCE",
+        "finding_type": "MISSING",
+        "severity": "HIGH",
+        "framework": "GDPR",
+        "sub_requirement_id": "SR-GDPR-04",
+        "control_id": "GDPR Art. 28(4)",
+        "title": "Subprocessor Management",
+        "confidence": null,
+        "matched_clause_id": null,
+        "direct_matches": 0,
+        "partial_matches": 0,
+        "clause_count": 1,
+        "description": "No clause found covering 'Subprocessor Management' (GDPR GDPR Art. 28(4)). This sub-requirement is entirely absent from the contract.",
+        "extracted_evidence": ""
+      },
+      {
+        "source": "SR_COMPLIANCE",
+        "finding_type": "MISSING",
+        "severity": "HIGH",
+        "framework": "ISO27001",
+        "sub_requirement_id": "SR-ISO27001-01",
+        "control_id": "ISO27001:2022 A.5.1",
+        "title": "Information Security Policy",
+        "confidence": null,
+        "matched_clause_id": null,
+        "direct_matches": 0,
+        "partial_matches": 0,
+        "clause_count": 1,
+        "description": "No clause found covering 'Information Security Policy' (ISO27001 ISO27001:2022 A.5.1). This sub-requirement is entirely absent from the contract.",
+        "extracted_evidence": ""
+      },
+      {
+        "source": "SR_COMPLIANCE",
+        "finding_type": "MISSING",
+        "severity": "HIGH",
+        "framework": "NIS2",
+        "sub_requirement_id": "SR-NIS2-02",
+        "control_id": "NIS2 Art. 21(d)",
+        "title": "Supply Chain Security",
+        "confidence": null,
+        "matched_clause_id": null,
+        "direct_matches": 0,
+        "partial_matches": 0,
+        "clause_count": 1,
+        "description": "No clause found covering 'Supply Chain Security' (NIS2 NIS2 Art. 21(d)). This sub-requirement is entirely absent from the contract.",
+        "extracted_evidence": ""
+      },
+      {
+        "source": "OBLIGATION_ANALYSIS",
+        "finding_type": "NON_TRANSFERABLE_REGULATION",
+        "severity": "HIGH",
+        "clause_id": "CL-103",
+        "page": 4,
+        "layout_type": "paragraph",
+        "reason": "Pattern match: 'provider\\s+shall\\s+submit\\s+(?:major\\s+)?incident\\s+reports\\s+(?:directly\\s+)?to'",
+        "recommended_action": "Reject or renegotiate this clause. The customer cannot contractually transfer their own regulatory obligations to the service provider. Escalate to Legal before acceptance.",
+        "confidence": 0.7,
+        "analysis_source": "RULES"
+      },
+      {
+        "source": "OBLIGATION_ANALYSIS",
+        "finding_type": "OPERATIONAL_RISK",
+        "severity": "HIGH",
+        "clause_id": "CL-104",
+        "page": 5,
+        "layout_type": "bullet_list",
+        "reason": "Pattern match: 'real.?time\\s+(?:security\\s+)?(?:event\\s+)?(?:log\\s+)?(?:feed|stream|access|notif'",
+        "recommended_action": "Negotiate realistic, measurable obligations. Replace unrealistic deadlines, unlimited access rights, or undefined frequency requirements with specific, operationally feasible commitments and caps.",
+        "confidence": 0.7,
+        "analysis_source": "RULES"
+      },
+      {
+        "source": "OBLIGATION_ANALYSIS",
+        "finding_type": "NON_TRANSFERABLE_REGULATION",
+        "severity": "HIGH",
+        "clause_id": "CL-108",
+        "page": 9,
+        "layout_type": "paragraph",
+        "reason": "Pattern match: 'provider\\s+shall\\s+(?:assume|take\\s+over|fulfil|submit|file|report\\s+to)\\s+(?:al'",
+        "recommended_action": "Reject or renegotiate this clause. The customer cannot contractually transfer their own regulatory obligations to the service provider. Escalate to Legal before acceptance.",
+        "confidence": 0.7,
+        "analysis_source": "RULES"
+      }
+    ]
+  }
+}

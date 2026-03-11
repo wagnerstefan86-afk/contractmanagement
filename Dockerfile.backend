@@ -1,0 +1,25 @@
+# ============================================================
+# Contract Analysis Platform — Backend
+# NOT production hardened. For test-instance deployment only.
+# ============================================================
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install Python dependencies first (cached layer)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the full project (pipeline stages live at project root)
+COPY . .
+
+# Ensure runtime directories exist; they will be volume-mounted
+RUN mkdir -p contracts analyses
+
+EXPOSE 8765
+
+# Run as non-root for minimal safety (not full hardening)
+RUN useradd -m appuser && chown -R appuser:appuser /app
+USER appuser
+
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8765"]

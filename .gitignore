@@ -1,0 +1,9 @@
+frontend/node_modules/
+frontend/.next/
+__pycache__/
+backend/__pycache__/
+llm/__pycache__/
+*.pyc
+data/
+.env
+*.db

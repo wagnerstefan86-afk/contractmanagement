@@ -1,0 +1,84 @@
+# ============================================================================
+# domains.yaml — Control families / chapters within each framework
+# Seed file for the `domains` table.
+# ============================================================================
+
+domains:
+
+  # --------------------------------------------------------------------------
+  # ISO/IEC 27001:2022  — Annex A themes (4 themes, 93 controls)
+  # --------------------------------------------------------------------------
+
+  - id: iso27001_a5
+    framework_id: iso27001
+    name: "A.5 Organizational Controls"
+    description: "37 controls covering policies, roles, supplier relationships, incident management and legal compliance."
+    sort_order: 10
+
+  - id: iso27001_a6
+    framework_id: iso27001
+    name: "A.6 People Controls"
+    description: "8 controls covering screening, terms of employment, awareness and disciplinary processes."
+    sort_order: 20
+
+  - id: iso27001_a7
+    framework_id: iso27001
+    name: "A.7 Physical Controls"
+    description: "14 controls covering physical security perimeters, equipment and clear desk policy."
+    sort_order: 30
+
+  - id: iso27001_a8
+    framework_id: iso27001
+    name: "A.8 Technological Controls"
+    description: "34 controls covering access, cryptography, vulnerability management and secure development."
+    sort_order: 40
+
+  # --------------------------------------------------------------------------
+  # DORA — 5 pillars
+  # --------------------------------------------------------------------------
+
+  - id: dora_ict_risk
+    framework_id: dora
+    name: "Chapter II — ICT Risk Management"
+    description: "Articles 5–16. Governance and overall ICT risk management framework."
+    sort_order: 10
+
+  - id: dora_incident
+    framework_id: dora
+    name: "Chapter III — ICT-Related Incident Management"
+    description: "Articles 17–23. Classification, reporting and notification of ICT incidents."
+    sort_order: 20
+
+  - id: dora_testing
+    framework_id: dora
+    name: "Chapter IV — Digital Operational Resilience Testing"
+    description: "Articles 24–27. Threat-led penetration testing and advanced testing requirements."
+    sort_order: 30
+
+  - id: dora_third_party
+    framework_id: dora
+    name: "Chapter V — ICT Third-Party Risk Management"
+    description: "Articles 28–44. Requirements for ICT third-party service providers (ITPPs) and contractual obligations."
+    sort_order: 40
+
+  - id: dora_info_sharing
+    framework_id: dora
+    name: "Chapter VI — Information Sharing"
+    description: "Article 45. Voluntary and mandatory cyber threat intelligence sharing."
+    sort_order: 50
+
+  # --------------------------------------------------------------------------
+  # GDPR — Key chapters relevant to supplier contracts
+  # --------------------------------------------------------------------------
+
+  - id: gdpr_ch4
+    framework_id: gdpr
+    name: "Chapter IV — Controller and Processor"
+    description: "Articles 24–43. Obligations for controllers and processors, including DPAs and sub-processing."
+    sort_order: 10
+
+  - id: gdpr_ch5
+    framework_id: gdpr
+    name: "Chapter V — Transfers to Third Countries"
+    description: "Articles 44–49. Rules for international data transfers and safeguards."
+    sort_order: 20

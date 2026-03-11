@@ -1,0 +1,354 @@
+{
+  "contract_id": "CT-2026-001",
+  "generated_at": "2026-03-10",
+  "scoring_version": "1.0",
+  "scoring_rules": {
+    "severity_base": {
+      "HIGH": 7.0,
+      "MEDIUM": 4.0,
+      "LOW": 1.5
+    },
+    "topic_bonus": {
+      "REGULATORY_COMPLIANCE": 1.5,
+      "DATA_PROTECTION": 1.5,
+      "SECURITY_CONTROLS": 1.0,
+      "AUDIT_RIGHTS": 1.0,
+      "INCIDENT_MANAGEMENT": 0.5,
+      "SERVICE_LEVELS": 0.3,
+      "OTHER": 0.0
+    },
+    "match_weight": {
+      "DIRECT_MATCH": 1.5,
+      "PARTIAL_MATCH": 0.75
+    },
+    "sr_bonus_cap": 2.0,
+    "floors": {
+      "HIGH_severity_min": 7.0,
+      "no_match_min": 6.0
+    }
+  },
+  "total_clauses": 10,
+  "high_priority": 3,
+  "medium_priority": 5,
+  "low_priority": 2,
+  "topic_summary": [
+    {
+      "topic": "REGULATORY_COMPLIANCE",
+      "clause_count": 3,
+      "max_score": 10.0,
+      "avg_score": 8.67,
+      "total_score": 26.0,
+      "priority": "HIGH"
+    },
+    {
+      "topic": "AUDIT_RIGHTS",
+      "clause_count": 1,
+      "max_score": 8.75,
+      "avg_score": 8.75,
+      "total_score": 8.75,
+      "priority": "HIGH"
+    },
+    {
+      "topic": "DATA_PROTECTION",
+      "clause_count": 2,
+      "max_score": 6.25,
+      "avg_score": 6.25,
+      "total_score": 12.5,
+      "priority": "MEDIUM"
+    },
+    {
+      "topic": "INCIDENT_MANAGEMENT",
+      "clause_count": 1,
+      "max_score": 6.0,
+      "avg_score": 6.0,
+      "total_score": 6.0,
+      "priority": "MEDIUM"
+    },
+    {
+      "topic": "SECURITY_CONTROLS",
+      "clause_count": 1,
+      "max_score": 6.0,
+      "avg_score": 6.0,
+      "total_score": 6.0,
+      "priority": "MEDIUM"
+    },
+    {
+      "topic": "VALID",
+      "clause_count": 2,
+      "max_score": 1.5,
+      "avg_score": 1.5,
+      "total_score": 3.0,
+      "priority": "LOW"
+    }
+  ],
+  "clause_scores": [
+    {
+      "clause_id": "CL-103",
+      "page": 4,
+      "obligation": "NON_TRANSFERABLE_REGULATION",
+      "severity": "HIGH",
+      "topic": "REGULATORY_COMPLIANCE",
+      "risk_score": 10.0,
+      "priority": "HIGH",
+      "sr_matches": [
+        {
+          "sr_id": "SR-NIS2-01",
+          "framework": "NIS2",
+          "match_type": "DIRECT_MATCH",
+          "confidence": 95
+        }
+      ],
+      "score_breakdown": {
+        "base_severity": 7.0,
+        "topic_bonus": 1.5,
+        "sr_match_bonus": 1.5,
+        "raw_score": 10.0,
+        "final_score": 10.0,
+        "has_sr_match": true,
+        "floors_applied": []
+      },
+      "text_preview": "As the Provider constitutes an essential entity under the NIS2 Directive (EU 2022/2555) as implemented by the NIS2UmsuCG, the Provider shall submit incident rep\u2026",
+      "remediation_available": true,
+      "suggested_clause_snippet": "The Customer acknowledges that all reporting and notification obligations owed to any competent supervisory authority (including but not lim\u2026"
+    },
+    {
+      "clause_id": "CL-108",
+      "page": 9,
+      "obligation": "NON_TRANSFERABLE_REGULATION",
+      "severity": "HIGH",
+      "topic": "REGULATORY_COMPLIANCE",
+      "risk_score": 10.0,
+      "priority": "HIGH",
+      "sr_matches": [
+        {
+          "sr_id": "SR-DORA-02",
+          "framework": "DORA",
+          "match_type": "DIRECT_MATCH",
+          "confidence": 90
+        },
+        {
+          "sr_id": "SR-DORA-01",
+          "framework": "DORA",
+          "match_type": "PARTIAL_MATCH",
+          "confidence": 68
+        }
+      ],
+      "score_breakdown": {
+        "base_severity": 7.0,
+        "topic_bonus": 1.5,
+        "sr_match_bonus": 2.0,
+        "raw_score": 10.5,
+        "final_score": 10.0,
+        "has_sr_match": true,
+        "floors_applied": []
+      },
+      "text_preview": "As the Customer is a financial entity regulated under DORA (Regulation EU 2022/2554), the Provider shall assume all ICT-related regulatory reporting obligations\u2026",
+      "remediation_available": true,
+      "suggested_clause_snippet": "The Customer acknowledges that all reporting and notification obligations owed to any competent supervisory authority (including but not lim\u2026"
+    },
+    {
+      "clause_id": "CL-104",
+      "page": 5,
+      "obligation": "OPERATIONAL_RISK",
+      "severity": "HIGH",
+      "topic": "AUDIT_RIGHTS",
+      "risk_score": 8.75,
+      "priority": "HIGH",
+      "sr_matches": [
+        {
+          "sr_id": "SR-ISO27001-03",
+          "framework": "ISO27001",
+          "match_type": "PARTIAL_MATCH",
+          "confidence": 78
+        }
+      ],
+      "score_breakdown": {
+        "base_severity": 7.0,
+        "topic_bonus": 1.0,
+        "sr_match_bonus": 0.75,
+        "raw_score": 8.75,
+        "final_score": 8.75,
+        "has_sr_match": true,
+        "floors_applied": []
+      },
+      "text_preview": "Security incident response obligations:\n\u2022 The Provider shall notify the Customer of any detected security incident within 15 minutes of internal detection, rega\u2026",
+      "remediation_available": true,
+      "suggested_clause_snippet": "Incident Notification: The Provider shall notify the Customer of any confirmed security incident materially affecting Customer data within f\u2026"
+    },
+    {
+      "clause_id": "CL-105",
+      "page": 6,
+      "obligation": "SCOPE_UNDEFINED",
+      "severity": "MEDIUM",
+      "topic": "DATA_PROTECTION",
+      "risk_score": 6.25,
+      "priority": "MEDIUM",
+      "sr_matches": [
+        {
+          "sr_id": "SR-GDPR-02",
+          "framework": "GDPR",
+          "match_type": "PARTIAL_MATCH",
+          "confidence": 65
+        }
+      ],
+      "score_breakdown": {
+        "base_severity": 4.0,
+        "topic_bonus": 1.5,
+        "sr_match_bonus": 0.75,
+        "raw_score": 6.25,
+        "final_score": 6.25,
+        "has_sr_match": true,
+        "floors_applied": []
+      },
+      "text_preview": "The Provider shall ensure compliance with relevant data protection standards and applicable security frameworks at all times. All data processing activities mus\u2026",
+      "remediation_available": true,
+      "suggested_clause_snippet": "The Provider shall comply with the data protection, security, and operational resilience standards enumerated in Schedule [A] (Applicable Re\u2026"
+    },
+    {
+      "clause_id": "CL-106",
+      "page": 7,
+      "obligation": "CUSTOMER_RESPONSIBILITY",
+      "severity": "MEDIUM",
+      "topic": "DATA_PROTECTION",
+      "risk_score": 6.25,
+      "priority": "MEDIUM",
+      "sr_matches": [
+        {
+          "sr_id": "SR-GDPR-02",
+          "framework": "GDPR",
+          "match_type": "PARTIAL_MATCH",
+          "confidence": 65
+        }
+      ],
+      "score_breakdown": {
+        "base_severity": 4.0,
+        "topic_bonus": 1.5,
+        "sr_match_bonus": 0.75,
+        "raw_score": 6.25,
+        "final_score": 6.25,
+        "has_sr_match": true,
+        "floors_applied": []
+      },
+      "text_preview": "The Provider shall determine the sensitivity classification of all Customer data processed under this Agreement and shall define appropriate data retention peri\u2026",
+      "remediation_available": true,
+      "suggested_clause_snippet": "The Customer, acting as data controller within the meaning of GDPR Art. 4(7), shall remain solely responsible for: (i) determining and docum\u2026"
+    },
+    {
+      "clause_id": "CL-102",
+      "page": 3,
+      "obligation": "SCOPE_UNDEFINED",
+      "severity": "MEDIUM",
+      "topic": "REGULATORY_COMPLIANCE",
+      "risk_score": 6.0,
+      "priority": "MEDIUM",
+      "sr_matches": [],
+      "score_breakdown": {
+        "base_severity": 4.0,
+        "topic_bonus": 1.5,
+        "sr_match_bonus": 0.0,
+        "raw_score": 6.0,
+        "final_score": 6.0,
+        "has_sr_match": false,
+        "floors_applied": [
+          "NO_MATCH_FLOOR"
+        ]
+      },
+      "text_preview": "The Provider shall at all times comply with all applicable laws, regulations, and industry best practices relevant to the provision of the services, including b\u2026",
+      "remediation_available": true,
+      "suggested_clause_snippet": "The Provider shall comply with the data protection, security, and operational resilience standards enumerated in Schedule [A] (Applicable Re\u2026"
+    },
+    {
+      "clause_id": "CL-107",
+      "page": 8,
+      "obligation": "OPERATIONAL_RISK",
+      "severity": "MEDIUM",
+      "topic": "INCIDENT_MANAGEMENT",
+      "risk_score": 6.0,
+      "priority": "MEDIUM",
+      "sr_matches": [],
+      "score_breakdown": {
+        "base_severity": 4.0,
+        "topic_bonus": 0.5,
+        "sr_match_bonus": 0.0,
+        "raw_score": 6.0,
+        "final_score": 6.0,
+        "has_sr_match": false,
+        "floors_applied": [
+          "NO_MATCH_FLOOR"
+        ]
+      },
+      "text_preview": "In the event of a data breach or any security incident potentially affecting Customer data, the Provider shall immediately notify all affected parties, relevant\u2026",
+      "remediation_available": true,
+      "suggested_clause_snippet": "Incident Notification: The Provider shall notify the Customer of any confirmed security incident materially affecting Customer data within f\u2026"
+    },
+    {
+      "clause_id": "CL-109",
+      "page": 10,
+      "obligation": "AMBIGUOUS_REQUIREMENT",
+      "severity": "MEDIUM",
+      "topic": "SECURITY_CONTROLS",
+      "risk_score": 6.0,
+      "priority": "MEDIUM",
+      "sr_matches": [],
+      "score_breakdown": {
+        "base_severity": 4.0,
+        "topic_bonus": 1.0,
+        "sr_match_bonus": 0.0,
+        "raw_score": 6.0,
+        "final_score": 6.0,
+        "has_sr_match": false,
+        "floors_applied": [
+          "AMBIGUOUS_OVERRIDE",
+          "NO_MATCH_FLOOR"
+        ]
+      },
+      "text_preview": "The Provider shall implement appropriate technical and organizational measures to ensure the security of all data processed. The Provider shall apply industry b\u2026",
+      "remediation_available": true,
+      "suggested_clause_snippet": "The Provider shall implement and maintain information security controls in accordance with ISO/IEC 27001:2022. Compliance shall be evidenced\u2026"
+    },
+    {
+      "clause_id": "CL-101",
+      "page": 2,
+      "obligation": "VALID",
+      "severity": "LOW",
+      "topic": null,
+      "risk_score": 1.5,
+      "priority": "LOW",
+      "sr_matches": [],
+      "score_breakdown": {
+        "base_severity": 1.5,
+        "topic_bonus": 0.0,
+        "sr_match_bonus": 0.0,
+        "raw_score": 1.5,
+        "final_score": 1.5,
+        "has_sr_match": false,
+        "floors_applied": []
+      },
+      "text_preview": "The Provider shall maintain a monthly uptime SLA of 99.9% as measured by a mutually agreed third-party monitoring service. Service credits for SLA breaches shal\u2026",
+      "remediation_available": false,
+      "suggested_clause_snippet": null
+    },
+    {
+      "clause_id": "CL-110",
+      "page": 11,
+      "obligation": "VALID",
+      "severity": "LOW",
+      "topic": null,
+      "risk_score": 1.5,
+      "priority": "LOW",
+      "sr_matches": [],
+      "score_breakdown": {
+        "base_severity": 1.5,
+        "topic_bonus": 0.0,
+        "sr_match_bonus": 0.0,
+        "raw_score": 1.5,
+        "final_score": 1.5,
+        "has_sr_match": false,
+        "floors_applied": []
+      },
+      "text_preview": "Encryption Standard | Algorithm | Scope | Review Cycle\nData at rest | AES-256-GCM | All Customer data on Provider infrastructure | Annual\nData in transit | TLS \u2026",
+      "remediation_available": false,
+      "suggested_clause_snippet": null
+    }
+  ]
+}

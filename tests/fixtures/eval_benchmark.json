@@ -1,0 +1,98 @@
+{
+  "contract_id": "CT-TEST-001",
+  "_comment": "Golden-set benchmark for Stage 5 evaluation validation. 13 labeled clauses, 2 unlabeled (CL-013, CL-014).",
+  "clauses": [
+    {
+      "clause_id": "CL-001",
+      "_note": "Strong det DIRECT: 'information security policy' + 'iso.{0,5}27001' both match. Expect TP under both policies.",
+      "expected_matches": [
+        {"sr_id": "SR-ISO27001-01", "expected_match_type": "DIRECT_MATCH"}
+      ]
+    },
+    {
+      "clause_id": "CL-002",
+      "_note": "Strong det DIRECT: Art.15 + Art.17 + Art.20 data subject rights patterns all match GDPR-01.",
+      "expected_matches": [
+        {"sr_id": "SR-GDPR-01", "expected_match_type": "DIRECT_MATCH"}
+      ]
+    },
+    {
+      "clause_id": "CL-003",
+      "_note": "Strong det DIRECT: 'business continuity', 'disaster recovery', 'recovery time objective', 'rpo' all match ISO27001-02.",
+      "expected_matches": [
+        {"sr_id": "SR-ISO27001-02", "expected_match_type": "DIRECT_MATCH"}
+      ]
+    },
+    {
+      "clause_id": "CL-004",
+      "_note": "Strong det DIRECT: '24.hour' + '72.hour' + 'early warning' + 'significant.{0,20}incident' all match NIS2-01.",
+      "expected_matches": [
+        {"sr_id": "SR-NIS2-01", "expected_match_type": "DIRECT_MATCH"}
+      ]
+    },
+    {
+      "clause_id": "CL-005",
+      "_note": "Strong det DIRECT: 'ict risk management' + 'digital operational resilience' match DORA-01.",
+      "expected_matches": [
+        {"sr_id": "SR-DORA-01", "expected_match_type": "DIRECT_MATCH"}
+      ]
+    },
+    {
+      "clause_id": "CL-006",
+      "_note": "Strong det DIRECT: 'right to audit' + 'third.party audit' + 'soc 2' all match ISO27001-03.",
+      "expected_matches": [
+        {"sr_id": "SR-ISO27001-03", "expected_match_type": "DIRECT_MATCH"}
+      ]
+    },
+    {
+      "clause_id": "CL-007",
+      "_note": "Strong det DIRECT: 'list of subprocessors' + 'subprocessor notification' + 'gdpr art. 28(4)' match GDPR-04.",
+      "expected_matches": [
+        {"sr_id": "SR-GDPR-04", "expected_match_type": "DIRECT_MATCH"}
+      ]
+    },
+    {
+      "clause_id": "CL-008",
+      "_note": "Strong det DIRECT: 'vendor security assessments' + 'subcontractors' + 'supply chain security' match NIS2-02.",
+      "expected_matches": [
+        {"sr_id": "SR-NIS2-02", "expected_match_type": "DIRECT_MATCH"}
+      ]
+    },
+    {
+      "clause_id": "CL-009",
+      "_note": "PARTIAL det (only 'isms' matches = 1/4 patterns). Benchmark says DIRECT. Tests strict wrong_type detection: relaxed=TP, strict=FP+FN.",
+      "expected_matches": [
+        {"sr_id": "SR-ISO27001-01", "expected_match_type": "DIRECT_MATCH"}
+      ]
+    },
+    {
+      "clause_id": "CL-010",
+      "_note": "Semantic-only: no regex patterns for GDPR-03 match this paraphrase. Tests shortlist recall: expected in shortlist but not in det.",
+      "expected_matches": [
+        {"sr_id": "SR-GDPR-03", "expected_match_type": "PARTIAL_MATCH"}
+      ]
+    },
+    {
+      "clause_id": "CL-011",
+      "_note": "Semantic-only: 'supervisory bodies' paraphrases 'competent authorities' for DORA-02. Tests whether semantic surfaces paraphrase.",
+      "expected_matches": [
+        {"sr_id": "SR-DORA-02", "expected_match_type": "PARTIAL_MATCH"}
+      ]
+    },
+    {
+      "clause_id": "CL-012",
+      "_note": "Multi-match: ISMS (det DIRECT ISO27001-01) + business continuity/DR (det DIRECT ISO27001-02).",
+      "expected_matches": [
+        {"sr_id": "SR-ISO27001-01", "expected_match_type": "DIRECT_MATCH"},
+        {"sr_id": "SR-ISO27001-02", "expected_match_type": "DIRECT_MATCH"}
+      ]
+    },
+    {
+      "clause_id": "CL-015",
+      "_note": "Strong det DIRECT: 'major ict-related incident' + 'competent authorit' + 'dora art. 17' + 'dora art. 19' all match DORA-02.",
+      "expected_matches": [
+        {"sr_id": "SR-DORA-02", "expected_match_type": "DIRECT_MATCH"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+# ============================================================================
+# requirements.yaml — Controls / articles within each domain
+# Seed file for the `requirements` table.
+# Only the supplier-contract-relevant controls are seeded here.
+# Full control sets should be added per framework guidance.
+# ============================================================================
+
+requirements:
+
+  # --------------------------------------------------------------------------
+  # ISO 27001 A.5 — Organizational Controls (supplier-relevant subset)
+  # --------------------------------------------------------------------------
+
+  - id: iso27001_a5_19
+    domain_id: iso27001_a5
+    name: "A.5.19 Information security in supplier relationships"
+    description: >
+      Processes and procedures shall be defined and implemented to manage information
+      security risks associated with the use of supplier products or services.
+    guidance_text: >
+      Includes identification of suppliers, risk assessment, contractual requirements,
+      and monitoring of supplier security posture. Contractual agreements should
+      address access controls, incident notification, audit rights, and sub-processing.
+    sort_order: 190
+
+  - id: iso27001_a5_20
+    domain_id: iso27001_a5
+    name: "A.5.20 Addressing information security within supplier agreements"
+    description: >
+      Relevant information security requirements shall be established and agreed with each
+      supplier based on the type of supplier relationship.
+    guidance_text: >
+      Agreements should cover: security requirements, SLAs, incident reporting timelines,
+      audit rights, data return/deletion on termination, sub-contractor management,
+      and applicable legal and regulatory obligations.
+    sort_order: 200
+
+  - id: iso27001_a5_23
+    domain_id: iso27001_a5
+    name: "A.5.23 Information security for use of cloud services"
+    description: >
+      Processes for acquisition, use, management and exit from cloud services shall be
+      established in accordance with the organisation's information security requirements.
+    guidance_text: >
+      Cloud-specific contractual requirements: data location, encryption at rest and in
+      transit, availability SLAs, portability, forensic access, and audit logging.
+    sort_order: 230
+
+  - id: iso27001_a5_24
+    domain_id: iso27001_a5
+    name: "A.5.24 Information security incident management planning and preparation"
+    description: >
+      The organisation shall plan and prepare for managing information security incidents
+      by defining processes, roles and responsibilities for incident response.
+    guidance_text: >
+      Supplier contracts must require timely notification of incidents affecting the
+      organisation's data or systems, with defined notification windows (e.g. 24/72 hours).
+    sort_order: 240
+
+  - id: iso27001_a5_36
+    domain_id: iso27001_a5
+    name: "A.5.36 Compliance with policies, rules and standards for information security"
+    description: >
+      Compliance with the organisation's information security policy, topic-specific
+      policies, rules and standards shall be regularly reviewed.
+    guidance_text: >
+      Supplier contracts should require compliance attestation, right to audit,
+      and access to relevant compliance reports (SOC 2, ISO 27001 certificate).
+    sort_order: 360
+
+  # --------------------------------------------------------------------------
+  # ISO 27001 A.8 — Technological Controls (supplier-relevant subset)
+  # --------------------------------------------------------------------------
+
+  - id: iso27001_a8_9
+    domain_id: iso27001_a8
+    name: "A.8.9 Configuration management"
+    description: >
+      Configurations, including security configurations, of hardware, software, services
+      and networks shall be established, documented, implemented, monitored and reviewed.
+    guidance_text: >
+      Supplier contracts for managed services should require baseline configuration
+      standards, change management processes, and notification of security-relevant changes.
+    sort_order: 90
+
+  - id: iso27001_a8_12
+    domain_id: iso27001_a8
+    name: "A.8.12 Data leakage prevention"
+    description: >
+      Data leakage prevention measures shall be applied to systems, networks and
+      devices that process, store or transmit sensitive information.
+    guidance_text: >
+      Contracts should specify DLP controls, data classification handling, and
+      requirements for incident notification when data exfiltration is suspected.
+    sort_order: 120
+
+  - id: iso27001_a8_24
+    domain_id: iso27001_a8
+    name: "A.8.24 Use of cryptography"
+    description: >
+      Rules for the effective use of cryptography, including cryptographic key management,
+      shall be defined and implemented.
+    guidance_text: >
+      Contracts should specify minimum encryption standards (e.g. AES-256 at rest,
+      TLS 1.2+ in transit), key management responsibilities, and certificate management.
+    sort_order: 240
+
+  # --------------------------------------------------------------------------
+  # DORA — Chapter V: ICT Third-Party Risk (core contractual obligations)
+  # --------------------------------------------------------------------------
+
+  - id: dora_art30_1
+    domain_id: dora_third_party
+    name: "Article 30(1) — Written agreements with ICT third-party service providers"
+    description: >
+      Financial entities shall ensure that contractual arrangements with ICT third-party
+      service providers include a comprehensive set of provisions covering all relevant
+      operational resilience requirements.
+    guidance_text: >
+      Mandatory contractual provisions under DORA Article 30. Applies to all ICT
+      third-party service providers, with enhanced requirements for critical ICT TPPs.
+    sort_order: 10
+
+  - id: dora_art30_2
+    domain_id: dora_third_party
+    name: "Article 30(2) — Minimum contractual provisions"
+    description: >
+      Contractual arrangements shall include at minimum: service descriptions and SLAs;
+      data location and processing geography; incident notification timelines; audit rights;
+      cooperation with supervisory authorities; business continuity requirements;
+      sub-contracting restrictions; termination rights and data return.
+    guidance_text: >
+      Checklist article — each sub-provision maps to a specific clause category.
+      Verify all 8 mandatory elements are present in supplier contracts.
+    sort_order: 20
+
+  - id: dora_art30_3
+    domain_id: dora_third_party
+    name: "Article 30(3) — Exit strategy and termination"
+    description: >
+      Financial entities shall develop exit strategies for ICT TPP relationships,
+      covering data portability, transition assistance, and post-termination data handling.
+    guidance_text: >
+      Contracts must include: termination notice periods, data return/deletion
+      timelines, transition support obligations, and non-compete restrictions on data use.
+    sort_order: 30
+
+  # --------------------------------------------------------------------------
+  # DORA — Chapter III: Incident Reporting
+  # --------------------------------------------------------------------------
+
+  - id: dora_art19_1
+    domain_id: dora_incident
+    name: "Article 19(1) — ICT-related incident notification to authorities"
+    description: >
+      Financial entities shall report major ICT-related incidents to competent authorities.
+      Suppliers must notify financial entities to enable this reporting within required timelines.
+    guidance_text: >
+      Initial notification: 4 hours (maximum) after classification as major incident.
+      Intermediate report: within 72 hours. Final report: within 1 month.
+      Supplier contracts must require notification windows enabling these deadlines.
+    sort_order: 10
+
+  # --------------------------------------------------------------------------
+  # GDPR — Chapter IV: Processor obligations
+  # --------------------------------------------------------------------------
+
+  - id: gdpr_art28
+    domain_id: gdpr_ch4
+    name: "Article 28 — Processor obligations and DPA requirements"
+    description: >
+      Processing by a processor shall be governed by a contract (Data Processing Agreement)
+      setting out the subject-matter, duration, nature and purpose of processing,
+      type of personal data, categories of data subjects, and obligations/rights of the controller.
+    guidance_text: >
+      DPA must include: processing instructions binding, confidentiality obligations,
+      security measures (Art 32), sub-processor approval requirements, data subject rights
+      assistance, deletion/return on termination, audit cooperation, and breach notification.
+    sort_order: 10
+
+  - id: gdpr_art32
+    domain_id: gdpr_ch4
+    name: "Article 32 — Security of processing"
+    description: >
+      The controller and processor shall implement appropriate technical and organisational
+      measures to ensure a level of security appropriate to the risk.
+    guidance_text: >
+      Contracts must specify: encryption, pseudonymisation, ongoing confidentiality/integrity/
+      availability assurance, regular testing, and incident response capability.
+      Measures should be proportionate to the risk and reviewed regularly.
+    sort_order: 32
+
+  - id: gdpr_art33
+    domain_id: gdpr_ch4
+    name: "Article 33 — Notification of personal data breach to supervisory authority"
+    description: >
+      In the case of a personal data breach, the controller shall without undue delay
+      (within 72 hours) notify the competent supervisory authority.
+    guidance_text: >
+      Processor contracts must require breach notification to the controller without undue
+      delay after becoming aware of a breach, to enable the 72-hour supervisory notification.
+      'Without undue delay' is typically interpreted as within 24 hours.
+    sort_order: 33

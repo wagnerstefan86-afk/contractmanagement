@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contract Analysis Platform — UI Demo</title>
+<style>
+/* ── Reset & base ─────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  background:#f8fafc;color:#1e293b;min-height:100vh}
+button{cursor:pointer;border:none;font:inherit}
+input,select,textarea{font:inherit}
+a{color:inherit;text-decoration:none}
+
+/* ── Layout ───────────────────────────────────────────────── */
+.page{display:none;min-height:100vh}
+.page.active{display:flex;flex-direction:column}
+.nav{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;height:56px;
+  position:sticky;top:0;z-index:100}
+.nav-brand{font-weight:700;font-size:15px;color:#0f172a;display:flex;align-items:center;gap:8px}
+.nav-brand span{background:#3b82f6;color:#fff;padding:2px 8px;border-radius:4px;font-size:12px}
+.nav-right{display:flex;align-items:center;gap:16px;font-size:14px}
+.nav-user{color:#475569}
+.nav-logout{color:#64748b;font-size:13px;padding:4px 10px;border-radius:4px;
+  border:1px solid #e2e8f0;background:#fff}
+.nav-logout:hover{background:#f1f5f9}
+.main{flex:1;padding:32px 24px;max-width:1200px;margin:0 auto;width:100%}
+
+/* ── Auth pages ───────────────────────────────────────────── */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#eff6ff 0%,#f8fafc 100%)}
+.auth-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;
+  padding:40px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-logo h1{font-size:20px;font-weight:700;color:#0f172a}
+.auth-logo p{font-size:13px;color:#64748b;margin-top:4px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:500;color:#374151;margin-bottom:6px}
+.form-group input{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:6px;
+  font-size:14px;outline:none;transition:border-color .15s}
+.form-group input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.btn{padding:10px 20px;border-radius:6px;font-size:14px;font-weight:500;transition:all .15s}
+.btn-primary{background:#3b82f6;color:#fff;width:100%;padding:11px}
+.btn-primary:hover{background:#2563eb}
+.btn-secondary{background:#fff;color:#374151;border:1px solid #d1d5db}
+.btn-secondary:hover{background:#f9fafb}
+.btn-danger{background:#ef4444;color:#fff}
+.btn-danger:hover{background:#dc2626}
+.btn-sm{padding:6px 12px;font-size:12px}
+.auth-link{text-align:center;font-size:13px;color:#64748b;margin-top:16px}
+.auth-link a{color:#3b82f6;font-weight:500}
+.demo-hint{background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;
+  padding:10px 14px;font-size:12px;color:#3b82f6;margin-bottom:20px}
+
+/* ── Page headers ─────────────────────────────────────────── */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.page-title{font-size:22px;font-weight:700;color:#0f172a}
+.page-subtitle{font-size:14px;color:#64748b;margin-top:2px}
+
+/* ── Cards ────────────────────────────────────────────────── */
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:24px}
+.card+.card{margin-top:16px}
+
+/* ── Stats row ────────────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:20px}
+.stat-label{font-size:12px;color:#64748b;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+.stat-value{font-size:28px;font-weight:700;color:#0f172a;margin-top:4px}
+.stat-value.red{color:#ef4444}
+.stat-value.amber{color:#f59e0b}
+.stat-value.green{color:#10b981}
+
+/* ── Table ────────────────────────────────────────────────── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;padding:10px 12px;font-size:12px;font-weight:600;color:#64748b;
+  text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #e2e8f0;background:#f8fafc}
+td{padding:12px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fafc}
+tr.clickable{cursor:pointer}
+
+/* ── Badges ───────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:99px;
+  font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.badge-red{background:#fef2f2;color:#dc2626}
+.badge-amber{background:#fffbeb;color:#d97706}
+.badge-green{background:#f0fdf4;color:#16a34a}
+.badge-blue{background:#eff6ff;color:#2563eb}
+.badge-gray{background:#f1f5f9;color:#475569}
+.badge-purple{background:#faf5ff;color:#7c3aed}
+
+/* ── Upload area ──────────────────────────────────────────── */
+.upload-zone{border:2px dashed #d1d5db;border-radius:10px;padding:48px;
+  text-align:center;transition:all .2s;cursor:pointer;background:#fafafa}
+.upload-zone:hover{border-color:#3b82f6;background:#eff6ff}
+.upload-zone.drag{border-color:#3b82f6;background:#eff6ff}
+.upload-icon{font-size:40px;margin-bottom:12px}
+.upload-text{font-size:15px;font-weight:500;color:#374151}
+.upload-hint{font-size:13px;color:#94a3b8;margin-top:4px}
+
+/* ── Progress bar ─────────────────────────────────────────── */
+.progress-wrap{background:#f1f5f9;border-radius:99px;height:8px;overflow:hidden}
+.progress-bar{height:100%;background:#3b82f6;border-radius:99px;transition:width .4s ease}
+.progress-bar.done{background:#10b981}
+.stage-list{margin-top:20px}
+.stage-item{display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:1px solid #f1f5f9;font-size:13px}
+.stage-item:last-child{border-bottom:none}
+.stage-dot{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:11px;flex-shrink:0}
+.stage-dot.done{background:#dcfce7;color:#16a34a}
+.stage-dot.running{background:#dbeafe;color:#2563eb;animation:pulse 1s infinite}
+.stage-dot.pending{background:#f1f5f9;color:#94a3b8}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ── Clause list ──────────────────────────────────────────── */
+.clause-item{border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:10px;
+  cursor:pointer;transition:all .15s}
+.clause-item:hover{border-color:#3b82f6;box-shadow:0 2px 8px rgba(59,130,246,.1)}
+.clause-item.selected{border-color:#3b82f6;background:#eff6ff}
+.clause-header{display:flex;align-items:center;justify-content:space-between}
+.clause-id{font-size:12px;font-weight:600;color:#64748b}
+.clause-preview{font-size:13px;color:#374151;margin-top:6px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.clause-meta{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+
+/* ── Detail panel ─────────────────────────────────────────── */
+.detail-panel{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:24px}
+.detail-section{margin-bottom:24px}
+.detail-section:last-child{margin-bottom:0}
+.detail-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:#94a3b8;margin-bottom:10px}
+.sr-match{border:1px solid #e2e8f0;border-radius:8px;padding:14px;margin-bottom:8px}
+.sr-match-header{display:flex;align-items:center;justify-content:space-between}
+.sr-id{font-size:12px;font-weight:700;color:#374151}
+.confidence-bar{height:4px;background:#e2e8f0;border-radius:2px;margin-top:8px}
+.confidence-fill{height:100%;background:#3b82f6;border-radius:2px}
+.evidence{font-size:12px;color:#64748b;margin-top:8px;font-style:italic;
+  border-left:2px solid #e2e8f0;padding-left:8px}
+.ai-meta{font-size:11px;color:#94a3b8;margin-top:6px;display:flex;gap:12px}
+
+/* ── Risk bars ────────────────────────────────────────────── */
+.risk-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:13px}
+.risk-label{width:160px;color:#374151;flex-shrink:0}
+.risk-bar-wrap{flex:1;height:10px;background:#f1f5f9;border-radius:5px;overflow:hidden}
+.risk-bar-fill{height:100%;border-radius:5px}
+.risk-bar-fill.red{background:#ef4444}
+.risk-bar-fill.amber{background:#f59e0b}
+.risk-bar-fill.green{background:#10b981}
+.risk-pct{width:36px;text-align:right;color:#64748b}
+
+/* ── Findings ─────────────────────────────────────────────── */
+.finding{border-left:3px solid #e2e8f0;padding:12px 14px;margin-bottom:8px;background:#fafafa;border-radius:0 6px 6px 0}
+.finding.HIGH{border-color:#ef4444}
+.finding.MEDIUM{border-color:#f59e0b}
+.finding.LOW{border-color:#3b82f6}
+.finding-title{font-size:13px;font-weight:600;color:#0f172a}
+.finding-desc{font-size:12px;color:#64748b;margin-top:4px}
+
+/* ── Tabs ─────────────────────────────────────────────────── */
+.tabs{display:flex;gap:4px;border-bottom:1px solid #e2e8f0;margin-bottom:20px}
+.tab{padding:8px 16px;font-size:14px;font-weight:500;color:#64748b;
+  border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;margin-bottom:-1px}
+.tab:hover{color:#374151}
+.tab.active{color:#3b82f6;border-bottom-color:#3b82f6}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── Two-col layout ───────────────────────────────────────── */
+.two-col{display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start}
+@media(max-width:900px){.two-col{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+
+/* ── Misc ─────────────────────────────────────────────────── */
+.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}.mt-24{margin-top:24px}
+.gap-8{gap:8px}.flex{display:flex}.items-center{align-items:center}
+.text-sm{font-size:13px}.text-xs{font-size:12px}.text-gray{color:#64748b}
+.font-bold{font-weight:700}.font-medium{font-weight:500}
+.notice{background:#fffbeb;border:1px solid #fde68a;border-radius:6px;
+  padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:20px}
+.info{background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;
+  padding:10px 14px;font-size:12px;color:#1e40af;margin-bottom:20px}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE: Login
+═══════════════════════════════════════════════════════════ -->
+<div id="pg-login" class="page active">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <h1>⚖️ Contract Analysis Platform</h1>
+        <p>Regulatory compliance &amp; risk intelligence</p>
+      </div>
+      <div class="demo-hint">
+        🧪 <strong>UI Demo</strong> — static mockup, no server required.<br>
+        Use any email / password to proceed.
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input id="login-email" type="email" value="analyst@acme.com" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input id="login-pw" type="password" value="demo1234" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary" onclick="goTo('dashboard')">Sign in</button>
+      <div class="auth-link">
+        No account? <a href="#" onclick="goTo('register')">Register</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE: Register
+═══════════════════════════════════════════════════════════ -->
+<div id="pg-register" class="page">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <h1>⚖️ Contract Analysis Platform</h1>
+        <p>Create your organisation account</p>
+      </div>
+      <div class="demo-hint">
+        🧪 First user becomes <strong>ADMIN</strong> of a new tenant.<br>
+        In the real app: POST /customers → POST /auth/register
+      </div>
+      <div class="form-group">
+        <label>Organisation name</label>
+        <input type="text" value="ACME Financial Services GmbH" placeholder="Your company">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" value="admin@acme.com" placeholder="admin@yourcompany.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" value="demo1234" placeholder="Choose a password">
+      </div>
+      <button class="btn btn-primary" onclick="goTo('dashboard')">Create account &amp; sign in</button>
+      <div class="auth-link">
+        Already registered? <a href="#" onclick="goTo('login')">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE: Dashboard
+═══════════════════════════════════════════════════════════ -->
+<div id="pg-dashboard" class="page">
+  <nav class="nav">
+    <div class="nav-brand">⚖️ Contract Analysis <span>DEMO</span></div>
+    <div class="nav-right">
+      <span class="nav-user">analyst@acme.com (ANALYST)</span>
+      <button class="nav-logout" onclick="goTo('login')">Sign out</button>
+    </div>
+  </nav>
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Dashboard</div>
+        <div class="page-subtitle">ACME Financial Services GmbH</div>
+      </div>
+      <button class="btn btn-primary" onclick="goTo('upload')">+ Upload Contract</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Total Contracts</div>
+        <div class="stat-value">4</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">High Risk</div>
+        <div class="stat-value red">2</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Pending Review</div>
+        <div class="stat-value amber">3</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Approved</div>
+        <div class="stat-value green">1</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Contract</th>
+              <th>Uploaded</th>
+              <th>Status</th>
+              <th>Risk</th>
+              <th>Findings</th>
+              <th>Review</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="clickable" onclick="goTo('contract')">
+              <td>
+                <div class="font-medium">Vendor SaaS Agreement Q1 2026</div>
+                <div class="text-xs text-gray mt-8">CloudOps Ltd · v1</div>
+              </td>
+              <td class="text-sm text-gray">2026-03-08</td>
+              <td><span class="badge badge-green">Completed</span></td>
+              <td><span class="badge badge-red">HIGH</span></td>
+              <td class="text-sm">6 findings</td>
+              <td><span class="badge badge-amber">Pending</span></td>
+            </tr>
+            <tr class="clickable" onclick="goTo('contract')">
+              <td>
+                <div class="font-medium">Data Processing Addendum 2026</div>
+                <div class="text-xs text-gray mt-8">DataSync GmbH · v2</div>
+              </td>
+              <td class="text-sm text-gray">2026-03-07</td>
+              <td><span class="badge badge-green">Completed</span></td>
+              <td><span class="badge badge-amber">MEDIUM</span></td>
+              <td class="text-sm">3 findings</td>
+              <td><span class="badge badge-amber">Pending</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="font-medium">Infrastructure MSA 2025-2027</div>
+                <div class="text-xs text-gray mt-8">NetCore AG · v1</div>
+              </td>
+              <td class="text-sm text-gray">2026-03-05</td>
+              <td><span class="badge badge-blue">Running</span></td>
+              <td><span class="badge badge-gray">—</span></td>
+              <td class="text-sm">—</td>
+              <td><span class="badge badge-gray">—</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="font-medium">Security Services Framework</div>
+                <div class="text-xs text-gray mt-8">SecureOps BV · v3</div>
+              </td>
+              <td class="text-sm text-gray">2026-02-28</td>
+              <td><span class="badge badge-green">Completed</span></td>
+              <td><span class="badge badge-green">LOW</span></td>
+              <td class="text-sm">1 finding</td>
+              <td><span class="badge badge-green">Approved</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE: Upload
+═══════════════════════════════════════════════════════════ -->
+<div id="pg-upload" class="page">
+  <nav class="nav">
+    <div class="nav-brand">⚖️ Contract Analysis <span>DEMO</span></div>
+    <div class="nav-right">
+      <a href="#" onclick="goTo('dashboard')" class="text-sm text-gray">← Dashboard</a>
+      <button class="nav-logout" onclick="goTo('login')">Sign out</button>
+    </div>
+  </nav>
+  <div class="main" style="max-width:680px">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Upload Contract</div>
+        <div class="page-subtitle">PDF, DOCX, or plain text · max 50 MB</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="upload-zone" onclick="simulateUpload()">
+        <div class="upload-icon">📄</div>
+        <div class="upload-text">Drop your contract here or click to browse</div>
+        <div class="upload-hint">Supported: .pdf · .docx · .txt</div>
+      </div>
+
+      <div id="upload-form" style="display:none;margin-top:24px">
+        <div class="form-group">
+          <label>Contract title (optional)</label>
+          <input type="text" id="contract-title" value="Vendor SaaS Agreement Q1 2026">
+        </div>
+        <div class="form-group">
+          <label>Counterparty</label>
+          <input type="text" id="counterparty" value="CloudOps Ltd">
+        </div>
+        <div style="display:flex;gap:12px;margin-top:8px">
+          <button class="btn btn-primary" style="flex:1" onclick="startAnalysis()">Upload &amp; Analyse</button>
+          <button class="btn btn-secondary" onclick="goTo('dashboard')">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="notice mt-16">
+      <strong>Deterministic mode active (LLM_ENABLED=false)</strong><br>
+      Pipeline runs rule-based analysis without external LLM calls. Results are immediate.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE: Analysis Progress
+═══════════════════════════════════════════════════════════ -->
+<div id="pg-progress" class="page">
+  <nav class="nav">
+    <div class="nav-brand">⚖️ Contract Analysis <span>DEMO</span></div>
+    <div class="nav-right">
+      <button class="nav-logout" onclick="goTo('login')">Sign out</button>
+    </div>
+  </nav>
+  <div class="main" style="max-width:640px">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Analysing Contract</div>
+        <div class="page-subtitle">Vendor SaaS Agreement Q1 2026</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px">
+        <span class="font-medium">Pipeline progress</span>
+        <span id="pct-label" class="text-gray">0%</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="pbar" style="width:0%"></div>
+      </div>
+
+      <div class="stage-list" id="stage-list">
+        <div class="stage-item" id="st-0">
+          <div class="stage-dot pending" id="dot-0">○</div>
+          <span>Stage 16 — Contract Ingestion</span>
+        </div>
+        <div class="stage-item" id="st-1">
+          <div class="stage-dot pending" id="dot-1">○</div>
+          <span>Stage 3 — Classification</span>
+        </div>
+        <div class="stage-item" id="st-2">
+          <div class="stage-dot pending" id="dot-2">○</div>
+          <span>Stage 4.5 — Obligation Analysis</span>
+        </div>
+        <div class="stage-item" id="st-3">
+          <div class="stage-dot pending" id="dot-3">○</div>
+          <span>Stage 5 — SR Matching (TF-IDF + regex)</span>
+        </div>
+        <div class="stage-item" id="st-4">
+          <div class="stage-dot pending" id="dot-4">○</div>
+          <span>Stage 6 — Compliance Assessment</span>
+        </div>
+        <div class="stage-item" id="st-5">
+          <div class="stage-dot pending" id="dot-5">○</div>
+          <span>Stage 8 — Remediation Generator</span>
+        </div>
+        <div class="stage-item" id="st-6">
+          <div class="stage-dot pending" id="dot-6">○</div>
+          <span>Stage 11 — Risk Scoring</span>
+        </div>
+        <div class="stage-item" id="st-7">
+          <div class="stage-dot pending" id="dot-7">○</div>
+          <span>Stages 9 / 12–14 — Reports &amp; Negotiation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE: Contract Detail (clauses, findings, risk, negotiation)
+═══════════════════════════════════════════════════════════ -->
+<div id="pg-contract" class="page">
+  <nav class="nav">
+    <div class="nav-brand">⚖️ Contract Analysis <span>DEMO</span></div>
+    <div class="nav-right">
+      <a href="#" onclick="goTo('dashboard')" class="text-sm text-gray">← Dashboard</a>
+      <button class="nav-logout" onclick="goTo('login')">Sign out</button>
+    </div>
+  </nav>
+  <div class="main">
+
+    <!-- Contract header -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Vendor SaaS Agreement Q1 2026</div>
+        <div class="text-sm text-gray mt-8">
+          CloudOps Ltd · v1 · Uploaded 2026-03-08 ·
+          <span class="badge badge-red" style="vertical-align:middle">HIGH RISK</span>
+          <span class="badge badge-amber" style="vertical-align:middle">Pending Review</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-secondary btn-sm" onclick="goTo('dashboard')">← Back</button>
+        <button class="btn btn-primary btn-sm">Approve Version</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('clauses',this)">Clause Explorer</div>
+      <div class="tab" onclick="switchTab('findings',this)">Findings (6)</div>
+      <div class="tab" onclick="switchTab('risk',this)">Risk Report</div>
+      <div class="tab" onclick="switchTab('negotiation',this)">Negotiation</div>
+    </div>
+
+    <!-- ── Tab: Clause Explorer ─────────────────────────────── -->
+    <div id="tab-clauses" class="tab-panel active">
+      <div class="two-col">
+
+        <!-- Clause list -->
+        <div>
+          <div class="text-xs text-gray font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">
+            12 clauses · 4 with findings
+          </div>
+          <div id="clause-list-items"></div>
+        </div>
+
+        <!-- Clause detail -->
+        <div id="clause-detail-panel" class="detail-panel">
+          <div class="text-sm text-gray" style="text-align:center;padding:40px 0">
+            ← Select a clause to view details
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Tab: Findings ────────────────────────────────────── -->
+    <div id="tab-findings" class="tab-panel">
+      <div id="findings-list"></div>
+    </div>
+
+    <!-- ── Tab: Risk Report ─────────────────────────────────── -->
+    <div id="tab-risk" class="tab-panel">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="detail-panel">
+          <div class="detail-label">Risk Distribution</div>
+          <div class="risk-row"><span class="risk-label">🔴 High Risk</span>
+            <div class="risk-bar-wrap"><div class="risk-bar-fill red" style="width:42%"></div></div>
+            <span class="risk-pct">42%</span></div>
+          <div class="risk-row"><span class="risk-label">🟡 Medium Risk</span>
+            <div class="risk-bar-wrap"><div class="risk-bar-fill amber" style="width:35%"></div></div>
+            <span class="risk-pct">35%</span></div>
+          <div class="risk-row"><span class="risk-label">🟢 Low Risk</span>
+            <div class="risk-bar-wrap"><div class="risk-bar-fill green" style="width:23%"></div></div>
+            <span class="risk-pct">23%</span></div>
+          <div class="mt-16 text-sm text-gray">
+            Overall risk score: <strong style="color:#ef4444">7.4 / 10</strong>
+          </div>
+        </div>
+        <div class="detail-panel">
+          <div class="detail-label">Top Risk Topics</div>
+          <table style="font-size:13px;width:100%">
+            <tbody>
+              <tr><td>Data Processing</td><td align="right"><span class="badge badge-red">HIGH</span></td></tr>
+              <tr><td style="padding-top:10px">Incident Notification</td><td align="right"><span class="badge badge-red">HIGH</span></td></tr>
+              <tr><td style="padding-top:10px">Subprocessor Control</td><td align="right"><span class="badge badge-amber">MEDIUM</span></td></tr>
+              <tr><td style="padding-top:10px">International Transfer</td><td align="right"><span class="badge badge-amber">MEDIUM</span></td></tr>
+              <tr><td style="padding-top:10px">IP Ownership</td><td align="right"><span class="badge badge-amber">MEDIUM</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="detail-panel" style="grid-column:1/-1">
+          <div class="detail-label">Regulatory Frameworks Triggered</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+            <span class="badge badge-blue">GDPR</span>
+            <span class="badge badge-purple">DORA</span>
+            <span class="badge badge-gray">ISO 27001</span>
+            <span class="badge badge-gray">NIS2</span>
+          </div>
+          <div class="text-sm text-gray mt-12">
+            <strong>8 SR matches</strong> across 4 frameworks.
+            Stage 5 ran in <strong>deterministic mode</strong> (LLM_ENABLED=false).
+          </div>
+          <div class="ai-meta mt-8">
+            <span>ai_metadata.llm_used: <strong>false</strong></span>
+            <span>provider: <strong>null</strong></span>
+            <span>model: <strong>null</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tab: Negotiation ─────────────────────────────────── -->
+    <div id="tab-negotiation" class="tab-panel">
+      <div id="negotiation-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     JavaScript — routing, mock data, interactions
+═══════════════════════════════════════════════════════════ -->
+<script>
+// ── Mock data ─────────────────────────────────────────────────────────────────
+
+const CLAUSES = [
+  {
+    clause_id: "CL-001",
+    page: 2,
+    topic: "Data Processing",
+    severity: "HIGH",
+    risk_score: 8.7,
+    finding_count: 3,
+    text: "The Processor may process Personal Data in any jurisdiction in which it or its Sub-processors maintain data processing operations, provided that such jurisdictions offer an 'adequate level of protection' as determined solely by the Processor.",
+    obligation_assessment: {
+      assessment: "NON_TRANSFERABLE_REGULATION",
+      severity: "HIGH",
+      reason: "Clause grants Processor unilateral discretion over international data transfers, removing Controller oversight required by GDPR Art. 46.",
+      recommended_action: "Replace with explicit transfer mechanism list (SCC or Binding Corporate Rules) subject to Controller approval."
+    },
+    sr_matches: [
+      { sr_id:"SR-GDPR-03", sr_title:"International Data Transfers", framework:"GDPR",
+        match_type:"DIRECT_MATCH", match_confidence:0.94,
+        extracted_evidence:"any jurisdiction … adequate level of protection … determined solely by the Processor",
+        ai_metadata:{llm_used:false,provider:null,model:null},
+        candidate_metadata:{candidate_source:"deterministic",regex_pattern:"transfer.{0,60}third.country"} },
+      { sr_id:"SR-GDPR-04", sr_title:"Sub-processor Management", framework:"GDPR",
+        match_type:"DIRECT_MATCH", match_confidence:0.81,
+        extracted_evidence:"Sub-processors maintain data processing operations",
+        ai_metadata:{llm_used:false,provider:null,model:null},
+        candidate_metadata:{candidate_source:"semantic_tfidf"} }
+    ]
+  },
+  {
+    clause_id: "CL-003",
+    page: 5,
+    topic: "Incident Notification",
+    severity: "HIGH",
+    risk_score: 8.2,
+    finding_count: 2,
+    text: "The Processor shall notify the Controller of any Security Incident within seventy-two (72) hours of detection, provided that the Processor determines in its sole discretion that such incident meets the materiality threshold defined in Schedule B.",
+    obligation_assessment: {
+      assessment: "CONDITIONAL_OBLIGATION",
+      severity: "HIGH",
+      reason: "72-hour notification window aligned with GDPR Art. 33 but conditioned on Processor's unilateral materiality assessment, undermining Controller's obligation to notify supervisory authorities.",
+      recommended_action: "Remove materiality threshold gate. Notification must be unconditional for all potential personal data breaches."
+    },
+    sr_matches: [
+      { sr_id:"SR-GDPR-01", sr_title:"Right to Erasure / Data Subject Rights", framework:"GDPR",
+        match_type:"INDIRECT_MATCH", match_confidence:0.52,
+        extracted_evidence:"Security Incident … notification",
+        ai_metadata:{llm_used:false,provider:null,model:null},
+        candidate_metadata:{candidate_source:"semantic_tfidf"} },
+      { sr_id:"SR-DORA-02", sr_title:"ICT Incident Reporting", framework:"DORA",
+        match_type:"DIRECT_MATCH", match_confidence:0.89,
+        extracted_evidence:"notify … Security Incident within seventy-two (72) hours … supervisory",
+        ai_metadata:{llm_used:false,provider:null,model:null},
+        candidate_metadata:{candidate_source:"deterministic",regex_pattern:"notify.{0,40}incident"} }
+    ]
+  },
+  {
+    clause_id: "CL-007",
+    page: 9,
+    topic: "Audit Rights",
+    severity: "MEDIUM",
+    risk_score: 5.4,
+    finding_count: 1,
+    text: "Controller's audit rights are limited to one (1) annual audit with 60 days' prior written notice, and may be substituted at Processor's sole election with a third-party audit report (SOC 2 Type II or ISO 27001 certification).",
+    obligation_assessment: {
+      assessment: "RESTRICTED_RIGHT",
+      severity: "MEDIUM",
+      reason: "Annual frequency cap and 60-day notice period may be insufficient for incident-triggered audits. Certification substitution acceptable if scope covers the services in question.",
+      recommended_action: "Add carve-out for incident-triggered audits with shorter notice period (5 business days). Verify certification scope aligns with contracted services."
+    },
+    sr_matches: [
+      { sr_id:"SR-ISO27001-01", sr_title:"Information Security Management", framework:"ISO 27001",
+        match_type:"DIRECT_MATCH", match_confidence:0.76,
+        extracted_evidence:"ISO 27001 certification … audit",
+        ai_metadata:{llm_used:false,provider:null,model:null},
+        candidate_metadata:{candidate_source:"deterministic"} }
+    ]
+  },
+  {
+    clause_id: "CL-011",
+    page: 14,
+    topic: "Liability",
+    severity: "MEDIUM",
+    risk_score: 4.8,
+    finding_count: 0,
+    text: "Each party's total aggregate liability under this Agreement shall not exceed the total fees paid or payable in the three (3) months preceding the event giving rise to the claim.",
+    obligation_assessment: {
+      assessment: "VALID",
+      severity: "LOW",
+      reason: "Standard liability cap. Three-month look-back period is below industry median (12 months) but not automatically non-compliant.",
+      recommended_action: "Negotiate cap to 12 months of fees for data breach scenarios to align with GDPR damage exposure."
+    },
+    sr_matches: []
+  },
+  {
+    clause_id: "CL-014",
+    page: 17,
+    topic: "Termination",
+    severity: "LOW",
+    risk_score: 2.1,
+    finding_count: 0,
+    text: "Either party may terminate this Agreement for convenience upon 90 days' written notice to the other party.",
+    obligation_assessment: { assessment:"VALID", severity:"LOW",
+      reason:"Standard termination clause, no regulatory concerns.", recommended_action:null },
+    sr_matches: []
+  }
+];
+
+const FINDINGS = [
+  { id:1, finding_key:"F-001", finding_type:"DATA_TRANSFER_GAP", topic:"Data Processing",
+    severity:"HIGH", status:"open",
+    text_preview:"Unilateral jurisdiction selection without defined safeguard mechanisms violates GDPR Art. 46." },
+  { id:2, finding_key:"F-002", finding_type:"CONTROLLER_OVERSIGHT_GAP", topic:"Data Processing",
+    severity:"HIGH", status:"open",
+    text_preview:"Processor retains sole discretion over adequacy determination — Controller cannot fulfil accountability obligations." },
+  { id:3, finding_key:"F-003", finding_type:"SUBJECT_ACCESS_CONSTRAINT", topic:"Data Processing",
+    severity:"MEDIUM", status:"open",
+    text_preview:"No explicit clause addressing data subject requests forwarded to Controller within statutory timeframe." },
+  { id:4, finding_key:"F-004", finding_type:"NOTIFICATION_GATE", topic:"Incident Notification",
+    severity:"HIGH", status:"open",
+    text_preview:"Materiality threshold gate on incident notification is incompatible with GDPR Art. 33 unconditional requirement." },
+  { id:5, finding_key:"F-005", finding_type:"SUPERVISORY_REPORTING_GAP", topic:"Incident Notification",
+    severity:"HIGH", status:"in_review",
+    text_preview:"72h clock conditioned on Processor's internal assessment; Controller cannot guarantee timely supervisory notification." },
+  { id:6, finding_key:"F-006", finding_type:"AUDIT_SCOPE_LIMITATION", topic:"Audit Rights",
+    severity:"MEDIUM", status:"open",
+    text_preview:"No provision for out-of-cycle incident-triggered audits. 60-day notice period incompatible with breach response timelines." }
+];
+
+const NEGOTIATION = [
+  { neg_id:"N-001", priority:"HIGH", topic:"International Data Transfers",
+    position_summary:"Reject unilateral jurisdiction clause. Replace with enumerated transfer mechanisms.",
+    recommended_text:"The Processor shall transfer Personal Data outside the EEA only pursuant to mechanisms approved by the Controller in writing, including Standard Contractual Clauses (Module 2) or Binding Corporate Rules." },
+  { neg_id:"N-002", priority:"HIGH", topic:"Incident Notification",
+    position_summary:"Remove materiality threshold from notification trigger.",
+    recommended_text:"The Processor shall notify the Controller without undue delay and no later than 24 hours after becoming aware of any actual or suspected Security Incident involving Personal Data, without any materiality threshold." },
+  { neg_id:"N-003", priority:"MEDIUM", topic:"Sub-processor Management",
+    position_summary:"Add prior written consent requirement for new sub-processors.",
+    recommended_text:"The Processor shall not engage any new Sub-processor without obtaining the Controller's prior specific written approval. The Processor shall provide 30 days' prior notice of any proposed Sub-processor change." },
+  { neg_id:"N-004", priority:"MEDIUM", topic:"Audit Rights",
+    position_summary:"Carve out incident-triggered audits from annual frequency cap.",
+    recommended_text:"The annual audit limitation shall not apply to audits triggered by a confirmed Security Incident, for which the Controller may conduct or commission an audit upon 5 business days' notice." }
+];
+
+// ── Router ────────────────────────────────────────────────────────────────────
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('pg-' + page).classList.add('active');
+  if (page === 'contract') renderContract();
+}
+
+// ── Upload flow ───────────────────────────────────────────────────────────────
+function simulateUpload() {
+  document.getElementById('upload-form').style.display = 'block';
+  document.querySelector('.upload-zone').style.display = 'none';
+}
+
+function startAnalysis() {
+  goTo('progress');
+  runProgress();
+}
+
+function runProgress() {
+  const stages = [
+    {pct:8,  label:"Stage 16 — Contract Ingestion"},
+    {pct:22, label:"Stage 3 — Classification"},
+    {pct:38, label:"Stage 4.5 — Obligation Analysis"},
+    {pct:55, label:"Stage 5 — SR Matching"},
+    {pct:67, label:"Stage 6 — Compliance Assessment"},
+    {pct:78, label:"Stage 8 — Remediation Generator"},
+    {pct:90, label:"Stage 11 — Risk Scoring"},
+    {pct:100,label:"Reports & Negotiation"}
+  ];
+  let i = 0;
+  function next() {
+    if (i > 0) {
+      const prev = document.getElementById('dot-' + (i-1));
+      prev.className = 'stage-dot done';
+      prev.textContent = '✓';
+    }
+    if (i < stages.length) {
+      const dot = document.getElementById('dot-' + i);
+      dot.className = 'stage-dot running';
+      dot.textContent = '●';
+      const pbar = document.getElementById('pbar');
+      const lbl  = document.getElementById('pct-label');
+      pbar.style.width = stages[i].pct + '%';
+      lbl.textContent  = stages[i].pct + '%';
+      if (stages[i].pct === 100) pbar.classList.add('done');
+      i++;
+      const delay = (i === stages.length) ? 600 : 700;
+      setTimeout(next, delay);
+    } else {
+      setTimeout(() => goTo('contract'), 500);
+    }
+  }
+  next();
+}
+
+// ── Tab switcher ──────────────────────────────────────────────────────────────
+function switchTab(id, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+// ── Clause Explorer ───────────────────────────────────────────────────────────
+function renderContract() {
+  renderClauseList();
+  renderFindings();
+  renderNegotiation();
+}
+
+function renderClauseList() {
+  const el = document.getElementById('clause-list-items');
+  el.innerHTML = CLAUSES.map((c, idx) => `
+    <div class="clause-item" id="ci-${idx}" onclick="selectClause(${idx})">
+      <div class="clause-header">
+        <span class="clause-id">${c.clause_id} · p.${c.page}</span>
+        <span class="badge ${severityBadge(c.severity)}">${c.severity}</span>
+      </div>
+      <div class="clause-preview">${c.text}</div>
+      <div class="clause-meta">
+        <span class="badge badge-gray">${c.topic}</span>
+        ${c.finding_count ? `<span class="badge badge-red">${c.finding_count} findings</span>` : ''}
+        ${c.sr_matches.length ? `<span class="badge badge-blue">${c.sr_matches.length} SR matches</span>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function selectClause(idx) {
+  document.querySelectorAll('.clause-item').forEach(el => el.classList.remove('selected'));
+  document.getElementById('ci-' + idx).classList.add('selected');
+  const c = CLAUSES[idx];
+  const panel = document.getElementById('clause-detail-panel');
+  panel.innerHTML = `
+    <div class="detail-section">
+      <div class="detail-label">Clause ${c.clause_id} · Page ${c.page}</div>
+      <div class="clause-id" style="margin-bottom:8px">${c.topic}</div>
+      <div style="font-size:13px;color:#374151;line-height:1.6;background:#f8fafc;
+        padding:12px;border-radius:6px;border:1px solid #e2e8f0">${c.text}</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">Obligation Assessment</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="badge ${severityBadge(c.obligation_assessment.severity)}">${c.obligation_assessment.severity||'—'}</span>
+        <span class="badge badge-gray">${c.obligation_assessment.assessment}</span>
+      </div>
+      <div style="font-size:13px;color:#374151;margin-bottom:8px">${c.obligation_assessment.reason}</div>
+      ${c.obligation_assessment.recommended_action
+        ? `<div class="info"style="margin:0"><strong>Recommended:</strong> ${c.obligation_assessment.recommended_action}</div>`
+        : ''}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">SR Matches (${c.sr_matches.length})</div>
+      ${c.sr_matches.length === 0
+        ? '<div class="text-sm text-gray">No regulatory requirements matched for this clause.</div>'
+        : c.sr_matches.map(m => `
+          <div class="sr-match">
+            <div class="sr-match-header">
+              <div>
+                <span class="sr-id">${m.sr_id}</span>
+                <span style="font-size:12px;color:#64748b;margin-left:8px">${m.sr_title}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="badge badge-blue">${m.framework}</span>
+                <span class="badge ${m.match_type==='DIRECT_MATCH'?'badge-green':'badge-amber'}">${m.match_type.replace('_',' ')}</span>
+              </div>
+            </div>
+            <div class="confidence-bar">
+              <div class="confidence-fill" style="width:${(m.match_confidence*100).toFixed(0)}%"></div>
+            </div>
+            <div style="font-size:11px;color:#64748b;margin-top:4px">
+              confidence: ${(m.match_confidence*100).toFixed(0)}% ·
+              source: ${m.candidate_metadata?.candidate_source||'—'}
+            </div>
+            ${m.extracted_evidence ? `<div class="evidence">"${m.extracted_evidence}"</div>` : ''}
+            <div class="ai-meta">
+              <span>llm_used: <strong>${m.ai_metadata.llm_used}</strong></span>
+              <span>provider: <strong>${m.ai_metadata.provider||'null'}</strong></span>
+              <span>model: <strong>${m.ai_metadata.model||'null'}</strong></span>
+            </div>
+          </div>`).join('')}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">Risk Score</div>
+      <div style="font-size:28px;font-weight:700;color:${c.risk_score>=7?'#ef4444':c.risk_score>=4?'#f59e0b':'#10b981'}">
+        ${c.risk_score.toFixed(1)}<span style="font-size:14px;color:#94a3b8"> / 10</span>
+      </div>
+    </div>`;
+}
+
+// ── Findings ──────────────────────────────────────────────────────────────────
+function renderFindings() {
+  const el = document.getElementById('findings-list');
+  el.innerHTML = FINDINGS.map(f => `
+    <div class="finding ${f.severity}">
+      <div class="finding-title">
+        ${f.finding_key} · ${f.finding_type.replace(/_/g,' ')}
+        <span class="badge ${severityBadge(f.severity)}" style="margin-left:8px">${f.severity}</span>
+        <span class="badge badge-gray" style="margin-left:4px">${f.status}</span>
+      </div>
+      <div class="finding-desc">${f.text_preview}</div>
+    </div>`).join('');
+}
+
+// ── Negotiation ───────────────────────────────────────────────────────────────
+function renderNegotiation() {
+  const el = document.getElementById('negotiation-list');
+  el.innerHTML = NEGOTIATION.map(n => `
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <span class="font-medium">${n.neg_id}</span>
+          <span class="badge badge-gray" style="margin-left:8px">${n.topic}</span>
+        </div>
+        <span class="badge ${n.priority==='HIGH'?'badge-red':'badge-amber'}">${n.priority}</span>
+      </div>
+      <div class="text-sm" style="margin-bottom:10px"><strong>Position:</strong> ${n.position_summary}</div>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:12px;
+        font-size:13px;color:#374151;border-left:3px solid #3b82f6">
+        <div class="text-xs text-gray font-bold" style="margin-bottom:6px">PROPOSED LANGUAGE</div>
+        ${n.recommended_text}
+      </div>
+    </div>`).join('');
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function severityBadge(s) {
+  return s==='HIGH'?'badge-red':s==='MEDIUM'?'badge-amber':s==='LOW'?'badge-green':'badge-gray';
+}
+
+// Restore upload form on re-visit
+document.getElementById('pg-upload').addEventListener('click', function(){}, {once:false});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,51 @@
+%%{ init: { 'flowchart': { 'curve': 'basis' } } }%%
+flowchart LR
+
+%% ── Styles ─────────────────────────────────────────────────────────
+    classDef HIGH fill:#ff4444,color:#fff,stroke:#ff4444
+    classDef MEDIUM fill:#ffaa00,color:#222,stroke:#ffaa00
+    classDef LOW fill:#44cc44,color:#222,stroke:#44cc44
+    classDef SR_DIR fill:#00b894,color:#fff,stroke:#00b894
+    classDef SR_PAR fill:#fdcb6e,color:#222,stroke:#fdcb6e
+
+    %% Clause nodes (score · priority)
+    CL_103["CL-103\n10.0 · HIGH"]
+    class CL_103 HIGH
+    CL_108["CL-108\n10.0 · HIGH"]
+    class CL_108 HIGH
+    CL_104["CL-104\n8.8 · HIGH"]
+    class CL_104 HIGH
+    CL_105["CL-105\n6.2 · MEDIUM"]
+    class CL_105 MEDIUM
+    CL_106["CL-106\n6.2 · MEDIUM"]
+    class CL_106 MEDIUM
+    CL_102["CL-102\n6.0 · MEDIUM"]
+    class CL_102 MEDIUM
+    CL_107["CL-107\n6.0 · MEDIUM"]
+    class CL_107 MEDIUM
+    CL_109["CL-109\n6.0 · MEDIUM"]
+    class CL_109 MEDIUM
+    CL_101["CL-101\n1.5 · LOW"]
+    class CL_101 LOW
+    CL_110["CL-110\n1.5 · LOW"]
+    class CL_110 LOW
+
+    %% SR regulatory nodes
+    SR_NIS2_01["SR-NIS2-01\nNIS2"]
+    class SR_NIS2_01 SR_DIR
+    SR_DORA_02["SR-DORA-02\nDORA"]
+    class SR_DORA_02 SR_DIR
+    SR_DORA_01["SR-DORA-01\nDORA"]
+    class SR_DORA_01 SR_PAR
+    SR_ISO27001_03["SR-ISO27001-03\nISO27001"]
+    class SR_ISO27001_03 SR_PAR
+    SR_GDPR_02["SR-GDPR-02\nGDPR"]
+    class SR_GDPR_02 SR_PAR
+
+    %% Clause → SR edges
+    CL_103 -->|"direct 95%"| SR_NIS2_01
+    CL_108 -->|"direct 90%"| SR_DORA_02
+    CL_108 -.->|"partial 68%"| SR_DORA_01
+    CL_104 -.->|"partial 78%"| SR_ISO27001_03
+    CL_105 -.->|"partial 65%"| SR_GDPR_02
+    CL_106 -.->|"partial 65%"| SR_GDPR_02

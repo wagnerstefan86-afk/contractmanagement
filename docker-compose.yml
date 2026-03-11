@@ -1,0 +1,64 @@
+# ============================================================
+# Contract Analysis Platform — Test-Instance Compose File
+# NOT production hardened. Browser testing use only.
+#
+# Quick start:
+#   1. cp .env.test .env          — then edit .env: set NEXT_PUBLIC_API_URL
+#   2. docker compose build       — bakes NEXT_PUBLIC_API_URL into the JS bundle
+#   3. docker compose up -d
+#   4. Open http://<your-host>:3000 in a browser
+#
+# To stop:        docker compose down
+# View logs:      docker compose logs -f
+# Rebuild after code change:  docker compose build && docker compose up -d
+# ============================================================
+
+services:
+
+  # ── FastAPI backend ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: cap-backend:test
+    ports:
+      - "8765:8765"
+    env_file:
+      - .env              # copied from .env.test; add LLM keys here for LLM mode
+    environment:
+      # Override env_file values that need container-specific values:
+      CORS_ORIGINS: "*"   # permissive for testing; tighten if desired
+      # Keep SQLite database in ./data so it survives image rebuilds
+      DATABASE_URL: "sqlite:////app/data/contracts.db"
+    volumes:
+      # All three paths persist across container restarts and image rebuilds.
+      # Docker creates host directories if they do not exist.
+      - ./data/contracts:/app/contracts     # uploaded contract files
+      - ./data/analyses:/app/analyses       # pipeline artifacts
+      - ./data:/app/data                    # SQLite database (contracts.db)
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8765/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # ── Next.js frontend ─────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        # NEXT_PUBLIC_API_URL is baked into the JS bundle at build time.
+        # It MUST be the URL a browser can reach — not the Docker service name.
+        # Set this in .env before running `docker compose build`.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8765}
+    image: cap-frontend:test
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped

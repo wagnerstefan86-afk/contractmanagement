@@ -1,0 +1,133 @@
+%%{ init: { 'flowchart': { 'curve': 'basis' } } }%%
+flowchart LR
+
+%% ── Styles ──────────────────────────────────────────────────────────
+    classDef HIGH    fill:#ff4444,color:#fff,stroke:#cc0000
+    classDef MEDIUM  fill:#ffaa00,color:#222,stroke:#cc8800
+    classDef LOW     fill:#44cc44,color:#222,stroke:#229922
+    classDef VALID   fill:#dfe6e9,color:#636e72,stroke:#b2bec3
+    classDef TOPIC_H fill:#d63031,color:#fff,stroke:#a00
+    classDef TOPIC_M fill:#0984e3,color:#fff,stroke:#0660a8
+    classDef TOPIC_L fill:#00b894,color:#fff,stroke:#007a62
+    classDef SR_DIR  fill:#00b894,color:#fff,stroke:#007a62
+    classDef SR_PAR  fill:#fdcb6e,color:#222,stroke:#e0a800
+
+%% ── Stage 4 — Clause Extraction ────────────────────────────────────
+    subgraph S4["📄 Stage 4 — Clause Extraction"]
+        CL_102["CL-102\np.3 | paragraph"]
+        class CL_102 MEDIUM
+        CL_103["CL-103\np.4 | paragraph"]
+        class CL_103 HIGH
+        CL_104["CL-104\np.5 | bullet_list"]
+        class CL_104 HIGH
+        CL_105["CL-105\np.6 | paragraph"]
+        class CL_105 MEDIUM
+        CL_106["CL-106\np.7 | paragraph"]
+        class CL_106 MEDIUM
+        CL_107["CL-107\np.8 | paragraph"]
+        class CL_107 MEDIUM
+        CL_108["CL-108\np.9 | paragraph"]
+        class CL_108 HIGH
+        CL_109["CL-109\np.10 | paragraph"]
+        class CL_109 MEDIUM
+    end
+
+%% ── Stage 4.5 — Obligation Analysis ────────────────────────────────
+    subgraph S45["🔍 Stage 4.5 — Obligation Analysis"]
+        OA_CL_102["SCOPE_UNDEFINED\nMEDIUM"]
+        class OA_CL_102 MEDIUM
+        OA_CL_103["NON_TRANSFERABLE_REGULATION\nHIGH"]
+        class OA_CL_103 HIGH
+        OA_CL_104["OPERATIONAL_RISK\nHIGH"]
+        class OA_CL_104 HIGH
+        OA_CL_105["SCOPE_UNDEFINED\nMEDIUM"]
+        class OA_CL_105 MEDIUM
+        OA_CL_106["CUSTOMER_RESPONSIBILITY\nMEDIUM"]
+        class OA_CL_106 MEDIUM
+        OA_CL_107["OPERATIONAL_RISK\nMEDIUM"]
+        class OA_CL_107 MEDIUM
+        OA_CL_108["NON_TRANSFERABLE_REGULATION\nHIGH"]
+        class OA_CL_108 HIGH
+        OA_CL_109["AMBIGUOUS_REQUIREMENT\nMEDIUM"]
+        class OA_CL_109 MEDIUM
+    end
+
+%% ── Stage 5 — Clause-SR Matches (clause-direct) ───────────────────
+    subgraph S5["📋 Stage 5 — Clause-SR Matches"]
+        SR_NIS2_01["SR-NIS2-01\nNIS2 NIS2 Art. 23\nDIRECT 95%"]
+        class SR_NIS2_01 SR_DIR
+        SR_ISO27001_03["SR-ISO27001-03\nISO27001 ISO27001:2022 A.18.2\nPARTIAL 78%"]
+        class SR_ISO27001_03 SR_PAR
+        SR_GDPR_02["SR-GDPR-02\nGDPR GDPR Art. 28\nPARTIAL 65%"]
+        class SR_GDPR_02 SR_PAR
+        SR_DORA_02["SR-DORA-02\nDORA DORA Art. 17, 19\nDIRECT 90%"]
+        class SR_DORA_02 SR_DIR
+        SR_DORA_01["SR-DORA-01\nDORA DORA Art. 6-10\nPARTIAL 68%"]
+        class SR_DORA_01 SR_PAR
+    end
+
+%% ── Stage 8 — Remediation Proposals ───────────────────────────────
+    subgraph S8["🔧 Stage 8 — Remediation"]
+        REM_CL_102["CL-102\nSCOPE_UNDEFINED"]
+        class REM_CL_102 MEDIUM
+        REM_CL_103["CL-103\nNON_TRANSFERABLE_REGULATION"]
+        class REM_CL_103 HIGH
+        REM_CL_104["CL-104\nOPERATIONAL_RISK"]
+        class REM_CL_104 HIGH
+        REM_CL_105["CL-105\nSCOPE_UNDEFINED"]
+        class REM_CL_105 MEDIUM
+        REM_CL_106["CL-106\nCUSTOMER_RESPONSIBILITY"]
+        class REM_CL_106 MEDIUM
+        REM_CL_107["CL-107\nOPERATIONAL_RISK"]
+        class REM_CL_107 MEDIUM
+        REM_CL_108["CL-108\nNON_TRANSFERABLE_REGULATION"]
+        class REM_CL_108 HIGH
+        REM_CL_109["CL-109\nAMBIGUOUS_REQUIREMENT"]
+        class REM_CL_109 MEDIUM
+    end
+
+%% ── Stage 9 — Negotiation Topics ──────────────────────────────────
+    subgraph S9["📝 Stage 9 — Negotiation Brief"]
+        T_REGULATORY_COMPLIANCE["Regulatory Compliance\nHIGH · 5 issues"]
+        class T_REGULATORY_COMPLIANCE TOPIC_H
+        T_AUDIT_RIGHTS["Audit Rights\nHIGH · 2 issues"]
+        class T_AUDIT_RIGHTS TOPIC_H
+        T_DATA_PROTECTION["Data Protection\nHIGH · 5 issues"]
+        class T_DATA_PROTECTION TOPIC_H
+        T_INCIDENT_MANAGEMENT["Incident Management\nMEDIUM · 1 issues"]
+        class T_INCIDENT_MANAGEMENT TOPIC_M
+        T_SECURITY_CONTROLS["Security Controls\nHIGH · 3 issues"]
+        class T_SECURITY_CONTROLS TOPIC_H
+    end
+
+%% ── Edges ───────────────────────────────────────────────────────────
+    CL_102 -->|Stage 4.5| OA_CL_102
+    OA_CL_102 -->|Stage 8| REM_CL_102
+    REM_CL_102 -->|Stage 9| T_REGULATORY_COMPLIANCE
+    CL_103 -->|Stage 4.5| OA_CL_103
+    CL_103 -->|direct 95%| SR_NIS2_01
+    OA_CL_103 -->|Stage 8| REM_CL_103
+    REM_CL_103 -->|Stage 9| T_REGULATORY_COMPLIANCE
+    CL_104 -->|Stage 4.5| OA_CL_104
+    CL_104 -.->|partial 78%| SR_ISO27001_03
+    OA_CL_104 -->|Stage 8| REM_CL_104
+    REM_CL_104 -->|Stage 9| T_AUDIT_RIGHTS
+    CL_105 -->|Stage 4.5| OA_CL_105
+    CL_105 -.->|partial 65%| SR_GDPR_02
+    OA_CL_105 -->|Stage 8| REM_CL_105
+    REM_CL_105 -->|Stage 9| T_DATA_PROTECTION
+    CL_106 -->|Stage 4.5| OA_CL_106
+    CL_106 -.->|partial 65%| SR_GDPR_02
+    OA_CL_106 -->|Stage 8| REM_CL_106
+    REM_CL_106 -->|Stage 9| T_DATA_PROTECTION
+    CL_107 -->|Stage 4.5| OA_CL_107
+    OA_CL_107 -->|Stage 8| REM_CL_107
+    REM_CL_107 -->|Stage 9| T_INCIDENT_MANAGEMENT
+    CL_108 -->|Stage 4.5| OA_CL_108
+    CL_108 -->|direct 90%| SR_DORA_02
+    CL_108 -.->|partial 68%| SR_DORA_01
+    OA_CL_108 -->|Stage 8| REM_CL_108
+    REM_CL_108 -->|Stage 9| T_REGULATORY_COMPLIANCE
+    CL_109 -->|Stage 4.5| OA_CL_109
+    OA_CL_109 -->|Stage 8| REM_CL_109
+    REM_CL_109 -->|Stage 9| T_SECURITY_CONTROLS

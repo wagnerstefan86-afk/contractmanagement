@@ -1,0 +1,79 @@
+{
+  "contract_id": "CT-2026-001",
+  "generated_at": "2026-03-10T16:57:33.296343+00:00",
+  "organization": "FinanzBank AG",
+  "frameworks": [
+    "ISO27001",
+    "DORA",
+    "NIS2",
+    "GDPR"
+  ],
+  "overall_risk": "HIGH",
+  "topic_count": 5,
+  "topics": [
+    {
+      "topic": "REGULATORY_COMPLIANCE",
+      "topic_label": "Regulatory Compliance",
+      "issue_count": 5,
+      "highest_severity": "HIGH",
+      "risk_summary": "The contract contains 2 HIGH and 3 MEDIUM-severity regulatory compliance issues involving NON_TRANSFERABLE_REGULATION, SCOPE_UNDEFINED, WEAK_MATCH. These clauses attempt to assign the Customer's non-transferable statutory obligations to the Provider and include undefined references to 'applicable law' that create open-ended liability.",
+      "affected_clauses": [
+        "CL-102",
+        "CL-103",
+        "CL-105",
+        "CL-108"
+      ],
+      "negotiation_position": "All clauses that transfer regulatory reporting obligations directly to the Provider must be removed or replaced with an Assistance Model: the Provider supports the Customer's compliance but cannot act as primary obligor to supervisory authorities. All open-ended references to 'applicable law' must be replaced with enumerated instruments in a mutually agreed contractual schedule, subject to a 90-day change notice and fee-adjustment mechanism."
+    },
+    {
+      "topic": "DATA_PROTECTION",
+      "topic_label": "Data Protection",
+      "issue_count": 5,
+      "highest_severity": "HIGH",
+      "risk_summary": "Data protection provisions contain 3 HIGH and 2 MEDIUM-severity issues (CUSTOMER_RESPONSIBILITY, MISSING, WEAK_MATCH). Controller-level GDPR duties (data classification, DPIA, lawful-basis determination) have been misallocated to the Provider as processor. International data transfer clauses lack explicit transfer mechanisms.",
+      "affected_clauses": [
+        "CL-105",
+        "CL-106",
+        "SR-GDPR-01",
+        "SR-GDPR-03",
+        "SR-GDPR-04"
+      ],
+      "negotiation_position": "All GDPR controller obligations \u2014 data classification, DPIA execution, lawful-basis determination, and retention-period definition \u2014 must be reassigned to the Customer as data controller. The Provider's role is limited to processor obligations under GDPR Art. 28. International data transfer mechanisms must be explicitly named (e.g. Standard Contractual Clauses). Subprocessor provisions must reference a maintained register with minimum 30-day advance notification of changes."
+    },
+    {
+      "topic": "SECURITY_CONTROLS",
+      "topic_label": "Security Controls",
+      "issue_count": 3,
+      "highest_severity": "HIGH",
+      "risk_summary": "Security control obligations contain 2 HIGH and 1 MEDIUM-severity issues (AMBIGUOUS_REQUIREMENT, MISSING). Multiple clauses use unmeasurable language ('state of the art', 'industry best practices') or reference frameworks without naming them. Supply chain security provisions are insufficiently specific for NIS2 compliance.",
+      "affected_clauses": [
+        "CL-109",
+        "SR-ISO27001-01",
+        "SR-NIS2-02"
+      ],
+      "negotiation_position": "All security obligation clauses must reference named, verifiable standards (e.g. ISO/IEC 27001:2022) with defined evidence requirements such as valid third-party certification or a current Statement of Applicability. Terms such as 'state of the art', 'industry best practices', or 'appropriate measures' must be replaced with objective, measurable criteria or a named standard. Supply chain security obligations must enumerate specific controls rather than reference generic frameworks."
+    },
+    {
+      "topic": "AUDIT_RIGHTS",
+      "topic_label": "Audit Rights",
+      "issue_count": 2,
+      "highest_severity": "HIGH",
+      "risk_summary": "Audit rights clauses contain 1 HIGH and 1 MEDIUM-severity issues. The contract demands unlimited, unscheduled access to all Provider systems, networks, and source code repositories without prior notice \u2014 a scope that creates critical security and operational risk for the Provider.",
+      "affected_clauses": [
+        "CL-104"
+      ],
+      "negotiation_position": "Unlimited, unscheduled, or unrestricted audit access to all Provider systems, infrastructure, and source code must be replaced with scoped, scheduled rights: one (1) annual compliance audit with thirty (30) calendar days' prior notice, limited to systems directly serving Customer data, conducted during normal business hours by a mutually agreed independent auditor. Emergency audits following a declared breach shall be scoped and scheduled within five (5) business days. Access to source code repositories is not included in standard audit scope."
+    },
+    {
+      "topic": "INCIDENT_MANAGEMENT",
+      "topic_label": "Incident Management",
+      "issue_count": 1,
+      "highest_severity": "MEDIUM",
+      "risk_summary": "Incident management obligations contain 1 MEDIUM-severity issues across 1 clause(s). Notification timeframes are operationally infeasible (sub-hour or 'immediate' obligations) and notification scope is undefined ('all stakeholders'). These obligations expose the Provider to unquantifiable breach-of-contract risk.",
+      "affected_clauses": [
+        "CL-107"
+      ],
+      "negotiation_position": "Replace all undefined notification timeframes ('immediately', 'without delay') with a tiered SLA model: preliminary notification to the Customer within four (4) business hours of incident declaration; full report within forty-eight (48) hours. Direct regulatory authority reporting remains the Customer's obligation. Any obligation to notify 'all affected parties' or 'all stakeholders' must be scoped to named recipients with agreed timelines."
+    }
+  ]
+}

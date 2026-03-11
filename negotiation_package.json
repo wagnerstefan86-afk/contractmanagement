@@ -1,0 +1,281 @@
+{
+  "contract_id": "CT-2026-001",
+  "generated_at": "2026-03-10",
+  "pipeline_stage": "Stage 13 \u2014 Negotiation Package",
+  "source_action_plan": "Stage 12 \u2014 Remediation Action Plan",
+  "total_items": 5,
+  "high_priority": 2,
+  "medium_priority": 3,
+  "low_priority": 0,
+  "frameworks_referenced": [
+    "DORA",
+    "GDPR",
+    "ISO27001",
+    "NIS2"
+  ],
+  "negotiation_items": [
+    {
+      "negotiation_id": "NEG-2026-001",
+      "action_id": "ACT-2026-001",
+      "topic": [
+        "REGULATORY_COMPLIANCE"
+      ],
+      "priority": "HIGH",
+      "affected_clauses": [
+        "CL-103",
+        "CL-108"
+      ],
+      "finding_type": "NON_TRANSFERABLE_REGULATION",
+      "finding_label": "Non-transferable regulatory obligation",
+      "problem_summary": "The contract contains 2 HIGH and 3 MEDIUM-severity regulatory compliance issues involving NON_TRANSFERABLE_REGULATION, SCOPE_UNDEFINED, WEAK_MATCH. These clauses attempt to assign the Customer's non-transferable statutory obligations to the Provider and include undefined references to 'applicable law' that create open-ended liability.\n\n**Finding detail**: The clause purports to transfer the Customer's own statutory or regulatory reporting obligations directly to the Provider. Regulatory obligations arising from the Customer's status as a regulated entity (e.g. under DORA, NIS2, GDPR) are non-delegable: the regulated entity remains solely responsible to the competent authority. Such a transfer is legally ineffective and exposes the Provider to undefined regulatory liability.",
+      "regulatory_basis": [
+        {
+          "sr_id": "SR-NIS2-01",
+          "framework": "NIS2",
+          "match_type": "DIRECT_MATCH",
+          "confidence": 95,
+          "source_clause": "CL-103",
+          "regulation": "Directive (EU) 2022/2555 (NIS2 Directive)",
+          "article": "Art. 23 \u2014 Reporting obligations for significant incidents",
+          "obligation": "Essential and important entities must notify the competent authority of significant incidents without undue delay. This obligation is personal to the regulated entity and cannot be contractually delegated.",
+          "penalty": "Administrative fines up to \u20ac10 M or 2 % of global annual turnover (essential entities); up to \u20ac7 M / 1.4 % (important entities)."
+        },
+        {
+          "sr_id": "SR-DORA-02",
+          "framework": "DORA",
+          "match_type": "DIRECT_MATCH",
+          "confidence": 90,
+          "source_clause": "CL-108",
+          "regulation": "Regulation (EU) 2022/2554 (DORA)",
+          "article": "Art. 19 \u2014 Reporting of major ICT-related incidents",
+          "obligation": "Financial entities must submit initial, intermediate, and final reports on major ICT incidents directly to the competent authority. Contractual assignment of this reporting obligation to an ICT third-party provider is not permissible.",
+          "penalty": "Fines set by national competent authority; EBA / ESMA / EIOPA may issue additional supervisory measures including temporary prohibition of services."
+        },
+        {
+          "sr_id": "SR-DORA-01",
+          "framework": "DORA",
+          "match_type": "PARTIAL_MATCH",
+          "confidence": 68,
+          "source_clause": "CL-108",
+          "regulation": "Regulation (EU) 2022/2554 (DORA)",
+          "article": "Art. 28 \u2014 General principles on sound management of ICT third-party risk",
+          "obligation": "ICT third-party service providers must support financial entities in meeting DORA obligations. The financial entity (Customer) remains the primary obligor and cannot transfer regulatory accountability.",
+          "penalty": "Non-compliance may trigger mandatory contractual termination clauses under Art. 28(7) and enhanced supervisory scrutiny."
+        }
+      ],
+      "risk_score_reference": {
+        "per_clause": {
+          "CL-103": 10.0,
+          "CL-108": 10.0
+        },
+        "max_score": 10.0
+      },
+      "current_clause_excerpts": [
+        {
+          "clause_id": "CL-103",
+          "page": 4,
+          "text": "As the Provider constitutes an essential entity under the NIS2 Directive (EU 2022/2555) as implemented by the NIS2UmsuCG, the Provider shall submit incident reports directly to the competent national \u2026"
+        },
+        {
+          "clause_id": "CL-108",
+          "page": 9,
+          "text": "As the Customer is a financial entity regulated under DORA (Regulation EU 2022/2554), the Provider shall assume all ICT-related regulatory reporting obligations on behalf of the Customer, including th\u2026"
+        }
+      ],
+      "recommended_clause_text": "The Customer acknowledges that all reporting and notification obligations owed to any competent supervisory authority (including but not limited to BaFin, BSI, and EBA) arising from the Customer's status as a regulated entity are borne exclusively by the Customer. The Provider shall support the Customer in discharging such obligations by: (i) notifying the Customer of any confirmed security incident materially affecting Customer data within four (4) hours of the Provider's internal incident declaration; (ii) providing a detailed incident report, including technical root-cause analysis and remediation measures, within forty-eight (48) hours of such declaration; (iii) supplying evidence, logs, and documentation reasonably required by the Customer to prepare and submit its own regulatory reports; and (iv) making available a designated point of contact to liaise with the Customer's compliance team during any regulatory investigation. The Provider shall have no obligation to submit reports or make representations directly to any regulatory authority on behalf of the Customer unless acting under a separately executed, duly notarised power of attorney that specifically authorises such action.",
+      "negotiation_argument": "**Position: Reject transfer of regulatory reporting obligations. Replace with Assistance Model.**\n\nClauses CL-103, CL-108 purport to make the Provider the primary obligor toward supervisory authorities for obligations that arise from the Customer's own regulated status. This is legally untenable on three grounds:\n\n1. **Regulatory non-transferability (SR-NIS2-01 (NIS2) \u00b7 SR-DORA-02 (DORA) \u00b7 SR-DORA-01 (DORA))**: The cited instruments (NIS2 Art. 23, DORA Art. 19) impose incident-reporting duties directly on essential entities and financial entities respectively. These obligations are personal to the licensed / designated entity and cannot be reassigned by private contract. Any contractual clause purporting to do so is unenforceable as against the supervisory authority.\n\n2. **Direct supervisory liability for the Provider**: Accepting primary obligor status means the Provider faces direct regulatory fines \u2014 up to \u20ac10 M or 2 % of global turnover under NIS2, and additional DORA sanctions \u2014 for reporting failures that may originate from Customer-side operational decisions, access restrictions, or delayed internal escalation, none of which the Provider controls.\n\n3. **Operational impossibility**: Meeting supervisory notification deadlines (NIS2: 24 h initial / 72 h intermediate; DORA: 4 h initial / 24 h detailed) requires full access to Customer-side incident triage, regulatory correspondence, and decision-making chains. None of these are contractually guaranteed to the Provider, making the obligation structurally unfulfillable.\n\nAll clauses that transfer regulatory reporting obligations directly to the Provider must be removed or replaced with an Assistance Model: the Provider supports the Customer's compliance but cannot act as primary obligor to supervisory authorities. All open-ended references to 'applicable law' must be replaced with enumerated instruments in a mutually agreed contractual schedule, subject to a 90-day change notice and fee-adjustment mechanism.\n\n**Non-negotiable floor**: The Provider will not sign any clause that designates it as direct reporting entity to BaFin, BSI, EBA, or any other supervisory authority absent a separately executed, notarised power of attorney.",
+      "fallback_option": "If the Customer insists on some form of Provider involvement, accept an **Assistance and Notification Model** only: the Provider commits to (i) notifying the Customer within 4 business hours of incident declaration, (ii) delivering a full incident report within 48 hours, and (iii) supplying evidence and logs needed for the Customer to prepare its own regulatory filings. The Provider explicitly does NOT submit reports or make representations to any supervisory authority unless acting under a separately executed, duly notarised power of attorney.",
+      "owner_role": "Legal / Compliance Officer",
+      "estimated_effort": "3\u20135 business days",
+      "expected_risk_reduction": "Eliminates direct regulatory exposure; expected clause score \u2264 3.0 post-remediation."
+    },
+    {
+      "negotiation_id": "NEG-2026-002",
+      "action_id": "ACT-2026-002",
+      "topic": [
+        "AUDIT_RIGHTS",
+        "INCIDENT_MANAGEMENT"
+      ],
+      "priority": "HIGH",
+      "affected_clauses": [
+        "CL-104",
+        "CL-107"
+      ],
+      "finding_type": "OPERATIONAL_RISK",
+      "finding_label": "Operationally unrealistic obligation",
+      "problem_summary": "Audit rights clauses contain 1 HIGH and 1 MEDIUM-severity issues. The contract demands unlimited, unscheduled access to all Provider systems, networks, and source code repositories without prior notice \u2014 a scope that creates critical security and operational risk for the Provider.\n\n**Finding detail**: The clause imposes operationally unrealistic obligations \u2014 such as notification within minutes, unlimited or unscheduled audit access to all systems, or continuous real-time data feeds \u2014 that cannot be delivered reliably, create disproportionate security risk, and may be technically infeasible at scale. Undefined scope obligations (e.g. 'all systems', 'all stakeholders') create unbounded liability.",
+      "regulatory_basis": [
+        {
+          "sr_id": "SR-ISO27001-03",
+          "framework": "ISO27001",
+          "match_type": "PARTIAL_MATCH",
+          "confidence": 78,
+          "source_clause": "CL-104",
+          "regulation": "ISO/IEC 27001:2022",
+          "article": "Annex A \u2014 Control 5.26: Response to information security incidents",
+          "obligation": "Organisations must establish, document, and implement a procedure for responding to information security incidents, including defined notification timelines proportionate to incident severity.",
+          "penalty": "Loss of ISO/IEC 27001 certification; contractual SLA breach exposure."
+        }
+      ],
+      "risk_score_reference": {
+        "per_clause": {
+          "CL-104": 8.75,
+          "CL-107": 6.0
+        },
+        "max_score": 8.75
+      },
+      "current_clause_excerpts": [
+        {
+          "clause_id": "CL-104",
+          "page": 5,
+          "text": "Security incident response obligations:\n\u2022 The Provider shall notify the Customer of any detected security incident within 15 minutes of internal detection, regardless of severity classification.\n\u2022 The\u2026"
+        },
+        {
+          "clause_id": "CL-107",
+          "page": 8,
+          "text": "In the event of a data breach or any security incident potentially affecting Customer data, the Provider shall immediately notify all affected parties, relevant regulatory authorities, and any other s\u2026"
+        }
+      ],
+      "recommended_clause_text": "Incident Notification: The Provider shall notify the Customer of any confirmed security incident materially affecting Customer data within four (4) business hours of the Provider's internal incident declaration. Notification shall include a preliminary impact assessment. A full incident report shall be delivered within forty-eight (48) hours. Audit Rights: The Customer or its appointed independent auditor may conduct one (1) compliance audit per calendar year upon thirty (30) calendar days' prior written notice, during normal business hours (Monday\u2013Friday, 09:00\u201317:00 CET), and subject to the Provider's information security and confidentiality requirements. The scope of each audit shall be limited to systems, processes, and records directly related to the services provided under this Agreement. Emergency audits following a declared data breach shall be scoped and scheduled by written agreement between the parties within five (5) business days of the breach notification. Log Access: The Provider shall make available to the Customer, within twenty-four (24) hours of a written request, aggregated security event logs relating to Customer data environments, in a mutually agreed machine-readable format. Continuous or real-time streaming of internal security event data is not included in the standard service scope and may be agreed as a separate, commercially scoped service.",
+      "negotiation_argument": "**Position: Replace infeasible obligations with a tiered SLA model aligned to SR-ISO27001-03 (ISO27001).**\n\nClauses CL-104, CL-107 impose notification obligations (e.g. 'within 15 minutes', 'immediately') that are operationally unachievable and create automatic, uncapped breach exposure:\n\n1. **Technical impossibility**: A 15-minute wall-clock notification obligation from first detection requires automated triaging, human escalation, and customer notification to complete within a single human operational cycle. Security operations centres operate on tiered alerting, with P1 (critical) incidents typically declared after 15\u201330 minutes of investigation. Any earlier notification would convey unverified noise rather than actionable intelligence.\n\n2. **Severity-blind scope**: Applying the same '15 minutes' or 'immediate' obligation to all incidents regardless of severity \u2014 from a failed login attempt to a full data exfiltration \u2014 creates an undifferentiated, unmanageable notification burden and renders the contractual SLA permanently in breach.\n\n3. **Undefined notification recipients**: 'Immediately notify all affected parties, relevant regulatory authorities, and any other stakeholders' is unbounded. Combined with an immediate obligation, this exposes the Provider to liability for every recipient and every timeline, including direct regulatory authority notification (see ACT-2026-001 for separate treatment).\n\n4. **ISO/IEC 27001:2022 Annex A Control 5.26** establishes a tiered incident response model as best practice. The recommended clause adopts: preliminary notification within 4 business hours, full report within 48 hours.\n\nUnlimited, unscheduled, or unrestricted audit access to all Provider systems, infrastructure, and source code must be replaced with scoped, scheduled rights: one (1) annual compliance audit with thirty (30) calendar days' prior notice, limited to systems directly serving Customer data, conducted during normal business hours by a mutually agreed independent auditor. Emergency audits following a declared breach shall be scoped and scheduled within five (5) business days. Access to source code repositories is not included in standard audit scope. | Replace all undefined notification timeframes ('immediately', 'without delay') with a tiered SLA model: preliminary notification to the Customer within four (4) business hours of incident declaration; full report within forty-eight (48) hours. Direct regulatory authority reporting remains the Customer's obligation. Any obligation to notify 'all affected parties' or 'all stakeholders' must be scoped to named recipients with agreed timelines.\n\n**Non-negotiable floor**: Any numerical obligation of less than 4 business hours for preliminary notification, or less than 48 hours for a full incident report, is not commercially acceptable.",
+      "fallback_option": "If 4 business hours is commercially rejected, accept a maximum fallback of **8 business hours** for preliminary notification, **24 hours** for a detailed incident summary, and **72 hours** for a full root-cause report \u2014 provided the obligation is tied to 'confirmed security incidents materially affecting Customer data' (not all alerts) and severity classification is mutually defined in an Incident Severity Schedule annexed to the contract.",
+      "owner_role": "Legal / Compliance Officer",
+      "estimated_effort": "3\u20135 business days",
+      "expected_risk_reduction": "Eliminates direct regulatory exposure; expected clause score \u2264 3.0 post-remediation."
+    },
+    {
+      "negotiation_id": "NEG-2026-003",
+      "action_id": "ACT-2026-003",
+      "topic": [
+        "DATA_PROTECTION"
+      ],
+      "priority": "MEDIUM",
+      "affected_clauses": [
+        "CL-106"
+      ],
+      "finding_type": "CUSTOMER_RESPONSIBILITY",
+      "finding_label": "Misassigned controller responsibility",
+      "problem_summary": "Data protection provisions contain 3 HIGH and 2 MEDIUM-severity issues (CUSTOMER_RESPONSIBILITY, MISSING, WEAK_MATCH). Controller-level GDPR duties (data classification, DPIA, lawful-basis determination) have been misallocated to the Provider as processor. International data transfer clauses lack explicit transfer mechanisms.\n\n**Finding detail**: The clause assigns to the Provider obligations that are legally the Customer's own controller responsibilities under GDPR \u2014 specifically, determining data classification, defining retention periods, establishing lawful bases for processing, and conducting Data Protection Impact Assessments (DPIA). Under GDPR Art. 4(7) and Art. 24, these are non-delegable controller duties. The Provider, acting as processor under Art. 28, cannot lawfully make these determinations on the Customer's behalf.",
+      "regulatory_basis": [
+        {
+          "sr_id": "SR-GDPR-02",
+          "framework": "GDPR",
+          "match_type": "PARTIAL_MATCH",
+          "confidence": 65,
+          "source_clause": "CL-106",
+          "regulation": "Regulation (EU) 2016/679 (GDPR)",
+          "article": "Art. 4(7) controller definition \u00b7 Art. 24 controller obligations \u00b7 Art. 28 processor obligations \u00b7 Art. 35 DPIA",
+          "obligation": "The data controller (Customer) bears sole responsibility for determining lawful bases for processing, conducting DPIAs, and defining data retention periods. These cannot be assigned to the data processor (Provider) by contract.",
+          "penalty": "Administrative fines up to \u20ac20 M or 4 % of global annual turnover for Art. 5/6/9 violations; up to \u20ac10 M / 2 % for Art. 24/28."
+        }
+      ],
+      "risk_score_reference": {
+        "per_clause": {
+          "CL-106": 6.25
+        },
+        "max_score": 6.25
+      },
+      "current_clause_excerpts": [
+        {
+          "clause_id": "CL-106",
+          "page": 7,
+          "text": "The Provider shall determine the sensitivity classification of all Customer data processed under this Agreement and shall define appropriate data retention periods for each category of Customer data i\u2026"
+        }
+      ],
+      "recommended_clause_text": "The Customer, acting as data controller within the meaning of GDPR Art. 4(7), shall remain solely responsible for: (i) determining and documenting the sensitivity classification of all personal data processed under this Agreement, as set out in the Data Classification Policy referenced in Schedule [B]; (ii) establishing the lawful basis for each category of processing under GDPR Art. 6 (and Art. 9 where special category data is involved) and documenting such basis in the Customer's Records of Processing Activities (RoPA); (iii) defining data retention periods for each category of Customer data, which the Provider shall implement on receipt of written instruction; and (iv) conducting any Data Protection Impact Assessment (DPIA) required under GDPR Art. 35. The Provider shall, upon written request and within fifteen (15) business days, supply the Customer with a description of the Provider's technical and organisational processing operations to assist the Customer in completing a DPIA. The Provider shall not be required to conduct, sign, or submit any DPIA on behalf of the Customer.",
+      "negotiation_argument": "**Position**: Reject all clauses that purport to transfer controller responsibilities to the Provider. Data classification, DPIA execution, lawful-basis determination, and retention policy definition must remain with the Customer. The Provider may offer supporting information (e.g. a description of technical processing operations to assist a DPIA), but cannot carry out the legal assessment. Propose a 'Controller Responsibilities Annex' that explicitly allocates these duties to the Customer and defines the Provider's supporting obligations (information supply, cooperation) with specific, bounded deliverables.\n\nRegulatory basis: SR-GDPR-02 (GDPR).\n\nAll GDPR controller obligations \u2014 data classification, DPIA execution, lawful-basis determination, and retention-period definition \u2014 must be reassigned to the Customer as data controller. The Provider's role is limited to processor obligations under GDPR Art. 28. International data transfer mechanisms must be explicitly named (e.g. Standard Contractual Clauses). Subprocessor provisions must reference a maintained register with minimum 30-day advance notification of changes.",
+      "fallback_option": "If the Customer insists the Provider 'assists' with classification, accept language under which the Provider provides a **technical data inventory** within 15 business days of a written request, describing processing operations and data categories. The Customer retains all classification decisions, lawful basis determinations, and DPIA obligations as data controller. The Provider's input is advisory only and does not constitute assumption of controller duties.",
+      "owner_role": "Data Protection Officer (DPO)",
+      "estimated_effort": "1\u20132 business days",
+      "expected_risk_reduction": "Removes ambiguity and scope gaps; expected clause score \u2264 2.5 post-remediation."
+    },
+    {
+      "negotiation_id": "NEG-2026-004",
+      "action_id": "ACT-2026-004",
+      "topic": [
+        "REGULATORY_COMPLIANCE",
+        "DATA_PROTECTION"
+      ],
+      "priority": "MEDIUM",
+      "affected_clauses": [
+        "CL-102",
+        "CL-105"
+      ],
+      "finding_type": "SCOPE_UNDEFINED",
+      "finding_label": "Undefined regulatory scope",
+      "problem_summary": "The contract contains 2 HIGH and 3 MEDIUM-severity regulatory compliance issues involving NON_TRANSFERABLE_REGULATION, SCOPE_UNDEFINED, WEAK_MATCH. These clauses attempt to assign the Customer's non-transferable statutory obligations to the Provider and include undefined references to 'applicable law' that create open-ended liability.\n\n**Finding detail**: The clause references 'applicable laws', 'relevant regulations', or 'industry standards' without naming specific legal instruments, frameworks, or supervisory authorities. This creates an open-ended, indeterminate obligation that may expand without mutual agreement as laws change, and makes compliance verification impossible.",
+      "regulatory_basis": [
+        {
+          "sr_id": "SR-GDPR-02",
+          "framework": "GDPR",
+          "match_type": "PARTIAL_MATCH",
+          "confidence": 65,
+          "source_clause": "CL-105",
+          "regulation": "Regulation (EU) 2016/679 (GDPR)",
+          "article": "Art. 4(7) controller definition \u00b7 Art. 24 controller obligations \u00b7 Art. 28 processor obligations \u00b7 Art. 35 DPIA",
+          "obligation": "The data controller (Customer) bears sole responsibility for determining lawful bases for processing, conducting DPIAs, and defining data retention periods. These cannot be assigned to the data processor (Provider) by contract.",
+          "penalty": "Administrative fines up to \u20ac20 M or 4 % of global annual turnover for Art. 5/6/9 violations; up to \u20ac10 M / 2 % for Art. 24/28."
+        }
+      ],
+      "risk_score_reference": {
+        "per_clause": {
+          "CL-102": 6.0,
+          "CL-105": 6.25
+        },
+        "max_score": 6.25
+      },
+      "current_clause_excerpts": [
+        {
+          "clause_id": "CL-102",
+          "page": 3,
+          "text": "The Provider shall at all times comply with all applicable laws, regulations, and industry best practices relevant to the provision of the services, including but not limited to all current and future\u2026"
+        },
+        {
+          "clause_id": "CL-105",
+          "page": 6,
+          "text": "The Provider shall ensure compliance with relevant data protection standards and applicable security frameworks at all times. All data processing activities must conform to applicable requirements as \u2026"
+        }
+      ],
+      "recommended_clause_text": "The Provider shall comply with the data protection, security, and operational resilience standards enumerated in Schedule [A] (Applicable Regulatory Frameworks), as agreed by the parties in writing and attached hereto. Schedule [A] as at the Effective Date references the following instruments: [to be completed by the parties]. Where a change in applicable law or regulation requires amendment of Schedule [A], the Customer shall notify the Provider in writing no later than ninety (90) days prior to the effective date of such change. If the required amendment imposes material additional cost or operational burden on the Provider, the parties shall negotiate in good faith a corresponding adjustment to fees and timelines within thirty (30) days of such notification. No amendment to Schedule [A] shall take effect without the written countersignature of both parties.",
+      "negotiation_argument": "**Position**: Require the customer to enumerate all referenced legal instruments, standards, and frameworks in a contractual annex (e.g. Schedule A \u2014 Applicable Regulatory Frameworks). Any future changes to the applicable set must require written agreement by both parties, with a minimum 90-day implementation notice period and, where changes impose material additional cost, a right to renegotiate fees. Reject dynamic-scope language such as 'as may be amended from time to time' unless accompanied by a change management clause that gives the Provider adequate notice and a price adjustment mechanism.\n\nRegulatory basis: SR-GDPR-02 (GDPR).\n\nAll clauses that transfer regulatory reporting obligations directly to the Provider must be removed or replaced with an Assistance Model: the Provider supports the Customer's compliance but cannot act as primary obligor to supervisory authorities. All open-ended references to 'applicable law' must be replaced with enumerated instruments in a mutually agreed contractual schedule, subject to a 90-day change notice and fee-adjustment mechanism. | All GDPR controller obligations \u2014 data classification, DPIA execution, lawful-basis determination, and retention-period definition \u2014 must be reassigned to the Customer as data controller. The Provider's role is limited to processor obligations under GDPR Art. 28. International data transfer mechanisms must be explicitly named (e.g. Standard Contractual Clauses). Subprocessor provisions must reference a maintained register with minimum 30-day advance notification of changes.",
+      "fallback_option": "If the Customer refuses a Schedule [A], accept a clause that enumerates the four currently applicable frameworks directly in the body of the clause: GDPR (EU) 2016/679, DORA (EU) 2022/2554, NIS2 Directive 2022/2555, and ISO/IEC 27001:2022. Any future additions require 90 days' written notice and, if they impose material cost, trigger a fee-adjustment negotiation within 30 days.",
+      "owner_role": "Legal / Compliance Officer",
+      "estimated_effort": "1\u20132 business days",
+      "expected_risk_reduction": "Removes ambiguity and scope gaps; expected clause score \u2264 2.5 post-remediation."
+    },
+    {
+      "negotiation_id": "NEG-2026-005",
+      "action_id": "ACT-2026-005",
+      "topic": [
+        "SECURITY_CONTROLS"
+      ],
+      "priority": "MEDIUM",
+      "affected_clauses": [
+        "CL-109"
+      ],
+      "finding_type": "AMBIGUOUS_REQUIREMENT",
+      "finding_label": "Vague / unmeasurable requirement",
+      "problem_summary": "Security control obligations contain 2 HIGH and 1 MEDIUM-severity issues (AMBIGUOUS_REQUIREMENT, MISSING). Multiple clauses use unmeasurable language ('state of the art', 'industry best practices') or reference frameworks without naming them. Supply chain security provisions are insufficiently specific for NIS2 compliance.\n\n**Finding detail**: The clause uses vague, unmeasurable language (e.g. 'industry best practices', 'state of the art', 'appropriate measures') that creates an indeterminate obligation. Without objective criteria, compliance cannot be verified and disputes cannot be resolved.",
+      "regulatory_basis": [],
+      "risk_score_reference": {
+        "per_clause": {
+          "CL-109": 6.0
+        },
+        "max_score": 6.0
+      },
+      "current_clause_excerpts": [
+        {
+          "clause_id": "CL-109",
+          "page": 10,
+          "text": "The Provider shall implement appropriate technical and organizational measures to ensure the security of all data processed. The Provider shall apply industry best practices and state-of-the-art secur\u2026"
+        }
+      ],
+      "recommended_clause_text": "The Provider shall implement and maintain information security controls in accordance with ISO/IEC 27001:2022. Compliance shall be evidenced by a valid certification issued by an accredited third-party certification body, or, where certification is not yet obtained, a current Statement of Applicability signed by the Provider's Chief Information Security Officer. Any additional security requirements proposed by the Customer shall be documented in a mutually executed Security Requirements Schedule prior to taking effect and shall not impose obligations on the Provider materially beyond the referenced standard without corresponding adjustment to fees and timelines.",
+      "negotiation_argument": "**Position**: Request that the customer replace all vague performance terms with objectively verifiable criteria, named standards, or defined metrics. Any security or compliance obligation must be measurable to be enforceable. Propose a named-standard model (e.g. ISO/IEC 27001:2022) with certification as evidence of compliance. Reject open-ended language that could expand scope without mutual agreement.\n\nRegulatory basis: no direct regulatory SR match on record.\n\nAll security obligation clauses must reference named, verifiable standards (e.g. ISO/IEC 27001:2022) with defined evidence requirements such as valid third-party certification or a current Statement of Applicability. Terms such as 'state of the art', 'industry best practices', or 'appropriate measures' must be replaced with objective, measurable criteria or a named standard. Supply chain security obligations must enumerate specific controls rather than reference generic frameworks.",
+      "fallback_option": "If the Customer refuses to name ISO/IEC 27001:2022 explicitly, accept 'appropriate technical and organisational measures' **provided** the clause also states: 'For the purposes of this Agreement, compliance with ISO/IEC 27001:2022, as evidenced by a valid third-party certification or a current Statement of Applicability signed by the Provider\\'s CISO, shall constitute fulfilment of this obligation.' This binds the standard by reference while preserving the Customer's preferred softer language.",
+      "owner_role": "CISO / Security Officer",
+      "estimated_effort": "1\u20132 business days",
+      "expected_risk_reduction": "Removes ambiguity and scope gaps; expected clause score \u2264 2.5 post-remediation."
+    }
+  ]
+}

@@ -1,0 +1,471 @@
+# ============================================================================
+# contract_type_mappings.yaml — Two seed tables in one file:
+#
+#   contract_type_req_mapping        (mandatory/optional + quality thresholds)
+#   contract_type_framework_weights  (framework relevance weights per type)
+#
+# Weights in contract_type_framework_weights are renormalized to sum=1.0
+# at query time — raw values here express relative importance, not absolute %.
+#
+# min_quality_score: minimum clause quality (0.000–1.000) for a finding to be
+#   classified as 'present' rather than 'partial'.
+# weight: relative importance of this sub-requirement within the framework score.
+# ============================================================================
+
+
+# ----------------------------------------------------------------------------
+# contract_type_framework_weights
+# Which frameworks apply to each contract type, and with what relative weight.
+# ----------------------------------------------------------------------------
+
+contract_type_framework_weights:
+
+  # SaaS — all four frameworks apply; GDPR and ISO 27001 dominate
+  - contract_type: saas
+    framework_id: iso27001
+    weight: 0.350
+
+  - contract_type: saas
+    framework_id: gdpr
+    weight: 0.350
+
+  - contract_type: saas
+    framework_id: nis2
+    weight: 0.150
+
+  - contract_type: saas
+    framework_id: dora
+    weight: 0.150
+
+  # DPA — GDPR is primary; ISO 27001 security measures support it
+  - contract_type: dpa
+    framework_id: gdpr
+    weight: 0.700
+
+  - contract_type: dpa
+    framework_id: iso27001
+    weight: 0.300
+
+  # Cloud IaaS/PaaS — DORA (for financial sector) and ISO 27001 dominate
+  - contract_type: cloud_iaas_paas
+    framework_id: dora
+    weight: 0.400
+
+  - contract_type: cloud_iaas_paas
+    framework_id: iso27001
+    weight: 0.350
+
+  - contract_type: cloud_iaas_paas
+    framework_id: gdpr
+    weight: 0.250
+
+  # Managed Security — ISO 27001 is primary; DORA applies for financial entities
+  - contract_type: managed_security
+    framework_id: iso27001
+    weight: 0.500
+
+  - contract_type: managed_security
+    framework_id: dora
+    weight: 0.300
+
+  - contract_type: managed_security
+    framework_id: nis2
+    weight: 0.200
+
+  # Outsourcing — DORA (if financial sector) and ISO 27001 apply equally
+  - contract_type: outsourcing
+    framework_id: dora
+    weight: 0.450
+
+  - contract_type: outsourcing
+    framework_id: iso27001
+    weight: 0.350
+
+  - contract_type: outsourcing
+    framework_id: gdpr
+    weight: 0.200
+
+  # Professional Services — ISO 27001 primary; GDPR if data processing involved
+  - contract_type: professional_svcs
+    framework_id: iso27001
+    weight: 0.600
+
+  - contract_type: professional_svcs
+    framework_id: gdpr
+    weight: 0.400
+
+  # Software License — lightweight; ISO 27001 baseline
+  - contract_type: software_license
+    framework_id: iso27001
+    weight: 0.700
+
+  - contract_type: software_license
+    framework_id: gdpr
+    weight: 0.300
+
+  # NDA — minimal framework requirements; basic ISO 27001 confidentiality controls
+  - contract_type: nda
+    framework_id: iso27001
+    weight: 1.000
+
+
+# ----------------------------------------------------------------------------
+# contract_type_req_mapping
+# Which sub-requirements are mandatory for each contract type and at what quality.
+# ----------------------------------------------------------------------------
+
+contract_type_req_mapping:
+
+  # ==========================================================================
+  # SaaS
+  # ==========================================================================
+
+  # ISO 27001 A.5.19 — Supplier relationships
+  - contract_type: saas
+    sub_requirement_id: iso27001_a5_19_1    # access controls
+    mandatory: true
+    min_quality_score: 0.600
+    weight: 0.120
+
+  - contract_type: saas
+    sub_requirement_id: iso27001_a5_19_2    # subcontractor management
+    mandatory: true
+    min_quality_score: 0.600
+    weight: 0.120
+
+  - contract_type: saas
+    sub_requirement_id: iso27001_a5_19_3    # incident notification
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.150
+
+  # ISO 27001 A.5.20 — Supplier agreements
+  - contract_type: saas
+    sub_requirement_id: iso27001_a5_20_1    # security requirements
+    mandatory: true
+    min_quality_score: 0.600
+    weight: 0.100
+
+  - contract_type: saas
+    sub_requirement_id: iso27001_a5_20_2    # audit rights
+    mandatory: true
+    min_quality_score: 0.600
+    weight: 0.100
+
+  - contract_type: saas
+    sub_requirement_id: iso27001_a5_20_3    # availability SLA
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.120
+
+  - contract_type: saas
+    sub_requirement_id: iso27001_a5_20_4    # data return/deletion
+    mandatory: true
+    min_quality_score: 0.600
+    weight: 0.100
+
+  # ISO 27001 A.8.24 — Encryption
+  - contract_type: saas
+    sub_requirement_id: iso27001_a8_24_1    # encryption
+    mandatory: true
+    min_quality_score: 0.650
+    weight: 0.120
+
+  # GDPR Art 28 — DPA
+  - contract_type: saas
+    sub_requirement_id: gdpr_art28_1        # processing instructions
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.150
+
+  - contract_type: saas
+    sub_requirement_id: gdpr_art28_2        # sub-processor approval
+    mandatory: true
+    min_quality_score: 0.650
+    weight: 0.120
+
+  - contract_type: saas
+    sub_requirement_id: gdpr_art28_3        # data deletion/return
+    mandatory: true
+    min_quality_score: 0.650
+    weight: 0.120
+
+  # GDPR Art 33 — Breach notification
+  - contract_type: saas
+    sub_requirement_id: gdpr_art33_1        # breach notification
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.150
+
+  # ==========================================================================
+  # DPA (standalone Data Processing Agreement)
+  # ==========================================================================
+
+  - contract_type: dpa
+    sub_requirement_id: gdpr_art28_1        # processing instructions
+    mandatory: true
+    min_quality_score: 0.750
+    weight: 0.200
+
+  - contract_type: dpa
+    sub_requirement_id: gdpr_art28_2        # sub-processor approval
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.180
+
+  - contract_type: dpa
+    sub_requirement_id: gdpr_art28_3        # data deletion/return
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.180
+
+  - contract_type: dpa
+    sub_requirement_id: gdpr_art33_1        # breach notification
+    mandatory: true
+    min_quality_score: 0.750
+    weight: 0.200
+
+  - contract_type: dpa
+    sub_requirement_id: iso27001_a8_24_1    # encryption
+    mandatory: true
+    min_quality_score: 0.650
+    weight: 0.120
+
+  - contract_type: dpa
+    sub_requirement_id: iso27001_a5_19_2    # subcontractor management
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.120
+
+  # ==========================================================================
+  # Outsourcing (financial sector — DORA-primary)
+  # ==========================================================================
+
+  # DORA Art 30(2) — all 7 mandatory provisions
+  - contract_type: outsourcing
+    sub_requirement_id: dora_art30_2_a      # service description + SLA
+    mandatory: true
+    min_quality_score: 0.650
+    weight: 0.100
+
+  - contract_type: outsourcing
+    sub_requirement_id: dora_art30_2_b      # data location
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.120
+
+  - contract_type: outsourcing
+    sub_requirement_id: dora_art30_2_c      # incident notification
+    mandatory: true
+    min_quality_score: 0.750
+    weight: 0.160
+
+  - contract_type: outsourcing
+    sub_requirement_id: dora_art30_2_d      # audit rights
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.150
+
+  - contract_type: outsourcing
+    sub_requirement_id: dora_art30_2_e      # business continuity
+    mandatory: true
+    min_quality_score: 0.650
+    weight: 0.130
+
+  - contract_type: outsourcing
+    sub_requirement_id: dora_art30_2_f      # sub-contracting restrictions
+    mandatory: true
+    min_quality_score: 0.650
+    weight: 0.120
+
+  - contract_type: outsourcing
+    sub_requirement_id: dora_art30_2_g      # termination rights
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.130
+
+  # ISO 27001 — also apply to outsourcing
+  - contract_type: outsourcing
+    sub_requirement_id: iso27001_a5_20_1    # security requirements
+    mandatory: true
+    min_quality_score: 0.600
+    weight: 0.100
+
+  - contract_type: outsourcing
+    sub_requirement_id: iso27001_a8_24_1    # encryption
+    mandatory: true
+    min_quality_score: 0.650
+    weight: 0.100
+
+  # GDPR — if personal data is processed
+  - contract_type: outsourcing
+    sub_requirement_id: gdpr_art28_1        # processing instructions
+    mandatory: false
+    min_quality_score: 0.700
+    weight: 0.080
+
+  - contract_type: outsourcing
+    sub_requirement_id: gdpr_art33_1        # breach notification
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.130
+
+  # ==========================================================================
+  # Cloud IaaS/PaaS
+  # ==========================================================================
+
+  - contract_type: cloud_iaas_paas
+    sub_requirement_id: dora_art30_2_a      # service description + SLA
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.130
+
+  - contract_type: cloud_iaas_paas
+    sub_requirement_id: dora_art30_2_b      # data location
+    mandatory: true
+    min_quality_score: 0.750
+    weight: 0.150
+
+  - contract_type: cloud_iaas_paas
+    sub_requirement_id: dora_art30_2_c      # incident notification
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.150
+
+  - contract_type: cloud_iaas_paas
+    sub_requirement_id: dora_art30_2_d      # audit rights
+    mandatory: true
+    min_quality_score: 0.650
+    weight: 0.120
+
+  - contract_type: cloud_iaas_paas
+    sub_requirement_id: dora_art30_2_e      # business continuity
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.150
+
+  - contract_type: cloud_iaas_paas
+    sub_requirement_id: dora_art30_2_g      # termination/portability
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.130
+
+  - contract_type: cloud_iaas_paas
+    sub_requirement_id: iso27001_a8_24_1    # encryption
+    mandatory: true
+    min_quality_score: 0.750
+    weight: 0.150
+
+  - contract_type: cloud_iaas_paas
+    sub_requirement_id: iso27001_a5_20_3    # availability SLA
+    mandatory: true
+    min_quality_score: 0.750
+    weight: 0.150
+
+  - contract_type: cloud_iaas_paas
+    sub_requirement_id: gdpr_art28_1        # processing instructions
+    mandatory: false
+    min_quality_score: 0.700
+    weight: 0.080
+
+  # ==========================================================================
+  # Managed Security
+  # ==========================================================================
+
+  - contract_type: managed_security
+    sub_requirement_id: iso27001_a5_19_3    # incident notification
+    mandatory: true
+    min_quality_score: 0.750
+    weight: 0.200
+
+  - contract_type: managed_security
+    sub_requirement_id: iso27001_a5_20_2    # audit rights
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.150
+
+  - contract_type: managed_security
+    sub_requirement_id: iso27001_a5_20_1    # security requirements
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.150
+
+  - contract_type: managed_security
+    sub_requirement_id: iso27001_a5_19_2    # subcontractor management
+    mandatory: true
+    min_quality_score: 0.650
+    weight: 0.120
+
+  - contract_type: managed_security
+    sub_requirement_id: iso27001_a5_20_4    # data return/deletion
+    mandatory: true
+    min_quality_score: 0.650
+    weight: 0.100
+
+  - contract_type: managed_security
+    sub_requirement_id: iso27001_a8_24_1    # encryption
+    mandatory: true
+    min_quality_score: 0.700
+    weight: 0.130
+
+  - contract_type: managed_security
+    sub_requirement_id: dora_art30_2_d      # audit rights (DORA)
+    mandatory: false
+    min_quality_score: 0.700
+    weight: 0.100
+
+  # ==========================================================================
+  # Professional Services
+  # ==========================================================================
+
+  - contract_type: professional_svcs
+    sub_requirement_id: iso27001_a5_19_3    # incident notification
+    mandatory: true
+    min_quality_score: 0.600
+    weight: 0.200
+
+  - contract_type: professional_svcs
+    sub_requirement_id: iso27001_a5_20_2    # audit rights
+    mandatory: false
+    min_quality_score: 0.600
+    weight: 0.150
+
+  - contract_type: professional_svcs
+    sub_requirement_id: iso27001_a5_19_2    # subcontractor management
+    mandatory: true
+    min_quality_score: 0.600
+    weight: 0.150
+
+  - contract_type: professional_svcs
+    sub_requirement_id: iso27001_a5_20_4    # data return/deletion
+    mandatory: true
+    min_quality_score: 0.600
+    weight: 0.150
+
+  - contract_type: professional_svcs
+    sub_requirement_id: gdpr_art28_1        # processing instructions
+    mandatory: false
+    min_quality_score: 0.650
+    weight: 0.150
+
+  # ==========================================================================
+  # Software License (lightweight — no data processing implied)
+  # ==========================================================================
+
+  - contract_type: software_license
+    sub_requirement_id: iso27001_a5_20_1    # security requirements
+    mandatory: false
+    min_quality_score: 0.500
+    weight: 0.300
+
+  - contract_type: software_license
+    sub_requirement_id: iso27001_a5_19_3    # incident notification
+    mandatory: false
+    min_quality_score: 0.500
+    weight: 0.200
+
+  - contract_type: software_license
+    sub_requirement_id: iso27001_a8_24_1    # encryption
+    mandatory: false
+    min_quality_score: 0.500
+    weight: 0.200

@@ -1,0 +1,62 @@
+INFORMATION TECHNOLOGY SERVICES AGREEMENT
+
+Between: Acme Financial Services AG ("Customer")
+And: TechVendor Solutions GmbH ("Vendor")
+Contract ID: CT-SMOKE-001
+Effective Date: 1 January 2026
+
+SECTION 1 — INFORMATION SECURITY MANAGEMENT
+
+1.1 The Vendor shall maintain a comprehensive information security management system (ISMS) that conforms to ISO 27001:2022 requirements and is reviewed at least annually by senior management. The ISMS shall cover all systems, personnel, and processes involved in delivering services under this Agreement.
+
+1.2 The Vendor shall maintain a documented information security policy that is approved by management, communicated to all relevant personnel, and made available to the Customer upon request.
+
+SECTION 2 — BUSINESS CONTINUITY AND DISASTER RECOVERY
+
+2.1 The Vendor shall maintain a business continuity plan (BCP) and disaster recovery plan (DRP) that ensure continued availability of critical services. The recovery time objective (RTO) for Tier-1 services shall not exceed four (4) hours. The recovery point objective (RPO) shall not exceed one (1) hour of data loss for critical data categories.
+
+2.2 The Vendor shall test its business continuity and disaster recovery plans at least annually and provide summary test results to the Customer within thirty (30) days of completing the test.
+
+SECTION 3 — ICT RISK MANAGEMENT AND DIGITAL OPERATIONAL RESILIENCE
+
+3.1 The Vendor shall implement and maintain an ICT risk management framework aligned with digital operational resilience requirements applicable to financial entities. The framework shall address identification, protection, detection, response, and recovery capabilities as required under DORA.
+
+3.2 The Vendor acknowledges that its services are subject to third-party ICT risk requirements applicable to financial entities under applicable EU regulations and shall cooperate fully with the Customer's risk assessment processes.
+
+SECTION 4 — INCIDENT REPORTING
+
+4.1 The Vendor shall notify the Customer of any significant cybersecurity incident within twenty-four (24) hours of detection. A full incident report shall be submitted within seventy-two (72) hours. For incidents meeting the threshold of a significant incident under applicable regulatory requirements, the Vendor shall cooperate with the Customer to support required notifications. This clause applies to NIS2-relevant incidents as defined under Directive (EU) 2022/2555.
+
+4.2 The Vendor shall report any major ICT-related incidents to competent authorities within the timelines prescribed by DORA Art. 17 and Art. 19. The Vendor shall simultaneously notify the Customer's designated security contact of any such regulatory notification.
+
+SECTION 5 — AUDIT AND COMPLIANCE VERIFICATION
+
+5.1 The Customer retains the right to audit the Vendor's security controls and compliance posture at any time with thirty (30) calendar days' written notice. The Vendor shall cooperate fully with such audits. The Customer may engage a qualified third-party audit firm to conduct assessments on its behalf.
+
+5.2 The Vendor shall provide the Customer with a current SOC 2 Type II report within thirty (30) days of request. The Vendor shall also permit penetration testing of its systems on reasonable notice, subject to mutually agreed rules of engagement.
+
+SECTION 6 — DATA PROTECTION AND GDPR COMPLIANCE
+
+6.1 The Vendor shall process personal data only on documented instructions from the Customer and shall not process such data for its own purposes. This Agreement constitutes the data processing agreement required under GDPR Art. 28. The Vendor acknowledges its role as a data processor and the Customer's role as data controller.
+
+6.2 The Vendor shall assist the Customer in responding to data subject rights requests within statutory timelines. This includes requests exercising the right of access (Art. 15), the right to erasure (Art. 17), the right to data portability (Art. 20), and the right to object (Art. 21) under the General Data Protection Regulation.
+
+6.3 All personal data transferred to countries outside the European Economic Area shall be protected by appropriate transfer safeguards ensuring equivalent data protection standards. The parties shall enter into standard contractual clauses (SCCs) approved by the European Commission for any such third country transfers.
+
+SECTION 7 — SUBPROCESSOR MANAGEMENT
+
+7.1 The Vendor maintains a list of approved subprocessors and shall provide it to the Customer on request. The Vendor shall notify the Customer at least thirty (30) days in advance of any intended changes to its subprocessor list pursuant to GDPR Art. 28(4). The subprocessor notification and approval procedure is set out in Schedule A.
+
+7.2 The Vendor shall conduct vendor security assessments for all subcontractors and fourth-party service providers who access Customer data or Customer systems, maintaining supply chain security controls consistent with applicable regulatory requirements.
+
+SECTION 8 — CONTRACTUAL ARRANGEMENTS AND EXIT
+
+8.1 This Agreement constitutes a contractual arrangement as defined under DORA Art. 30 for ICT services. In the event of termination, the Vendor shall provide transition assistance for a period of up to six (6) months to support migration to an alternative provider. The Vendor shall have a documented exit strategy and shall not create undue concentration risk.
+
+SECTION 9 — GENERAL PROVISIONS
+
+9.1 This Agreement is governed by the laws of Germany. Any disputes shall be resolved exclusively before the courts of Frankfurt am Main.
+
+9.2 Payment terms are net thirty (30) days from invoice date. Late payment shall accrue interest at the statutory rate.
+
+9.3 Either party may terminate this Agreement for convenience with ninety (90) days written notice.

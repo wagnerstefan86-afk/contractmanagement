@@ -1,0 +1,441 @@
+{
+  "contract_id": "CT-2026-001",
+  "generated_at": "2026-03-10",
+  "pipeline_stage": "Stage 14 \u2014 Contract Risk Report",
+  "metadata": {
+    "contract_id": "CT-2026-001",
+    "organization": "FinanzBank AG",
+    "generated_at": "2026-03-10",
+    "overall_risk": "HIGH",
+    "frameworks_in_scope": [
+      "ISO27001",
+      "DORA",
+      "NIS2",
+      "GDPR"
+    ],
+    "total_clauses": 10,
+    "valid_clauses": 2,
+    "total_findings": 8,
+    "high_risk_clauses": 3,
+    "medium_risk_clauses": 5,
+    "low_risk_clauses": 0,
+    "total_actions": 5,
+    "high_priority_actions": 2,
+    "medium_priority_actions": 3,
+    "total_negotiation_items": 5,
+    "high_priority_negotiation": 2,
+    "medium_priority_negotiation": 3,
+    "unique_sr_ids": 5
+  },
+  "risk_distribution": [
+    {
+      "clause_id": "CL-103",
+      "page": 4,
+      "topic": "REGULATORY_COMPLIANCE",
+      "obligation": "NON_TRANSFERABLE_REGULATION",
+      "severity": "HIGH",
+      "risk_score": 10.0,
+      "priority": "HIGH",
+      "sr_match_count": 1,
+      "linked_action": "ACT-2026-001",
+      "linked_neg_item": "NEG-2026-001",
+      "text_preview": "As the Provider constitutes an essential entity under the NIS2 Directive (EU 2022/2555) as implemented by the NIS2UmsuCG\u2026"
+    },
+    {
+      "clause_id": "CL-108",
+      "page": 9,
+      "topic": "REGULATORY_COMPLIANCE",
+      "obligation": "NON_TRANSFERABLE_REGULATION",
+      "severity": "HIGH",
+      "risk_score": 10.0,
+      "priority": "HIGH",
+      "sr_match_count": 2,
+      "linked_action": "ACT-2026-001",
+      "linked_neg_item": "NEG-2026-001",
+      "text_preview": "As the Customer is a financial entity regulated under DORA (Regulation EU 2022/2554), the Provider shall assume all ICT-\u2026"
+    },
+    {
+      "clause_id": "CL-104",
+      "page": 5,
+      "topic": "AUDIT_RIGHTS",
+      "obligation": "OPERATIONAL_RISK",
+      "severity": "HIGH",
+      "risk_score": 8.75,
+      "priority": "HIGH",
+      "sr_match_count": 1,
+      "linked_action": "ACT-2026-002",
+      "linked_neg_item": "NEG-2026-002",
+      "text_preview": "Security incident response obligations:\n\u2022 The Provider shall notify the Customer of any detected security incident withi\u2026"
+    },
+    {
+      "clause_id": "CL-105",
+      "page": 6,
+      "topic": "DATA_PROTECTION",
+      "obligation": "SCOPE_UNDEFINED",
+      "severity": "MEDIUM",
+      "risk_score": 6.25,
+      "priority": "MEDIUM",
+      "sr_match_count": 1,
+      "linked_action": "ACT-2026-004",
+      "linked_neg_item": "NEG-2026-004",
+      "text_preview": "The Provider shall ensure compliance with relevant data protection standards and applicable security frameworks at all t\u2026"
+    },
+    {
+      "clause_id": "CL-106",
+      "page": 7,
+      "topic": "DATA_PROTECTION",
+      "obligation": "CUSTOMER_RESPONSIBILITY",
+      "severity": "MEDIUM",
+      "risk_score": 6.25,
+      "priority": "MEDIUM",
+      "sr_match_count": 1,
+      "linked_action": "ACT-2026-003",
+      "linked_neg_item": "NEG-2026-003",
+      "text_preview": "The Provider shall determine the sensitivity classification of all Customer data processed under this Agreement and shal\u2026"
+    },
+    {
+      "clause_id": "CL-102",
+      "page": 3,
+      "topic": "REGULATORY_COMPLIANCE",
+      "obligation": "SCOPE_UNDEFINED",
+      "severity": "MEDIUM",
+      "risk_score": 6.0,
+      "priority": "MEDIUM",
+      "sr_match_count": 0,
+      "linked_action": "ACT-2026-004",
+      "linked_neg_item": "NEG-2026-004",
+      "text_preview": "The Provider shall at all times comply with all applicable laws, regulations, and industry best practices relevant to th\u2026"
+    },
+    {
+      "clause_id": "CL-107",
+      "page": 8,
+      "topic": "INCIDENT_MANAGEMENT",
+      "obligation": "OPERATIONAL_RISK",
+      "severity": "MEDIUM",
+      "risk_score": 6.0,
+      "priority": "MEDIUM",
+      "sr_match_count": 0,
+      "linked_action": "ACT-2026-002",
+      "linked_neg_item": "NEG-2026-002",
+      "text_preview": "In the event of a data breach or any security incident potentially affecting Customer data, the Provider shall immediate\u2026"
+    },
+    {
+      "clause_id": "CL-109",
+      "page": 10,
+      "topic": "SECURITY_CONTROLS",
+      "obligation": "AMBIGUOUS_REQUIREMENT",
+      "severity": "MEDIUM",
+      "risk_score": 6.0,
+      "priority": "MEDIUM",
+      "sr_match_count": 0,
+      "linked_action": "ACT-2026-005",
+      "linked_neg_item": "NEG-2026-005",
+      "text_preview": "The Provider shall implement appropriate technical and organizational measures to ensure the security of all data proces\u2026"
+    }
+  ],
+  "top_risk_areas": [
+    {
+      "topic": "REGULATORY_COMPLIANCE",
+      "topic_label": "Regulatory Compliance",
+      "clause_count": 3,
+      "max_score": 10.0,
+      "avg_score": 8.67,
+      "priority": "HIGH",
+      "related_actions": [
+        "ACT-2026-001",
+        "ACT-2026-004"
+      ],
+      "risk_summary": "The contract contains 2 HIGH and 3 MEDIUM-severity regulatory compliance issues involving NON_TRANSFERABLE_REGULATION, SCOPE_UNDEFINED, WEAK_MATCH. These clauses attempt to assign the Customer's non-transferable statutory obligations to the Provider and include undefined references to 'applicable law' that create open-ended liability."
+    },
+    {
+      "topic": "AUDIT_RIGHTS",
+      "topic_label": "Audit Rights",
+      "clause_count": 1,
+      "max_score": 8.75,
+      "avg_score": 8.75,
+      "priority": "HIGH",
+      "related_actions": [
+        "ACT-2026-002"
+      ],
+      "risk_summary": "Audit rights clauses contain 1 HIGH and 1 MEDIUM-severity issues. The contract demands unlimited, unscheduled access to all Provider systems, networks, and source code repositories without prior notice \u2014 a scope that creates critical security and operational risk for the Provider."
+    },
+    {
+      "topic": "DATA_PROTECTION",
+      "topic_label": "Data Protection",
+      "clause_count": 2,
+      "max_score": 6.25,
+      "avg_score": 6.25,
+      "priority": "MEDIUM",
+      "related_actions": [
+        "ACT-2026-003",
+        "ACT-2026-004"
+      ],
+      "risk_summary": "Data protection provisions contain 3 HIGH and 2 MEDIUM-severity issues (CUSTOMER_RESPONSIBILITY, MISSING, WEAK_MATCH). Controller-level GDPR duties (data classification, DPIA, lawful-basis determination) have been misallocated to the Provider as processor. International data transfer clauses lack explicit transfer mechanisms."
+    },
+    {
+      "topic": "INCIDENT_MANAGEMENT",
+      "topic_label": "Incident Management",
+      "clause_count": 1,
+      "max_score": 6.0,
+      "avg_score": 6.0,
+      "priority": "MEDIUM",
+      "related_actions": [
+        "ACT-2026-002"
+      ],
+      "risk_summary": "Incident management obligations contain 1 MEDIUM-severity issues across 1 clause(s). Notification timeframes are operationally infeasible (sub-hour or 'immediate' obligations) and notification scope is undefined ('all stakeholders'). These obligations expose the Provider to unquantifiable breach-of-contract risk."
+    },
+    {
+      "topic": "SECURITY_CONTROLS",
+      "topic_label": "Security Controls",
+      "clause_count": 1,
+      "max_score": 6.0,
+      "avg_score": 6.0,
+      "priority": "MEDIUM",
+      "related_actions": [
+        "ACT-2026-005"
+      ],
+      "risk_summary": "Security control obligations contain 2 HIGH and 1 MEDIUM-severity issues (AMBIGUOUS_REQUIREMENT, MISSING). Multiple clauses use unmeasurable language ('state of the art', 'industry best practices') or reference frameworks without naming them. Supply chain security provisions are insufficiently specific for NIS2 compliance."
+    }
+  ],
+  "regulatory_exposure": [
+    {
+      "sr_id": "SR-GDPR-02",
+      "framework": "GDPR",
+      "regulation": "Regulation (EU) 2016/679 (GDPR)",
+      "article": "Art. 4(7)/24/28/35 \u2014 Controller/processor duties",
+      "match_type": "PARTIAL_MATCH",
+      "confidence": 65,
+      "clauses": [
+        "CL-105",
+        "CL-106",
+        "CL-102"
+      ],
+      "neg_ids": [
+        "NEG-2026-003",
+        "NEG-2026-004"
+      ]
+    },
+    {
+      "sr_id": "SR-DORA-01",
+      "framework": "DORA",
+      "regulation": "Regulation (EU) 2022/2554 (DORA)",
+      "article": "Art. 28 \u2014 ICT third-party risk management",
+      "match_type": "PARTIAL_MATCH",
+      "confidence": 68,
+      "clauses": [
+        "CL-108",
+        "CL-103"
+      ],
+      "neg_ids": [
+        "NEG-2026-001"
+      ]
+    },
+    {
+      "sr_id": "SR-DORA-02",
+      "framework": "DORA",
+      "regulation": "Regulation (EU) 2022/2554 (DORA)",
+      "article": "Art. 19 \u2014 Major ICT incident reporting",
+      "match_type": "DIRECT_MATCH",
+      "confidence": 90,
+      "clauses": [
+        "CL-108",
+        "CL-103"
+      ],
+      "neg_ids": [
+        "NEG-2026-001"
+      ]
+    },
+    {
+      "sr_id": "SR-ISO27001-03",
+      "framework": "ISO27001",
+      "regulation": "ISO/IEC 27001:2022",
+      "article": "Annex A Control 5.26 \u2014 Incident response",
+      "match_type": "PARTIAL_MATCH",
+      "confidence": 78,
+      "clauses": [
+        "CL-104",
+        "CL-107"
+      ],
+      "neg_ids": [
+        "NEG-2026-002"
+      ]
+    },
+    {
+      "sr_id": "SR-NIS2-01",
+      "framework": "NIS2",
+      "regulation": "Directive (EU) 2022/2555 (NIS2)",
+      "article": "Art. 23 \u2014 Reporting obligations",
+      "match_type": "DIRECT_MATCH",
+      "confidence": 95,
+      "clauses": [
+        "CL-103",
+        "CL-108"
+      ],
+      "neg_ids": [
+        "NEG-2026-001"
+      ]
+    }
+  ],
+  "action_plan_overview": [
+    {
+      "action_id": "ACT-2026-001",
+      "priority": "HIGH",
+      "finding_type": "NON_TRANSFERABLE_REGULATION",
+      "finding_label": "Non-transferable regulatory obligation",
+      "topic": [
+        "REGULATORY_COMPLIANCE"
+      ],
+      "affected_clauses": [
+        "CL-103",
+        "CL-108"
+      ],
+      "owner_role": "Legal / Compliance Officer",
+      "estimated_effort": "3\u20135 business days",
+      "expected_risk_reduction": "Eliminates direct regulatory exposure; expected clause score \u2264 3.0 post-remediation.",
+      "linked_neg_item": "NEG-2026-001"
+    },
+    {
+      "action_id": "ACT-2026-002",
+      "priority": "HIGH",
+      "finding_type": "OPERATIONAL_RISK",
+      "finding_label": "Operationally unrealistic obligation",
+      "topic": [
+        "AUDIT_RIGHTS",
+        "INCIDENT_MANAGEMENT"
+      ],
+      "affected_clauses": [
+        "CL-104",
+        "CL-107"
+      ],
+      "owner_role": "Legal / Compliance Officer",
+      "estimated_effort": "3\u20135 business days",
+      "expected_risk_reduction": "Eliminates direct regulatory exposure; expected clause score \u2264 3.0 post-remediation.",
+      "linked_neg_item": "NEG-2026-002"
+    },
+    {
+      "action_id": "ACT-2026-003",
+      "priority": "MEDIUM",
+      "finding_type": "CUSTOMER_RESPONSIBILITY",
+      "finding_label": "Misassigned controller responsibility",
+      "topic": [
+        "DATA_PROTECTION"
+      ],
+      "affected_clauses": [
+        "CL-106"
+      ],
+      "owner_role": "Data Protection Officer (DPO)",
+      "estimated_effort": "1\u20132 business days",
+      "expected_risk_reduction": "Removes ambiguity and scope gaps; expected clause score \u2264 2.5 post-remediation.",
+      "linked_neg_item": "NEG-2026-003"
+    },
+    {
+      "action_id": "ACT-2026-004",
+      "priority": "MEDIUM",
+      "finding_type": "SCOPE_UNDEFINED",
+      "finding_label": "Undefined regulatory scope",
+      "topic": [
+        "REGULATORY_COMPLIANCE",
+        "DATA_PROTECTION"
+      ],
+      "affected_clauses": [
+        "CL-102",
+        "CL-105"
+      ],
+      "owner_role": "Legal / Compliance Officer",
+      "estimated_effort": "1\u20132 business days",
+      "expected_risk_reduction": "Removes ambiguity and scope gaps; expected clause score \u2264 2.5 post-remediation.",
+      "linked_neg_item": "NEG-2026-004"
+    },
+    {
+      "action_id": "ACT-2026-005",
+      "priority": "MEDIUM",
+      "finding_type": "AMBIGUOUS_REQUIREMENT",
+      "finding_label": "Vague / unmeasurable requirement",
+      "topic": [
+        "SECURITY_CONTROLS"
+      ],
+      "affected_clauses": [
+        "CL-109"
+      ],
+      "owner_role": "CISO / Security Officer",
+      "estimated_effort": "1\u20132 business days",
+      "expected_risk_reduction": "Removes ambiguity and scope gaps; expected clause score \u2264 2.5 post-remediation.",
+      "linked_neg_item": "NEG-2026-005"
+    }
+  ],
+  "negotiation_priorities": [
+    {
+      "negotiation_id": "NEG-2026-001",
+      "action_id": "ACT-2026-001",
+      "priority": "HIGH",
+      "topic": [
+        "REGULATORY_COMPLIANCE"
+      ],
+      "affected_clauses": [
+        "CL-103",
+        "CL-108"
+      ],
+      "finding_label": "Non-transferable regulatory obligation",
+      "problem_summary": "The contract contains 2 HIGH and 3 MEDIUM-severity regulatory compliance issues involving NON_TRANSFERABLE_REGULATION, SCOPE_UNDEFINED, WEAK_MATCH. These clauses attempt to assign the Customer's non-t\u2026",
+      "regulatory_basis": [
+        {
+          "sr_id": "SR-NIS2-01",
+          "framework": "NIS2",
+          "regulation": "Directive (EU) 2022/2555 (NIS2)",
+          "article": "Art. 23 \u2014 Reporting obligations",
+          "match_type": "DIRECT_MATCH",
+          "confidence": 95
+        },
+        {
+          "sr_id": "SR-DORA-02",
+          "framework": "DORA",
+          "regulation": "Regulation (EU) 2022/2554 (DORA)",
+          "article": "Art. 19 \u2014 Major ICT incident reporting",
+          "match_type": "DIRECT_MATCH",
+          "confidence": 90
+        },
+        {
+          "sr_id": "SR-DORA-01",
+          "framework": "DORA",
+          "regulation": "Regulation (EU) 2022/2554 (DORA)",
+          "article": "Art. 28 \u2014 ICT third-party risk management",
+          "match_type": "PARTIAL_MATCH",
+          "confidence": 68
+        }
+      ],
+      "recommended_clause_summary": "The Customer acknowledges that all reporting and notification obligations owed to any competent supervisory authority (including but not limited to BaFin, BSI, and EBA) arising fro\u2026",
+      "fallback_option": "If the Customer insists on some form of Provider involvement, accept an **Assistance and Notification Model** only: the Provider commits to (i) notifying the Customer within 4 business hours of incide\u2026",
+      "max_risk_score": 10.0,
+      "owner_role": "Legal / Compliance Officer"
+    },
+    {
+      "negotiation_id": "NEG-2026-002",
+      "action_id": "ACT-2026-002",
+      "priority": "HIGH",
+      "topic": [
+        "AUDIT_RIGHTS",
+        "INCIDENT_MANAGEMENT"
+      ],
+      "affected_clauses": [
+        "CL-104",
+        "CL-107"
+      ],
+      "finding_label": "Operationally unrealistic obligation",
+      "problem_summary": "Audit rights clauses contain 1 HIGH and 1 MEDIUM-severity issues. The contract demands unlimited, unscheduled access to all Provider systems, networks, and source code repositories without prior notic\u2026",
+      "regulatory_basis": [
+        {
+          "sr_id": "SR-ISO27001-03",
+          "framework": "ISO27001",
+          "regulation": "ISO/IEC 27001:2022",
+          "article": "Annex A Control 5.26 \u2014 Incident response",
+          "match_type": "PARTIAL_MATCH",
+          "confidence": 78
+        }
+      ],
+      "recommended_clause_summary": "Incident Notification: The Provider shall notify the Customer of any confirmed security incident materially affecting Customer data within four (4) business hours of the Provider's\u2026",
+      "fallback_option": "If 4 business hours is commercially rejected, accept a maximum fallback of **8 business hours** for preliminary notification, **24 hours** for a detailed incident summary, and **72 hours** for a full \u2026",
+      "max_risk_score": 8.75,
+      "owner_role": "Legal / Compliance Officer"
+    }
+  ]
+}

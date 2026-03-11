@@ -1,0 +1,26 @@
+{
+  "organization_name": "FinanzBank AG",
+  "industry": "FINANCIAL_SERVICES",
+  "is_regulated_financial_entity": true,
+  "nis2_entity_type": "ESSENTIAL",
+  "regulatory_frameworks": [
+    "ISO27001",
+    "DORA",
+    "NIS2",
+    "GDPR"
+  ],
+  "default_vendor_risk_model": "THIRD_PARTY_RISK_V1",
+  "data_classification_levels": [
+    "PUBLIC",
+    "INTERNAL",
+    "CONFIDENTIAL",
+    "PERSONAL_DATA",
+    "SPECIAL_CATEGORY"
+  ],
+  "_meta": {
+    "profile_version": "1.0.0",
+    "last_reviewed": "2026-01-15",
+    "owner": "Chief Information Security Officer",
+    "notes": "Regulated under BaFin supervision. DORA applies as of 17 January 2025. NIS2 classification: ESSENTIAL entity per NIS2UmsuCG §28. All vendor contracts must be reviewed against all four frameworks regardless of contract type."
+  }
+}

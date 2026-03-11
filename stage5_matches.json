@@ -1,0 +1,134 @@
+{
+  "contract_id": "CT-2026-001",
+  "org_profile_source": "org_profile.json",
+  "frameworks_checked": [
+    "ISO27001",
+    "DORA",
+    "NIS2",
+    "GDPR"
+  ],
+  "contract_type": "DATA_PROCESSING",
+  "vendor_risk_tier": "CRITICAL",
+  "data_sensitivity": "PERSONAL_DATA",
+  "total_srs_evaluated": 9,
+  "matches": [
+    {
+      "sub_requirement_id": "SR-ISO27001-01",
+      "framework": "ISO27001",
+      "title": "Information Security Policy",
+      "result": "COMPLIANT",
+      "confidence": 0.92,
+      "layout_type": "paragraph",
+      "page": 3,
+      "evidence_text": "2. INFORMATION SECURITY  The Provider shall maintain and enforce a documented Information Security Management System (ISMS) aligned with ISO/IEC 27001:2022. The ISMS shall be reviewed at least annually and subject to third-party certification audits. The Provider shall provide the Customer with the…",
+      "human_review_flags": []
+    },
+    {
+      "sub_requirement_id": "SR-ISO27001-02",
+      "framework": "ISO27001",
+      "title": "Business Continuity & Disaster Recovery",
+      "result": "COMPLIANT",
+      "confidence": 0.9,
+      "layout_type": "paragraph",
+      "page": 9,
+      "evidence_text": "8. BUSINESS CONTINUITY AND DISASTER RECOVERY  The Provider shall maintain a Business Continuity Plan (BCP) and Disaster Recovery Plan (DRP) tested at least annually. Test results shall be made available to the Customer upon written request. The Provider's infrastructure is deployed across two geogra…",
+      "human_review_flags": []
+    },
+    {
+      "sub_requirement_id": "SR-ISO27001-03",
+      "framework": "ISO27001",
+      "title": "Audit Rights",
+      "result": "COMPLIANT",
+      "confidence": 0.95,
+      "layout_type": "paragraph",
+      "page": 10,
+      "evidence_text": "9. AUDIT RIGHTS  The Customer or its designated auditor shall have the right to audit the Provider's compliance with this Agreement and applicable regulatory requirements (including DORA Art. 30 third-party audit rights) upon 30 days' written notice, no more than once per calendar year except in cas…",
+      "human_review_flags": []
+    },
+    {
+      "sub_requirement_id": "SR-NIS2-01",
+      "framework": "NIS2",
+      "title": "Cybersecurity Incident Reporting Timelines",
+      "result": "COMPLIANT",
+      "confidence": 0.95,
+      "layout_type": "paragraph",
+      "page": 4,
+      "evidence_text": "4. CYBERSECURITY INCIDENT REPORTING (NIS2)  The Provider acknowledges obligations under Directive (EU) 2022/2555 (NIS2) and its national implementation (NIS2UmsuCG). In the event of a significant cybersecurity incident affecting the SaaS Platform or Customer data, the Provider shall: (i) submit an e…",
+      "human_review_flags": []
+    },
+    {
+      "sub_requirement_id": "SR-NIS2-02",
+      "framework": "NIS2",
+      "title": "Supply Chain Security",
+      "result": "WEAK_MATCH",
+      "confidence": 0.65,
+      "layout_type": "paragraph",
+      "page": 7,
+      "evidence_text": "7. SUBPROCESSORS  The Provider maintains a current list of approved subprocessors and data sub-processors at https://securecloud.example.com/subprocessors. The Provider shall notify the Customer of any intended addition or replacement of subprocessors at least 30 days in advance. The Customer may ob…",
+      "human_review_flags": [
+        {
+          "flag_code": "WEAK_MATCH",
+          "severity": "MEDIUM",
+          "description": "Partial match found for 'Supply Chain Security' — clause may be insufficiently specific (confidence 0.65).",
+          "recommended_action": "Review and strengthen the clause to explicitly address all NIS2 requirements for Supply Chain Security."
+        }
+      ]
+    },
+    {
+      "sub_requirement_id": "SR-GDPR-01",
+      "framework": "GDPR",
+      "title": "Data Subject Rights Handling",
+      "result": "COMPLIANT",
+      "confidence": 0.95,
+      "layout_type": "paragraph",
+      "page": 6,
+      "evidence_text": "6. DATA SUBJECT RIGHTS  The Provider shall assist the Customer in fulfilling requests from data subjects exercising their rights under GDPR Art. 15 (right of access), Art. 16 (rectification), Art. 17 (erasure / right to be forgotten), Art. 18 (restriction of processing), Art. 20 (data portability),…",
+      "human_review_flags": []
+    },
+    {
+      "sub_requirement_id": "SR-GDPR-02",
+      "framework": "GDPR",
+      "title": "Data Processing Agreement (Art. 28)",
+      "result": "COMPLIANT",
+      "confidence": 0.92,
+      "layout_type": "paragraph",
+      "page": 5,
+      "evidence_text": "5. DATA PROCESSING AGREEMENT (GDPR ART. 28)  For the purposes of Regulation (EU) 2016/679 (GDPR), the Customer acts as data controller and the Provider acts as data processor with respect to personal data processed via the SaaS Platform. This section constitutes the Data Processing Agreement (DPA) r…",
+      "human_review_flags": []
+    },
+    {
+      "sub_requirement_id": "SR-GDPR-03",
+      "framework": "GDPR",
+      "title": "International Data Transfers",
+      "result": "WEAK_MATCH",
+      "confidence": 0.65,
+      "layout_type": "paragraph",
+      "page": 5,
+      "evidence_text": "5. DATA PROCESSING AGREEMENT (GDPR ART. 28)  For the purposes of Regulation (EU) 2016/679 (GDPR), the Customer acts as data controller and the Provider acts as data processor with respect to personal data processed via the SaaS Platform. This section constitutes the Data Processing Agreement (DPA) r…",
+      "human_review_flags": [
+        {
+          "flag_code": "WEAK_MATCH",
+          "severity": "MEDIUM",
+          "description": "Partial match found for 'International Data Transfers' — clause may be insufficiently specific (confidence 0.65).",
+          "recommended_action": "Review and strengthen the clause to explicitly address all GDPR requirements for International Data Transfers."
+        }
+      ]
+    },
+    {
+      "sub_requirement_id": "SR-GDPR-04",
+      "framework": "GDPR",
+      "title": "Subprocessor Management",
+      "result": "COMPLIANT",
+      "confidence": 0.95,
+      "layout_type": "paragraph",
+      "page": 7,
+      "evidence_text": "7. SUBPROCESSORS  The Provider maintains a current list of approved subprocessors and data sub-processors at https://securecloud.example.com/subprocessors. The Provider shall notify the Customer of any intended addition or replacement of subprocessors at least 30 days in advance. The Customer may ob…",
+      "human_review_flags": []
+    }
+  ],
+  "_summary": {
+    "COMPLIANT": 7,
+    "WEAK_MATCH": 2,
+    "MISSING": 0
+  }
+}

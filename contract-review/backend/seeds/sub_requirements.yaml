@@ -1,0 +1,487 @@
+# ============================================================================
+# sub_requirements.yaml — Leaf-level obligations mapped to clause categories
+# Seed file for the `sub_requirements` table.
+#
+# clause_categories must be non-empty (Fix 9) and use values from
+# clause_category_enum exactly.
+# missing_severity must be one of: critical / high / medium / low / info (Fix 4).
+# ============================================================================
+
+sub_requirements:
+
+  # --------------------------------------------------------------------------
+  # ISO 27001 A.5.19 — Information security in supplier relationships
+  # --------------------------------------------------------------------------
+
+  - id: iso27001_a5_19_1
+    requirement_id: iso27001_a5_19
+    name: "Supplier access controls"
+    description: >
+      The agreement must define and restrict supplier access to the organisation's
+      information systems, specifying access control mechanisms and the principle of
+      least privilege.
+    clause_categories:
+      - access_control
+      - security_requirements
+    evidence_keywords:
+      - "least privilege"
+      - "access control"
+      - "role-based access"
+      - "multi-factor authentication"
+      - "MFA"
+      - "access revocation"
+    missing_severity: high
+    missing_finding_template: >
+      No access control clause was found. The agreement does not restrict or define
+      supplier access to systems or data, creating uncontrolled access risk.
+    sort_order: 10
+
+  - id: iso27001_a5_19_2
+    requirement_id: iso27001_a5_19
+    name: "Subcontractor and sub-processor management"
+    description: >
+      The agreement must require the supplier to obtain prior written approval before
+      engaging subcontractors who will access or process the organisation's data,
+      and impose equivalent security obligations on subcontractors.
+    clause_categories:
+      - subcontractor_management
+    evidence_keywords:
+      - "subcontractor"
+      - "sub-processor"
+      - "prior written consent"
+      - "prior approval"
+      - "flow-down obligations"
+      - "equivalent protections"
+    missing_severity: high
+    missing_finding_template: >
+      No subcontractor management clause was found. The supplier may engage sub-processors
+      without approval, creating uncontrolled data access risks downstream.
+    sort_order: 20
+
+  - id: iso27001_a5_19_3
+    requirement_id: iso27001_a5_19
+    name: "Security incident notification"
+    description: >
+      The agreement must require the supplier to notify the organisation of any security
+      incident affecting the organisation's data or systems within a defined timeframe.
+    clause_categories:
+      - incident_reporting
+      - data_breach_notification
+    evidence_keywords:
+      - "notify"
+      - "notification"
+      - "security incident"
+      - "data breach"
+      - "hours"
+      - "without undue delay"
+      - "prompt notice"
+    missing_severity: critical
+    missing_finding_template: >
+      No security incident notification clause was found. The organisation cannot
+      guarantee timely awareness of breaches, jeopardising regulatory notification
+      obligations (GDPR Art. 33, DORA Art. 19).
+    sort_order: 30
+
+  # --------------------------------------------------------------------------
+  # ISO 27001 A.5.20 — Information security within supplier agreements
+  # --------------------------------------------------------------------------
+
+  - id: iso27001_a5_20_1
+    requirement_id: iso27001_a5_20
+    name: "Security requirements specification"
+    description: >
+      The agreement must include specific, measurable information security requirements
+      covering confidentiality, integrity, and availability of the organisation's data.
+    clause_categories:
+      - security_requirements
+      - data_protection_obligations
+    evidence_keywords:
+      - "confidentiality"
+      - "integrity"
+      - "availability"
+      - "security controls"
+      - "ISO 27001"
+      - "SOC 2"
+      - "security standards"
+    missing_severity: high
+    missing_finding_template: >
+      No information security requirements clause was found. The agreement does not
+      establish a security baseline, making compliance verification impossible.
+    sort_order: 10
+
+  - id: iso27001_a5_20_2
+    requirement_id: iso27001_a5_20
+    name: "Audit and inspection rights"
+    description: >
+      The organisation must have the contractual right to audit the supplier's compliance
+      with security requirements, either directly or through a qualified third-party auditor.
+    clause_categories:
+      - audit_rights
+    evidence_keywords:
+      - "audit"
+      - "right to audit"
+      - "inspection"
+      - "third-party audit"
+      - "penetration test results"
+      - "SOC 2 report"
+      - "ISO 27001 certificate"
+      - "upon request"
+    missing_severity: high
+    missing_finding_template: >
+      No audit rights clause was found. The organisation cannot verify supplier
+      compliance with security obligations and cannot satisfy its own audit obligations
+      to regulators.
+    sort_order: 20
+
+  - id: iso27001_a5_20_3
+    requirement_id: iso27001_a5_20
+    name: "Availability SLA"
+    description: >
+      The agreement must specify minimum service availability levels, measurement
+      methodology, and remedies for breach (e.g. service credits).
+    clause_categories:
+      - availability_sla
+    evidence_keywords:
+      - "SLA"
+      - "service level"
+      - "uptime"
+      - "availability"
+      - "99."
+      - "service credit"
+      - "downtime"
+    missing_severity: medium
+    missing_finding_template: >
+      No availability SLA clause was found. Service disruptions have no contractual
+      remedy and cannot be used to demonstrate resilience to regulators.
+    sort_order: 30
+
+  - id: iso27001_a5_20_4
+    requirement_id: iso27001_a5_20
+    name: "Data return and deletion on termination"
+    description: >
+      The agreement must require the supplier to return or securely destroy all
+      organisation data upon contract termination, within a defined timeframe,
+      and provide confirmation of destruction.
+    clause_categories:
+      - termination_data_return
+      - data_retention_deletion
+    evidence_keywords:
+      - "return"
+      - "deletion"
+      - "destroy"
+      - "termination"
+      - "expiry"
+      - "data return"
+      - "certificate of destruction"
+      - "secure erase"
+    missing_severity: high
+    missing_finding_template: >
+      No data return or deletion clause was found. The organisation cannot guarantee
+      data is destroyed after termination, creating ongoing data protection risk.
+    sort_order: 40
+
+  # --------------------------------------------------------------------------
+  # ISO 27001 A.8.24 — Use of cryptography
+  # --------------------------------------------------------------------------
+
+  - id: iso27001_a8_24_1
+    requirement_id: iso27001_a8_24
+    name: "Encryption at rest and in transit"
+    description: >
+      The agreement must specify encryption standards for data at rest (e.g. AES-256)
+      and in transit (e.g. TLS 1.2 minimum), with key management responsibilities defined.
+    clause_categories:
+      - encryption_requirements
+      - security_requirements
+    evidence_keywords:
+      - "encryption"
+      - "AES-256"
+      - "AES 256"
+      - "TLS 1.2"
+      - "TLS 1.3"
+      - "at rest"
+      - "in transit"
+      - "in-transit"
+      - "key management"
+    missing_severity: high
+    missing_finding_template: >
+      No encryption requirements clause was found. The agreement does not specify
+      how data is protected in storage or transmission, creating confidentiality risk.
+    sort_order: 10
+
+  # --------------------------------------------------------------------------
+  # DORA Article 30(2) — Minimum contractual provisions
+  # --------------------------------------------------------------------------
+
+  - id: dora_art30_2_a
+    requirement_id: dora_art30_2
+    name: "Service description and SLA"
+    description: >
+      The contract must contain a full and clear description of all services and sub-services
+      to be provided by the ICT TPP, including the means, locations, and service levels.
+    clause_categories:
+      - availability_sla
+      - security_requirements
+    evidence_keywords:
+      - "service description"
+      - "service catalogue"
+      - "SLA"
+      - "service level agreement"
+      - "performance targets"
+      - "response time"
+    missing_severity: high
+    missing_finding_template: >
+      No service description or SLA was found. DORA Article 30(2)(a) requires a complete
+      description of all services and applicable service levels.
+    sort_order: 10
+
+  - id: dora_art30_2_b
+    requirement_id: dora_art30_2
+    name: "Data processing location"
+    description: >
+      The contract must specify all locations where data will be processed and stored,
+      including whether data will be transferred outside the EU/EEA.
+    clause_categories:
+      - data_protection_obligations
+    evidence_keywords:
+      - "data location"
+      - "processing location"
+      - "data residency"
+      - "EU"
+      - "EEA"
+      - "geographic"
+      - "jurisdiction"
+      - "stored in"
+      - "processed in"
+    missing_severity: high
+    missing_finding_template: >
+      No data processing location clause was found. DORA Article 30(2)(b) requires
+      specification of where data will be processed and stored.
+    sort_order: 20
+
+  - id: dora_art30_2_c
+    requirement_id: dora_art30_2
+    name: "ICT incident notification to financial entity"
+    description: >
+      The contract must require the ICT TPP to notify the financial entity of ICT-related
+      incidents without undue delay, providing the information required for timely
+      supervisory reporting under DORA Article 19.
+    clause_categories:
+      - incident_reporting
+      - data_breach_notification
+    evidence_keywords:
+      - "incident notification"
+      - "without undue delay"
+      - "notify"
+      - "24 hours"
+      - "72 hours"
+      - "ICT incident"
+      - "major incident"
+      - "cyber incident"
+    missing_severity: critical
+    missing_finding_template: >
+      No ICT incident notification clause was found. DORA Article 30(2)(c) requires
+      the ICT TPP to notify the financial entity of incidents without undue delay.
+      Without this clause, DORA Article 19 supervisory notification timelines cannot
+      be met.
+    sort_order: 30
+
+  - id: dora_art30_2_d
+    requirement_id: dora_art30_2
+    name: "Audit rights and cooperation with supervisory authorities"
+    description: >
+      The contract must grant the financial entity and its supervisory authorities
+      full access rights, inspection rights, and audit rights over the ICT TPP,
+      including on-site audits.
+    clause_categories:
+      - audit_rights
+    evidence_keywords:
+      - "audit"
+      - "inspection"
+      - "supervisory authority"
+      - "regulator"
+      - "competent authority"
+      - "on-site audit"
+      - "right of access"
+      - "DORA"
+    missing_severity: critical
+    missing_finding_template: >
+      No audit rights or supervisory authority cooperation clause was found.
+      DORA Article 30(2)(d) requires full audit and inspection rights for both
+      the financial entity and its competent supervisory authorities.
+    sort_order: 40
+
+  - id: dora_art30_2_e
+    requirement_id: dora_art30_2
+    name: "Business continuity requirements"
+    description: >
+      The contract must require the ICT TPP to implement and maintain business continuity
+      and disaster recovery plans covering the services provided to the financial entity,
+      with defined recovery time and recovery point objectives.
+    clause_categories:
+      - business_continuity
+    evidence_keywords:
+      - "business continuity"
+      - "disaster recovery"
+      - "BCP"
+      - "DR plan"
+      - "RTO"
+      - "RPO"
+      - "recovery time objective"
+      - "recovery point objective"
+      - "failover"
+    missing_severity: high
+    missing_finding_template: >
+      No business continuity clause was found. DORA Article 30(2)(e) requires the
+      ICT TPP to maintain business continuity plans with defined recovery objectives.
+    sort_order: 50
+
+  - id: dora_art30_2_f
+    requirement_id: dora_art30_2
+    name: "Sub-contracting restrictions"
+    description: >
+      The contract must restrict sub-contracting of critical or important functions,
+      require prior approval of sub-processors, and impose equivalent obligations on sub-contractors.
+    clause_categories:
+      - subcontractor_management
+    evidence_keywords:
+      - "sub-contracting"
+      - "sub-processor"
+      - "subcontractor"
+      - "prior written consent"
+      - "prior approval"
+      - "flow-down"
+      - "equivalent obligations"
+    missing_severity: high
+    missing_finding_template: >
+      No sub-contracting restrictions clause was found. DORA Article 30(2)(f) requires
+      contractual restrictions and approval requirements for critical function sub-contracting.
+    sort_order: 60
+
+  - id: dora_art30_2_g
+    requirement_id: dora_art30_2
+    name: "Termination rights and data return"
+    description: >
+      The contract must include termination rights enabling the financial entity to exit
+      the relationship without disproportionate cost or detriment, including data portability
+      and transition assistance obligations.
+    clause_categories:
+      - termination_data_return
+    evidence_keywords:
+      - "termination"
+      - "exit"
+      - "data portability"
+      - "data return"
+      - "transition assistance"
+      - "wind-down"
+      - "right to terminate"
+      - "notice period"
+    missing_severity: high
+    missing_finding_template: >
+      No adequate termination rights clause was found. DORA Article 30(2)(g) requires
+      exit strategy provisions including data portability and transition assistance.
+    sort_order: 70
+
+  # --------------------------------------------------------------------------
+  # GDPR Article 28 — Data Processing Agreement requirements
+  # --------------------------------------------------------------------------
+
+  - id: gdpr_art28_1
+    requirement_id: gdpr_art28
+    name: "Data processing instructions binding on processor"
+    description: >
+      The DPA must establish that the processor processes personal data only on documented
+      instructions from the controller.
+    clause_categories:
+      - data_protection_obligations
+    evidence_keywords:
+      - "documented instructions"
+      - "controller's instructions"
+      - "only on instructions"
+      - "pursuant to instructions"
+      - "data processing agreement"
+      - "DPA"
+    missing_severity: critical
+    missing_finding_template: >
+      No controller instruction binding clause was found. GDPR Article 28(3)(a)
+      requires the processor to act only on documented instructions from the controller.
+    sort_order: 10
+
+  - id: gdpr_art28_2
+    requirement_id: gdpr_art28
+    name: "Sub-processor approval and flow-down"
+    description: >
+      The DPA must require the processor to obtain prior written authorisation before
+      engaging sub-processors, and impose equivalent data protection obligations.
+    clause_categories:
+      - subcontractor_management
+      - data_protection_obligations
+    evidence_keywords:
+      - "sub-processor"
+      - "prior authorisation"
+      - "prior written consent"
+      - "GDPR"
+      - "data protection obligations"
+      - "flow-down"
+      - "equivalent obligations"
+    missing_severity: high
+    missing_finding_template: >
+      No sub-processor approval clause was found. GDPR Article 28(2) requires prior
+      specific or general written authorisation of sub-processors, with equivalent
+      obligations imposed on them.
+    sort_order: 20
+
+  - id: gdpr_art28_3
+    requirement_id: gdpr_art28
+    name: "Data deletion or return on termination"
+    description: >
+      At the choice of the controller, the processor must delete or return all personal
+      data at the end of the provision of services, and delete existing copies.
+    clause_categories:
+      - data_retention_deletion
+      - termination_data_return
+    evidence_keywords:
+      - "delete"
+      - "deletion"
+      - "return"
+      - "end of services"
+      - "upon termination"
+      - "expiry"
+      - "destroy"
+      - "GDPR"
+    missing_severity: high
+    missing_finding_template: >
+      No data deletion/return clause was found. GDPR Article 28(3)(g) requires
+      the processor to delete or return all personal data at the end of the service
+      and delete existing copies.
+    sort_order: 30
+
+  # --------------------------------------------------------------------------
+  # GDPR Article 33 — Breach notification
+  # --------------------------------------------------------------------------
+
+  - id: gdpr_art33_1
+    requirement_id: gdpr_art33
+    name: "Personal data breach notification timeline"
+    description: >
+      The agreement must require the processor to notify the controller of a personal
+      data breach without undue delay (typically interpreted as within 24 hours),
+      to enable the controller's 72-hour supervisory notification obligation.
+    clause_categories:
+      - data_breach_notification
+      - incident_reporting
+    evidence_keywords:
+      - "personal data breach"
+      - "data breach"
+      - "without undue delay"
+      - "notify"
+      - "72 hours"
+      - "24 hours"
+      - "GDPR"
+      - "supervisory authority"
+    missing_severity: critical
+    missing_finding_template: >
+      No personal data breach notification clause was found. GDPR Article 33 requires
+      controllers to notify supervisory authorities within 72 hours of a breach;
+      processor contracts must require notification without undue delay to enable this.
+    sort_order: 10

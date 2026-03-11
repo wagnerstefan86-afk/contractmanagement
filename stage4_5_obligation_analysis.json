@@ -1,0 +1,112 @@
+[
+  {
+    "clause_id": "CL-101",
+    "page": 2,
+    "layout_type": "paragraph",
+    "assessment": "VALID",
+    "severity": "LOW",
+    "reason": "No obligation risk patterns detected.",
+    "recommended_action": "No action required. Clause is clear and operationally feasible.",
+    "_confidence": 0.75,
+    "_source": "RULES"
+  },
+  {
+    "clause_id": "CL-102",
+    "page": 3,
+    "layout_type": "paragraph",
+    "assessment": "SCOPE_UNDEFINED",
+    "severity": "MEDIUM",
+    "reason": "Pattern match: 'applicable\\s+(?:data\\s+protection\\s+)?law[s]?(?!\\s*(?:of|,\\s*(?:namely|including'",
+    "recommended_action": "Request the customer to name the exact laws, standards, and frameworks referenced. Replace generic terms such as 'applicable law' or 'relevant standards' with enumerated, specific references.",
+    "_confidence": 0.7,
+    "_source": "RULES"
+  },
+  {
+    "clause_id": "CL-103",
+    "page": 4,
+    "layout_type": "paragraph",
+    "assessment": "NON_TRANSFERABLE_REGULATION",
+    "severity": "HIGH",
+    "reason": "Pattern match: 'provider\\s+shall\\s+submit\\s+(?:major\\s+)?incident\\s+reports\\s+(?:directly\\s+)?to'",
+    "recommended_action": "Reject or renegotiate this clause. The customer cannot contractually transfer their own regulatory obligations to the service provider. Escalate to Legal before acceptance.",
+    "_confidence": 0.7,
+    "_source": "RULES"
+  },
+  {
+    "clause_id": "CL-104",
+    "page": 5,
+    "layout_type": "bullet_list",
+    "assessment": "OPERATIONAL_RISK",
+    "severity": "HIGH",
+    "reason": "Pattern match: 'real.?time\\s+(?:security\\s+)?(?:event\\s+)?(?:log\\s+)?(?:feed|stream|access|notif'",
+    "recommended_action": "Negotiate realistic, measurable obligations. Replace unrealistic deadlines, unlimited access rights, or undefined frequency requirements with specific, operationally feasible commitments and caps.",
+    "_confidence": 0.7,
+    "_source": "RULES"
+  },
+  {
+    "clause_id": "CL-105",
+    "page": 6,
+    "layout_type": "paragraph",
+    "assessment": "SCOPE_UNDEFINED",
+    "severity": "MEDIUM",
+    "reason": "Pattern match: '(?:relevant|applicable)\\s+(?:security\\s+)?(?:standards?|frameworks?|requirements'",
+    "recommended_action": "Request the customer to name the exact laws, standards, and frameworks referenced. Replace generic terms such as 'applicable law' or 'relevant standards' with enumerated, specific references.",
+    "_confidence": 0.7,
+    "_source": "RULES"
+  },
+  {
+    "clause_id": "CL-106",
+    "page": 7,
+    "layout_type": "paragraph",
+    "assessment": "CUSTOMER_RESPONSIBILITY",
+    "severity": "MEDIUM",
+    "reason": "Pattern match: 'provider\\s+shall\\s+(?:determine|decide|classify|assess)\\s+(?:the\\s+)?(?:sensitiv'",
+    "recommended_action": "Reject this obligation as misallocated. Data classification, DPIA execution, and legal basis determination are controller responsibilities under GDPR. Request removal from the provider obligation set.",
+    "_confidence": 0.7,
+    "_source": "RULES"
+  },
+  {
+    "clause_id": "CL-107",
+    "page": 8,
+    "layout_type": "paragraph",
+    "assessment": "OPERATIONAL_RISK",
+    "severity": "MEDIUM",
+    "reason": "Pattern match: 'immediately\\s+notif(?:y|ication)(?:\\s+all)?(?:\\s+affected)?\\s+parties'",
+    "recommended_action": "Negotiate realistic, measurable obligations. Replace unrealistic deadlines, unlimited access rights, or undefined frequency requirements with specific, operationally feasible commitments and caps.",
+    "_confidence": 0.7,
+    "_source": "RULES"
+  },
+  {
+    "clause_id": "CL-108",
+    "page": 9,
+    "layout_type": "paragraph",
+    "assessment": "NON_TRANSFERABLE_REGULATION",
+    "severity": "HIGH",
+    "reason": "Pattern match: 'provider\\s+shall\\s+(?:assume|take\\s+over|fulfil|submit|file|report\\s+to)\\s+(?:al'",
+    "recommended_action": "Reject or renegotiate this clause. The customer cannot contractually transfer their own regulatory obligations to the service provider. Escalate to Legal before acceptance.",
+    "_confidence": 0.7,
+    "_source": "RULES"
+  },
+  {
+    "clause_id": "CL-109",
+    "page": 10,
+    "layout_type": "paragraph",
+    "assessment": "AMBIGUOUS_REQUIREMENT",
+    "severity": "MEDIUM",
+    "reason": "Pattern match: '\\bindustry\\s+best\\s+practices?\\b'",
+    "recommended_action": "Request concrete, measurable criteria. Replace vague terms such as 'best efforts', 'appropriate measures', or 'state of the art' with defined metrics, named standards, or objective test criteria.",
+    "_confidence": 0.7,
+    "_source": "RULES"
+  },
+  {
+    "clause_id": "CL-110",
+    "page": 11,
+    "layout_type": "table",
+    "assessment": "VALID",
+    "severity": "LOW",
+    "reason": "No obligation risk patterns detected.",
+    "recommended_action": "No action required. Clause is clear and operationally feasible.",
+    "_confidence": 0.75,
+    "_source": "RULES"
+  }
+]

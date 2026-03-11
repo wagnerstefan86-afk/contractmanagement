@@ -1,0 +1,92 @@
+[
+  {
+    "chunk_id": "chunk_001",
+    "page": 1,
+    "layout_type": "paragraph",
+    "text": "CLOUD SAAS SERVICES AGREEMENT\n\nThis Cloud SaaS Services Agreement ('Agreement') is entered into as of January 15, 2026, between SecureCloud GmbH, a company incorporated under German law, HRB 123456, registered at Taunusanlage 12, 60325 Frankfurt am Main ('Provider'), and FinanzBank AG, a financial entity regulated by the German Federal Financial Supervisory Authority (BaFin), ('Customer'). The Provider offers a subscription-based, multi-tenant software platform delivered as a hosted service accessible via the internet ('SaaS Platform')."
+  },
+  {
+    "chunk_id": "chunk_002",
+    "page": 2,
+    "layout_type": "paragraph",
+    "text": "1. SERVICES AND SUBSCRIPTION\n\nThe Provider grants the Customer a non-exclusive, non-transferable right to access and use the SaaS Platform during the subscription term. The Customer shall pay an annual subscription fee per seat as specified in the Order Form. The platform is delivered as a web-based, cloud application hosted in ISO/IEC 27001:2022 certified data centers located in the European Union. The Provider guarantees a monthly uptime SLA of 99.9% as measured on a calendar month basis."
+  },
+  {
+    "chunk_id": "chunk_003",
+    "page": 2,
+    "layout_type": "bullet_list",
+    "text": "Service Level Commitments:\n• Uptime SLA: 99.9% monthly availability\n• Maximum Planned Downtime: 4 hours per quarter with 72-hour advance notice\n• Incident Response Time (Critical): 30 minutes\n• Incident Resolution Target (P1): 4 hours\n• Data Backup Frequency: Every 6 hours with cross-region replication\n• Recovery Time Objective (RTO): 4 hours\n• Recovery Point Objective (RPO): 1 hour"
+  },
+  {
+    "chunk_id": "chunk_004",
+    "page": 3,
+    "layout_type": "paragraph",
+    "text": "2. INFORMATION SECURITY\n\nThe Provider shall maintain and enforce a documented Information Security Management System (ISMS) aligned with ISO/IEC 27001:2022. The ISMS shall be reviewed at least annually and subject to third-party certification audits. The Provider shall provide the Customer with the current ISO 27001 certificate of compliance upon written request within 5 business days. All personnel with access to Customer data shall complete mandatory information security training annually."
+  },
+  {
+    "chunk_id": "chunk_005",
+    "page": 3,
+    "layout_type": "paragraph",
+    "text": "3. ICT RISK MANAGEMENT (DORA COMPLIANCE)\n\nAs the Customer constitutes a financial entity under the Digital Operational Resilience Act (DORA), Regulation (EU) 2022/2554, this Agreement incorporates the Provider's obligations as a third-party ICT service provider. The Provider acknowledges its operational dependency classification and agrees to maintain a documented ICT risk management framework in accordance with DORA Art. 6-10, covering identification of critical ICT assets, protection measures, detection capabilities, response and recovery procedures, and annual threat-led penetration testing (TLPT) per DORA Art. 26."
+  },
+  {
+    "chunk_id": "chunk_006",
+    "page": 4,
+    "layout_type": "paragraph",
+    "text": "4. CYBERSECURITY INCIDENT REPORTING (NIS2)\n\nThe Provider acknowledges obligations under Directive (EU) 2022/2555 (NIS2) and its national implementation (NIS2UmsuCG). In the event of a significant cybersecurity incident affecting the SaaS Platform or Customer data, the Provider shall: (i) submit an early warning to the Customer within 24 hours of becoming aware of the incident; (ii) provide a full incident notification within 72 hours including impact assessment and containment measures; and (iii) deliver a final incident report within one month of the initial notification, including root cause analysis and remediation steps."
+  },
+  {
+    "chunk_id": "chunk_007",
+    "page": 5,
+    "layout_type": "paragraph",
+    "text": "5. DATA PROCESSING AGREEMENT (GDPR ART. 28)\n\nFor the purposes of Regulation (EU) 2016/679 (GDPR), the Customer acts as data controller and the Provider acts as data processor with respect to personal data processed via the SaaS Platform. This section constitutes the Data Processing Agreement (DPA) required under GDPR Art. 28. The Provider shall process personal data exclusively on documented instructions from the Customer (data controller) and shall not transfer personal data to any third country without appropriate safeguards as defined under GDPR Chapter V."
+  },
+  {
+    "chunk_id": "chunk_008",
+    "page": 5,
+    "layout_type": "bullet_list",
+    "text": "Categories of personal data processed:\n• Customer employee data: name, work email address, employee ID, role\n• End-user data: name, email address, IP address, session cookies\n• Transaction data linked to identified natural persons\n• Communication records containing personal data of data subjects\nLegal basis for processing: GDPR Art. 6(1)(b) — performance of contract; Art. 6(1)(c) — legal obligation"
+  },
+  {
+    "chunk_id": "chunk_009",
+    "page": 6,
+    "layout_type": "paragraph",
+    "text": "6. DATA SUBJECT RIGHTS\n\nThe Provider shall assist the Customer in fulfilling requests from data subjects exercising their rights under GDPR Art. 15 (right of access), Art. 16 (rectification), Art. 17 (erasure / right to be forgotten), Art. 18 (restriction of processing), Art. 20 (data portability), and Art. 21 (right to object). The Provider shall respond to such requests within 5 business days and shall provide technical means to facilitate bulk data subject request handling at no additional charge."
+  },
+  {
+    "chunk_id": "chunk_010",
+    "page": 7,
+    "layout_type": "paragraph",
+    "text": "7. SUBPROCESSORS\n\nThe Provider maintains a current list of approved subprocessors and data sub-processors at https://securecloud.example.com/subprocessors. The Provider shall notify the Customer of any intended addition or replacement of subprocessors at least 30 days in advance. The Customer may object to such changes within 14 days. All subprocessors are contractually bound to data protection obligations no less stringent than those set out in this Agreement and GDPR Art. 28(4)."
+  },
+  {
+    "chunk_id": "chunk_011",
+    "page": 8,
+    "layout_type": "table",
+    "text": "Subprocessor Registry (excerpt):\nSubprocessor | Country | Processing Purpose | SCCs in Place\nAWS EMEA SARL | Luxembourg/EU | Cloud infrastructure, compute, storage | Yes — EU SCCs 2021\nSendGrid Inc. | USA | Transactional email delivery | Yes — EU SCCs 2021 + DPA\nDatadog Inc. | USA | Application monitoring and logging | Yes — EU SCCs 2021 + DPA\nAll subprocessors are certified under ISO/IEC 27001:2022 and comply with GDPR data transfer requirements."
+  },
+  {
+    "chunk_id": "chunk_012",
+    "page": 9,
+    "layout_type": "paragraph",
+    "text": "8. BUSINESS CONTINUITY AND DISASTER RECOVERY\n\nThe Provider shall maintain a Business Continuity Plan (BCP) and Disaster Recovery Plan (DRP) tested at least annually. Test results shall be made available to the Customer upon written request. The Provider's infrastructure is deployed across two geographically separated AWS availability zones within the EU-CENTRAL-1 region to ensure high availability. Full DR failover exercises shall be conducted annually with optional Customer participation. The Provider shall notify the Customer of any material changes to the BCP or DRP within 30 days."
+  },
+  {
+    "chunk_id": "chunk_013",
+    "page": 10,
+    "layout_type": "paragraph",
+    "text": "9. AUDIT RIGHTS\n\nThe Customer or its designated auditor shall have the right to audit the Provider's compliance with this Agreement and applicable regulatory requirements (including DORA Art. 30 third-party audit rights) upon 30 days' written notice, no more than once per calendar year except in cases of suspected material breach. The Provider shall make available all information necessary to demonstrate compliance, including ISMS documentation, penetration test results, and SOC 2 Type II reports."
+  },
+  {
+    "chunk_id": "chunk_014",
+    "page": 11,
+    "layout_type": "paragraph",
+    "text": "10. CONFIDENTIALITY\n\nBoth parties agree to treat all non-public information received from the other party as strictly confidential and proprietary. The Provider shall implement and maintain technical and organizational measures to prevent unauthorized disclosure of Customer confidential data, trade secrets, or business information. This obligation survives termination of the Agreement for a period of five (5) years."
+  },
+  {
+    "chunk_id": "chunk_015",
+    "page": 12,
+    "layout_type": "paragraph",
+    "text": "11. GOVERNING LAW AND JURISDICTION\n\nThis Agreement shall be governed by and construed in accordance with the laws of the Federal Republic of Germany. Any disputes arising out of or in connection with this Agreement shall be subject to the exclusive jurisdiction of the courts of Frankfurt am Main. This Agreement, including all Annexes and Order Forms, constitutes the entire agreement between the parties with respect to its subject matter and supersedes all prior negotiations and representations."
+  }
+]

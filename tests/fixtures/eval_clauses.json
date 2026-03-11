@@ -1,0 +1,77 @@
+[
+  {
+    "clause_id": "CL-001",
+    "page": 1,
+    "text": "The Vendor shall maintain a comprehensive information security policy that is reviewed annually and aligns with ISO 27001 requirements. The policy shall cover all aspects of the information security management system."
+  },
+  {
+    "clause_id": "CL-002",
+    "page": 2,
+    "text": "The Vendor shall handle all data subject rights requests including the right of access under Art. 15, the right to erasure under Art. 17, and the right to data portability under Art. 20 within statutory timelines."
+  },
+  {
+    "clause_id": "CL-003",
+    "page": 3,
+    "text": "Vendor shall maintain business continuity and disaster recovery plans with a recovery time objective (RTO) of 4 hours and recovery point objective (RPO) of 1 hour for critical systems."
+  },
+  {
+    "clause_id": "CL-004",
+    "page": 4,
+    "text": "In the event of a significant incident affecting data availability, the Vendor shall provide an early warning within 24 hours and submit a full report to the Customer within 72 hours of becoming aware."
+  },
+  {
+    "clause_id": "CL-005",
+    "page": 5,
+    "text": "The Vendor shall implement and maintain an ICT risk management framework that satisfies digital operational resilience requirements applicable to financial entities under DORA."
+  },
+  {
+    "clause_id": "CL-006",
+    "page": 6,
+    "text": "The Customer retains the right to audit the Vendor's security controls and may engage a third-party audit firm at any time with 30 days' notice. The Vendor shall provide SOC 2 Type II reports upon request."
+  },
+  {
+    "clause_id": "CL-007",
+    "page": 7,
+    "text": "The Vendor maintains a list of subprocessors and shall notify the Customer 30 days in advance of any changes pursuant to GDPR Art. 28(4). The subprocessor notification procedure is described in Annex B."
+  },
+  {
+    "clause_id": "CL-008",
+    "page": 8,
+    "text": "The Vendor shall conduct vendor security assessments for all subcontractors who process Customer data and maintain supply chain security controls consistent with applicable regulatory requirements."
+  },
+  {
+    "clause_id": "CL-009",
+    "page": 9,
+    "text": "The vendor's ISMS documentation is regularly reviewed and updated to reflect current threat intelligence and security control effectiveness. Findings are tracked to closure."
+  },
+  {
+    "clause_id": "CL-010",
+    "page": 10,
+    "text": "All personal data transferred to countries outside the European Economic Area shall be protected by appropriate safeguards that ensure equivalent protection levels consistent with applicable data protection law."
+  },
+  {
+    "clause_id": "CL-011",
+    "page": 11,
+    "text": "The Vendor shall promptly notify relevant supervisory bodies of any operational disruption that materially affects the continuity of critical financial services provided under this agreement."
+  },
+  {
+    "clause_id": "CL-012",
+    "page": 12,
+    "text": "The Vendor's information security management system (ISMS) shall address business continuity and disaster recovery planning as mandatory control areas with documented recovery procedures."
+  },
+  {
+    "clause_id": "CL-013",
+    "page": 13,
+    "text": "The Vendor shall provide monthly status reports covering service availability metrics, incident counts by category, and a summary of change management activities during the reporting period."
+  },
+  {
+    "clause_id": "CL-014",
+    "page": 14,
+    "text": "Payment terms are net 30 from the date of invoice. Invoices not disputed within 10 business days are deemed accepted. Late payments incur a 1.5% monthly interest charge."
+  },
+  {
+    "clause_id": "CL-015",
+    "page": 15,
+    "text": "The Vendor shall report any major ICT-related incidents to competent authorities within the timelines prescribed by DORA Art. 17 and Art. 19, and simultaneously notify the Customer's designated contact."
+  }
+]

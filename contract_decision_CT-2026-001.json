@@ -1,0 +1,56 @@
+{
+  "contract_id": "CT-2026-001",
+  "decision": "REJECT",
+  "blocking_findings": [
+    {
+      "sr_id": "SR-DORA-01",
+      "framework": "DORA",
+      "severity": "HIGH",
+      "finding_type": "MISSING",
+      "recommended_action": "Vertragsergänzung zwingend erforderlich: Einfügung einer eigenständigen Klausel 'ICT Risk Management Framework' gemäß DORA Art. 6–10 (EU) 2022/2554. Die Klausel muss die fünf Funktionsbereiche abdecken: (1) Identifikation kritischer ICT-Assets und Abhängigkeiten, (2) Schutzmaßnahmen und Zugangskontrolle, (3) Erkennung von Anomalien und Vorfällen, (4) Reaktions- und Wiederherstellungsplan mit definierten RTO/RPO, (5) Testverfahren inkl. TLPT (Threat-Led Penetration Testing) nach DORA Art. 26. Ohne diese Klausel ist der Vertrag für regulierte Finanzentitäten nicht DORA-konform. Eskalation an Legal & Compliance vor Vertragsunterzeichnung."
+    },
+    {
+      "sr_id": "SR-NIS2-01",
+      "framework": "NIS2",
+      "severity": "HIGH",
+      "finding_type": "WEAK_MATCH",
+      "recommended_action": "Klauselüberarbeitung auf Seite 5 (bullet_list) erforderlich: Der bestehende Text muss um konkrete, NIS2-konforme Meldefristen gemäß Art. 23 Abs. 4 der Richtlinie (EU) 2022/2555 ergänzt werden. Empfohlene Formulierung: 'Der Anbieter übermittelt (i) eine Frühwarnung innerhalb von 24 Stunden nach Kenntnisnahme eines erheblichen Sicherheitsvorfalls, (ii) eine vollständige Vorfallsmeldung innerhalb von 72 Stunden nach Kenntnisnahme sowie (iii) einen abschließenden Bericht spätestens einen Monat nach Einreichung der Vorfallsmeldung.' Zusätzlich muss der Begriff 'erheblicher Sicherheitsvorfall' (significant incident) nach NIS2 Art. 23 Abs. 3 definiert oder auf die nationale Umsetzungsgesetzgebung verwiesen werden. Das bullet-format der Klausel begünstigt eine gezielte Ergänzung ohne Neustrukturierung des Abschnitts."
+    },
+    {
+      "sr_id": "SR-GDPR-01",
+      "framework": "GDPR",
+      "severity": "MEDIUM",
+      "finding_type": "WEAK_MATCH",
+      "recommended_action": "Zweistufiger Review-Prozess erforderlich: (1) OCR-Qualitätskorrektur — Originaldokument (Seite 7) muss durch einen menschlichen Prüfer im Klartext verifiziert werden, da die maschinenextrahierte Fassung Zeichenfehler aufweist (Confidence 0.65 unterschreitet den Akzeptanzschwellenwert von 0.75). Danach Stage-5-Rematching. (2) Inhaltliche Klauselschärfung — nach Textbereinigung sollte die Klausel alle betroffenenrelevanten Rechte gemäß DSGVO Art. 15–22 explizit enumieren: Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung (Art. 18), Datenübertragbarkeit (Art. 20), Widerspruch (Art. 21). Der Verweis auf 'applicable data protection law' ist durch 'Verordnung (EU) 2016/679 (DSGVO) sowie anwendbares nationales Datenschutzrecht' zu ersetzen."
+    }
+  ],
+  "remediation_tasks": [
+    {
+      "task_id": "TASK-001",
+      "description": "Vertragsergänzung zwingend erforderlich: Einfügung einer eigenständigen Klausel 'ICT Risk Management Framework' gemäß DORA Art. 6–10 (EU) 2022/2554. Die Klausel muss die fünf Funktionsbereiche abdecken: (1) Identifikation kritischer ICT-Assets und Abhängigkeiten, (2) Schutzmaßnahmen und Zugangskontrolle, (3) Erkennung von Anomalien und Vorfällen, (4) Reaktions- und Wiederherstellungsplan mit definierten RTO/RPO, (5) Testverfahren inkl. TLPT (Threat-Led Penetration Testing) nach DORA Art. 26. Ohne diese Klausel ist der Vertrag für regulierte Finanzentitäten nicht DORA-konform. Eskalation an Legal & Compliance vor Vertragsunterzeichnung.",
+      "owner_role": "Legal",
+      "priority": "HIGH",
+      "related_sr": "SR-DORA-01"
+    },
+    {
+      "task_id": "TASK-002",
+      "description": "Klauselüberarbeitung auf Seite 5 (bullet_list) erforderlich: Der bestehende Text muss um konkrete, NIS2-konforme Meldefristen gemäß Art. 23 Abs. 4 der Richtlinie (EU) 2022/2555 ergänzt werden. Empfohlene Formulierung: 'Der Anbieter übermittelt (i) eine Frühwarnung innerhalb von 24 Stunden nach Kenntnisnahme eines erheblichen Sicherheitsvorfalls, (ii) eine vollständige Vorfallsmeldung innerhalb von 72 Stunden nach Kenntnisnahme sowie (iii) einen abschließenden Bericht spätestens einen Monat nach Einreichung der Vorfallsmeldung.' Zusätzlich muss der Begriff 'erheblicher Sicherheitsvorfall' (significant incident) nach NIS2 Art. 23 Abs. 3 definiert oder auf die nationale Umsetzungsgesetzgebung verwiesen werden. Das bullet-format der Klausel begünstigt eine gezielte Ergänzung ohne Neustrukturierung des Abschnitts.",
+      "owner_role": "Security",
+      "priority": "HIGH",
+      "related_sr": "SR-NIS2-01"
+    },
+    {
+      "task_id": "TASK-003",
+      "description": "Zweistufiger Review-Prozess erforderlich: (1) OCR-Qualitätskorrektur — Originaldokument (Seite 7) muss durch einen menschlichen Prüfer im Klartext verifiziert werden, da die maschinenextrahierte Fassung Zeichenfehler aufweist (Confidence 0.65 unterschreitet den Akzeptanzschwellenwert von 0.75). Danach Stage-5-Rematching. (2) Inhaltliche Klauselschärfung — nach Textbereinigung sollte die Klausel alle betroffenenrelevanten Rechte gemäß DSGVO Art. 15–22 explizit enumieren: Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung (Art. 18), Datenübertragbarkeit (Art. 20), Widerspruch (Art. 21). Der Verweis auf 'applicable data protection law' ist durch 'Verordnung (EU) 2016/679 (DSGVO) sowie anwendbares nationales Datenschutzrecht' zu ersetzen.",
+      "owner_role": "DPO",
+      "priority": "MEDIUM",
+      "related_sr": "SR-GDPR-01"
+    }
+  ],
+  "summary": {
+    "total_srs": 5,
+    "high_findings": 2,
+    "medium_findings": 1,
+    "low_findings": 2
+  }
+}

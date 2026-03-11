@@ -1,0 +1,84 @@
+[
+  {
+    "sub_requirement_id": "SR-ISO27001-01",
+    "framework": "ISO27001",
+    "title": "Information Security Policy",
+    "result": "COMPLIANT",
+    "confidence": 0.92,
+    "layout_type": "paragraph",
+    "page": 3,
+    "evidence_text": "The Provider shall at all times maintain and enforce a documented information security policy that is aligned with ISO/IEC 27001:2022, reviewed at least annually, and made available to the Customer upon written request. Compliance with this policy is mandatory for all personnel with access to Customer data or systems.",
+    "human_review_flags": []
+  },
+  {
+    "sub_requirement_id": "SR-DORA-01",
+    "framework": "DORA",
+    "title": "ICT Risk Management Framework",
+    "result": "MISSING",
+    "confidence": null,
+    "layout_type": null,
+    "page": null,
+    "evidence_text": null,
+    "human_review_flags": [
+      {
+        "flag_code": "MISSING_CLAUSE",
+        "severity": "HIGH",
+        "description": "No clause found addressing ICT risk management obligations as required under DORA Art. 6. Contract contains no reference to risk identification, classification, or mitigation procedures for ICT systems.",
+        "recommended_action": "Insert a dedicated ICT Risk Management clause covering identification, protection, detection, response, and recovery in accordance with DORA Art. 6–10."
+      }
+    ]
+  },
+  {
+    "sub_requirement_id": "SR-NIS2-01",
+    "framework": "NIS2",
+    "title": "Cybersecurity Incident Reporting",
+    "result": "WEAK_MATCH",
+    "confidence": 0.78,
+    "layout_type": "bullet_list",
+    "page": 5,
+    "evidence_text": "• The Provider will inform the Customer of significant security events within a reasonable timeframe. • Notification shall include a description of the event and initial remediation steps taken by the Provider.",
+    "human_review_flags": [
+      {
+        "flag_code": "WEAK_MATCH",
+        "severity": "HIGH",
+        "description": "Clause references 'significant security events' without defining reporting timelines consistent with NIS2 Art. 23 (initial notification within 24h, detailed report within 72h). The term 'reasonable timeframe' is legally insufficient under NIS2.",
+        "recommended_action": "Replace 'reasonable timeframe' with explicit NIS2-compliant deadlines: early warning within 24 hours and full incident report within 72 hours of detection."
+      }
+    ]
+  },
+  {
+    "sub_requirement_id": "SR-GDPR-01",
+    "framework": "GDPR",
+    "title": "Data Subject Rights & Request Handling",
+    "result": "WEAK_MATCH",
+    "confidence": 0.65,
+    "layout_type": "ocr_text",
+    "page": 7,
+    "evidence_text": "The Provid3r sh4ll supp0rt the Customer in fulfilling requests from data subj3cts, including acc3ss, rectification and eras[ure], within the peri0d prescribed by applicable data pr0tection law.",
+    "human_review_flags": [
+      {
+        "flag_code": "OCR_QUALITY",
+        "severity": "MEDIUM",
+        "description": "Source text extracted via OCR with low fidelity (confidence 0.65). Multiple character substitutions detected (e.g. '3' for 'e', '0' for 'o', '[ure]' fragment). Semantic intent appears consistent with GDPR Art. 12–22 obligations, but legal enforceability requires verification against the original signed document.",
+        "recommended_action": "Retrieve clean text from original PDF or executed contract copy and re-run Stage-5 matching. Legal review of this clause is mandatory before compliance sign-off."
+      },
+      {
+        "flag_code": "AMBIGUOUS_SCOPE",
+        "severity": "MEDIUM",
+        "description": "Clause does not explicitly enumerate all GDPR data subject rights (Art. 17 erasure, Art. 20 portability, Art. 21 objection). Reference to 'applicable data protection law' is overly broad and may not bind the Provider to GDPR specifically.",
+        "recommended_action": "Enumerate all applicable GDPR data subject rights explicitly and replace 'applicable data protection law' with 'GDPR (EU) 2016/679 and any successor regulation'."
+      }
+    ]
+  },
+  {
+    "sub_requirement_id": "SR-ISO27001-02",
+    "framework": "ISO27001",
+    "title": "Business Continuity & Disaster Recovery",
+    "result": "COMPLIANT",
+    "confidence": 0.88,
+    "layout_type": "table",
+    "page": 10,
+    "evidence_text": "Recovery Objective | Committed SLA | Verification Method | Review Cycle — RTO (Recovery Time Objective) | ≤ 4 hours | Annual DR test, results shared with Customer | Annually — RPO (Recovery Point Objective) | ≤ 1 hour | Backup integrity logs available on request | Quarterly — Full DR Test | Mandatory | Joint exercise with Customer participation option | Annually",
+    "human_review_flags": []
+  }
+]

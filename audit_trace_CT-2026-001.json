@@ -1,0 +1,956 @@
+{
+  "contract_id": "CT-2026-001",
+  "generated_at": "2026-03-10T16:57:46.695016+00:00",
+  "total_clauses": 10,
+  "linkage_method": "clause_direct",
+  "pipeline_stages": [
+    {
+      "stage": 4,
+      "source_file": "stage4_clauses.json",
+      "description": "Clause Extraction"
+    },
+    {
+      "stage": 4.5,
+      "source_file": "stage4_5_obligation_analysis.json",
+      "description": "Obligation Analysis"
+    },
+    {
+      "stage": 5,
+      "source_file": "clause_sr_matches.json",
+      "description": "SR Regulatory Matching"
+    },
+    {
+      "stage": 6,
+      "source_file": "stage6_compliance_CT-2026-001.json",
+      "description": "Compliance Report"
+    },
+    {
+      "stage": 8,
+      "source_file": "stage8_remediation_proposals.json",
+      "description": "Remediation Proposal"
+    },
+    {
+      "stage": 9,
+      "source_file": "contract_negotiation_brief.json",
+      "description": "Negotiation Brief"
+    }
+  ],
+  "trace_records": [
+    {
+      "trace_id": "TRACE-001",
+      "clause_id": "CL-101",
+      "page": 2,
+      "layout_type": "paragraph",
+      "original_text_preview": "The Provider shall maintain a monthly uptime SLA of 99.9% as measured by a mutually agreed third-party monitoring service. Service credits for SLA breaches shall be calculated as set forth in Annex B \u2026",
+      "obligation_assessment": "VALID",
+      "obligation_severity": "LOW",
+      "obligation_reason": "No obligation risk patterns detected.",
+      "regulatory_matches": [],
+      "compliance_findings": [],
+      "remediation": null,
+      "negotiation_topic": null,
+      "pipeline_steps": {
+        "stage_4": {
+          "stage": 4,
+          "stage_name": "Clause Extraction",
+          "source_file": "stage4_clauses.json",
+          "clause_id": "CL-101",
+          "page": 2,
+          "layout_type": "paragraph"
+        },
+        "stage_4_5": {
+          "stage": 4.5,
+          "stage_name": "Obligation Analysis",
+          "source_file": "stage4_5_obligation_analysis.json",
+          "found": true,
+          "assessment": "VALID",
+          "severity": "LOW",
+          "reason": "No obligation risk patterns detected.",
+          "recommended_action": "No action required. Clause is clear and operationally feasible.",
+          "confidence": 0.75,
+          "analysis_source": "RULES"
+        },
+        "stage_5": {
+          "stage": 5,
+          "stage_name": "SR Regulatory Matching",
+          "source_file": "clause_sr_matches.json",
+          "linkage_method": "clause_direct",
+          "regulatory_matches": []
+        },
+        "stage_6": {
+          "stage": 6,
+          "stage_name": "Compliance Report",
+          "source_file": "stage6_compliance_CT-2026-001.json",
+          "compliance_findings": []
+        },
+        "stage_8": {
+          "stage": 8,
+          "stage_name": "Remediation Proposal",
+          "source_file": "stage8_remediation_proposals.json",
+          "found": false
+        },
+        "stage_9": {
+          "stage": 9,
+          "stage_name": "Negotiation Brief",
+          "source_file": "contract_negotiation_brief.json",
+          "found": false
+        }
+      }
+    },
+    {
+      "trace_id": "TRACE-002",
+      "clause_id": "CL-102",
+      "page": 3,
+      "layout_type": "paragraph",
+      "original_text_preview": "The Provider shall at all times comply with all applicable laws, regulations, and industry best practices relevant to the provision of the services, including but not limited to all current and future\u2026",
+      "obligation_assessment": "SCOPE_UNDEFINED",
+      "obligation_severity": "MEDIUM",
+      "obligation_reason": "Pattern match: 'applicable\\s+(?:data\\s+protection\\s+)?law[s]?(?!\\s*(?:of|,\\s*(?:namely|including'",
+      "regulatory_matches": [],
+      "compliance_findings": [
+        {
+          "severity": "MEDIUM",
+          "finding_type": "SCOPE_UNDEFINED"
+        }
+      ],
+      "remediation": {
+        "suggested_clause": "The Provider shall comply with the data protection, security, and operational resilience standards enumerated in Schedule [A] (Applicable Regulatory Frameworks), as agreed by the parties in writing and attached hereto. Schedule [A] as at the Effective Date references the following instruments: [to be completed by the parties]. Where a change in applicable law or regulation requires amendment of Schedule [A], the Customer shall notify the Provider in writing no later than ninety (90) days prior to the effective date of such change. If the required amendment imposes material additional cost or operational burden on the Provider, the parties shall negotiate in good faith a corresponding adjustment to fees and timelines within thirty (30) days of such notification. No amendment to Schedule [A] shall take effect without the written countersignature of both parties.",
+        "negotiation_guidance": "Require the customer to enumerate all referenced legal instruments, standards, and frameworks in a contractual annex (e.g. Schedule A \u2014 Applicable Regulatory Frameworks). Any future changes to the applicable set must require written agreement by both parties, with a minimum 90-day implementation notice period and, where changes impose material additional cost, a right to renegotiate fees. Reject dynamic-scope language such as 'as may be amended from time to time' unless accompanied by a change management clause that gives the Provider adequate notice and a price adjustment mechanism."
+      },
+      "negotiation_topic": "REGULATORY_COMPLIANCE",
+      "pipeline_steps": {
+        "stage_4": {
+          "stage": 4,
+          "stage_name": "Clause Extraction",
+          "source_file": "stage4_clauses.json",
+          "clause_id": "CL-102",
+          "page": 3,
+          "layout_type": "paragraph"
+        },
+        "stage_4_5": {
+          "stage": 4.5,
+          "stage_name": "Obligation Analysis",
+          "source_file": "stage4_5_obligation_analysis.json",
+          "found": true,
+          "assessment": "SCOPE_UNDEFINED",
+          "severity": "MEDIUM",
+          "reason": "Pattern match: 'applicable\\s+(?:data\\s+protection\\s+)?law[s]?(?!\\s*(?:of|,\\s*(?:namely|including'",
+          "recommended_action": "Request the customer to name the exact laws, standards, and frameworks referenced. Replace generic terms such as 'applicable law' or 'relevant standards' with enumerated, specific references.",
+          "confidence": 0.7,
+          "analysis_source": "RULES"
+        },
+        "stage_5": {
+          "stage": 5,
+          "stage_name": "SR Regulatory Matching",
+          "source_file": "clause_sr_matches.json",
+          "linkage_method": "clause_direct",
+          "regulatory_matches": []
+        },
+        "stage_6": {
+          "stage": 6,
+          "stage_name": "Compliance Report",
+          "source_file": "stage6_compliance_CT-2026-001.json",
+          "compliance_findings": [
+            {
+              "source": "OBLIGATION_ANALYSIS",
+              "finding_type": "SCOPE_UNDEFINED",
+              "severity": "MEDIUM",
+              "description": "Pattern match: 'applicable\\s+(?:data\\s+protection\\s+)?law[s]?(?!\\s*(?:of|,\\s*(?:namely|including'"
+            }
+          ]
+        },
+        "stage_8": {
+          "stage": 8,
+          "stage_name": "Remediation Proposal",
+          "source_file": "stage8_remediation_proposals.json",
+          "found": true,
+          "finding_type": "SCOPE_UNDEFINED",
+          "severity": "MEDIUM",
+          "problem_summary": "The clause references 'applicable laws', 'relevant regulations', or 'industry standards' without naming specific legal instruments, frameworks, or supervisory authorities. This creates an open-ended, indeterminate obligation that may expand without mutual agreement as laws change, and makes compliance verification impossible.",
+          "negotiation_guidance": "Require the customer to enumerate all referenced legal instruments, standards, and frameworks in a contractual annex (e.g. Schedule A \u2014 Applicable Regulatory Frameworks). Any future changes to the applicable set must require written agreement by both parties, with a minimum 90-day implementation notice period and, where changes impose material additional cost, a right to renegotiate fees. Reject dynamic-scope language such as 'as may be amended from time to time' unless accompanied by a change management clause that gives the Provider adequate notice and a price adjustment mechanism.",
+          "suggested_clause_preview": "The Provider shall comply with the data protection, security, and operational resilience standards enumerated in Schedule [A] (Applicable Regulatory Frameworks), as agreed by the parties in writing and attached hereto. Schedule [A] as at the Effective Date references the following instruments: [to b\u2026",
+          "proposal_source": "RULES"
+        },
+        "stage_9": {
+          "stage": 9,
+          "stage_name": "Negotiation Brief",
+          "source_file": "contract_negotiation_brief.json",
+          "found": true,
+          "negotiation_topic": "REGULATORY_COMPLIANCE",
+          "negotiation_topic_label": "Regulatory Compliance",
+          "topic_highest_severity": "HIGH",
+          "topic_issue_count": 5
+        }
+      }
+    },
+    {
+      "trace_id": "TRACE-003",
+      "clause_id": "CL-103",
+      "page": 4,
+      "layout_type": "paragraph",
+      "original_text_preview": "As the Provider constitutes an essential entity under the NIS2 Directive (EU 2022/2555) as implemented by the NIS2UmsuCG, the Provider shall submit incident reports directly to the competent national \u2026",
+      "obligation_assessment": "NON_TRANSFERABLE_REGULATION",
+      "obligation_severity": "HIGH",
+      "obligation_reason": "Pattern match: 'provider\\s+shall\\s+submit\\s+(?:major\\s+)?incident\\s+reports\\s+(?:directly\\s+)?to'",
+      "regulatory_matches": [
+        {
+          "framework": "NIS2",
+          "sr_id": "SR-NIS2-01",
+          "match_type": "DIRECT_MATCH",
+          "match_confidence": 0.95
+        }
+      ],
+      "compliance_findings": [
+        {
+          "severity": "HIGH",
+          "finding_type": "NON_TRANSFERABLE_REGULATION"
+        }
+      ],
+      "remediation": {
+        "suggested_clause": "The Customer acknowledges that all reporting and notification obligations owed to any competent supervisory authority (including but not limited to BaFin, BSI, and EBA) arising from the Customer's status as a regulated entity are borne exclusively by the Customer. The Provider shall support the Customer in discharging such obligations by: (i) notifying the Customer of any confirmed security incident materially affecting Customer data within four (4) hours of the Provider's internal incident declaration; (ii) providing a detailed incident report, including technical root-cause analysis and remediation measures, within forty-eight (48) hours of such declaration; (iii) supplying evidence, logs, and documentation reasonably required by the Customer to prepare and submit its own regulatory reports; and (iv) making available a designated point of contact to liaise with the Customer's compliance team during any regulatory investigation. The Provider shall have no obligation to submit reports or make representations directly to any regulatory authority on behalf of the Customer unless acting under a separately executed, duly notarised power of attorney that specifically authorises such action.",
+        "negotiation_guidance": "Reject any clause that makes the Provider the primary obligor toward a regulatory authority on the Customer's behalf. The Provider may agree to support the Customer operationally (e.g. timely incident notifications, supplying audit evidence, providing SIEM-compatible logs), but must not file reports to BaFin, BSI, EBA or any other authority in the Customer's name. Propose an Assistance Model: the Customer retains the obligation; the Provider commits to specific, scoped assistance actions within agreed timeframes. Ensure all reference to 'on behalf of' or 'in the name of' the Customer is removed or limited to duly executed power-of-attorney arrangements that are separately negotiated."
+      },
+      "negotiation_topic": "REGULATORY_COMPLIANCE",
+      "pipeline_steps": {
+        "stage_4": {
+          "stage": 4,
+          "stage_name": "Clause Extraction",
+          "source_file": "stage4_clauses.json",
+          "clause_id": "CL-103",
+          "page": 4,
+          "layout_type": "paragraph"
+        },
+        "stage_4_5": {
+          "stage": 4.5,
+          "stage_name": "Obligation Analysis",
+          "source_file": "stage4_5_obligation_analysis.json",
+          "found": true,
+          "assessment": "NON_TRANSFERABLE_REGULATION",
+          "severity": "HIGH",
+          "reason": "Pattern match: 'provider\\s+shall\\s+submit\\s+(?:major\\s+)?incident\\s+reports\\s+(?:directly\\s+)?to'",
+          "recommended_action": "Reject or renegotiate this clause. The customer cannot contractually transfer their own regulatory obligations to the service provider. Escalate to Legal before acceptance.",
+          "confidence": 0.7,
+          "analysis_source": "RULES"
+        },
+        "stage_5": {
+          "stage": 5,
+          "stage_name": "SR Regulatory Matching",
+          "source_file": "clause_sr_matches.json",
+          "linkage_method": "clause_direct",
+          "regulatory_matches": [
+            {
+              "sr_id": "SR-NIS2-01",
+              "framework": "NIS2",
+              "control_id": "NIS2 Art. 23",
+              "sr_title": "Cybersecurity Incident Reporting Timelines",
+              "match_type": "DIRECT_MATCH",
+              "match_confidence": 0.95,
+              "extracted_evidence": "submit incident reports directly to the competent national authority (Bundesamt f\u00fcr Sicherheit in der Informationstechnik \u2026 early warning within 24 hours, a detailed notification within 72 hours, and a final report within one month \u2026 significant cybersecurity incident",
+              "linkage_method": "clause_direct"
+            }
+          ]
+        },
+        "stage_6": {
+          "stage": 6,
+          "stage_name": "Compliance Report",
+          "source_file": "stage6_compliance_CT-2026-001.json",
+          "compliance_findings": [
+            {
+              "source": "OBLIGATION_ANALYSIS",
+              "finding_type": "NON_TRANSFERABLE_REGULATION",
+              "severity": "HIGH",
+              "description": "Pattern match: 'provider\\s+shall\\s+submit\\s+(?:major\\s+)?incident\\s+reports\\s+(?:directly\\s+)?to'"
+            }
+          ]
+        },
+        "stage_8": {
+          "stage": 8,
+          "stage_name": "Remediation Proposal",
+          "source_file": "stage8_remediation_proposals.json",
+          "found": true,
+          "finding_type": "NON_TRANSFERABLE_REGULATION",
+          "severity": "HIGH",
+          "problem_summary": "The clause purports to transfer the Customer's own statutory or regulatory reporting obligations directly to the Provider. Regulatory obligations arising from the Customer's status as a regulated entity (e.g. under DORA, NIS2, GDPR) are non-delegable: the regulated entity remains solely responsible to the competent authority. Such a transfer is legally ineffective and exposes the Provider to undefined regulatory liability.",
+          "negotiation_guidance": "Reject any clause that makes the Provider the primary obligor toward a regulatory authority on the Customer's behalf. The Provider may agree to support the Customer operationally (e.g. timely incident notifications, supplying audit evidence, providing SIEM-compatible logs), but must not file reports to BaFin, BSI, EBA or any other authority in the Customer's name. Propose an Assistance Model: the Customer retains the obligation; the Provider commits to specific, scoped assistance actions within agreed timeframes. Ensure all reference to 'on behalf of' or 'in the name of' the Customer is removed or limited to duly executed power-of-attorney arrangements that are separately negotiated.",
+          "suggested_clause_preview": "The Customer acknowledges that all reporting and notification obligations owed to any competent supervisory authority (including but not limited to BaFin, BSI, and EBA) arising from the Customer's status as a regulated entity are borne exclusively by the Customer. The Provider shall support the Cust\u2026",
+          "proposal_source": "RULES"
+        },
+        "stage_9": {
+          "stage": 9,
+          "stage_name": "Negotiation Brief",
+          "source_file": "contract_negotiation_brief.json",
+          "found": true,
+          "negotiation_topic": "REGULATORY_COMPLIANCE",
+          "negotiation_topic_label": "Regulatory Compliance",
+          "topic_highest_severity": "HIGH",
+          "topic_issue_count": 5
+        }
+      }
+    },
+    {
+      "trace_id": "TRACE-004",
+      "clause_id": "CL-104",
+      "page": 5,
+      "layout_type": "bullet_list",
+      "original_text_preview": "Security incident response obligations:\n\u2022 The Provider shall notify the Customer of any detected security incident within 15 minutes of internal detection, regardless of severity classification.\n\u2022 The\u2026",
+      "obligation_assessment": "OPERATIONAL_RISK",
+      "obligation_severity": "HIGH",
+      "obligation_reason": "Pattern match: 'real.?time\\s+(?:security\\s+)?(?:event\\s+)?(?:log\\s+)?(?:feed|stream|access|notif'",
+      "regulatory_matches": [
+        {
+          "framework": "ISO27001",
+          "sr_id": "SR-ISO27001-03",
+          "match_type": "PARTIAL_MATCH",
+          "match_confidence": 0.78
+        }
+      ],
+      "compliance_findings": [
+        {
+          "severity": "HIGH",
+          "finding_type": "OPERATIONAL_RISK"
+        }
+      ],
+      "remediation": {
+        "suggested_clause": "Incident Notification: The Provider shall notify the Customer of any confirmed security incident materially affecting Customer data within four (4) business hours of the Provider's internal incident declaration. Notification shall include a preliminary impact assessment. A full incident report shall be delivered within forty-eight (48) hours. Audit Rights: The Customer or its appointed independent auditor may conduct one (1) compliance audit per calendar year upon thirty (30) calendar days' prior written notice, during normal business hours (Monday\u2013Friday, 09:00\u201317:00 CET), and subject to the Provider's information security and confidentiality requirements. The scope of each audit shall be limited to systems, processes, and records directly related to the services provided under this Agreement. Emergency audits following a declared data breach shall be scoped and scheduled by written agreement between the parties within five (5) business days of the breach notification. Log Access: The Provider shall make available to the Customer, within twenty-four (24) hours of a written request, aggregated security event logs relating to Customer data environments, in a mutually agreed machine-readable format. Continuous or real-time streaming of internal security event data is not included in the standard service scope and may be agreed as a separate, commercially scoped service.",
+        "negotiation_guidance": "Replace all undefined or unrealistic time obligations with specific, tiered SLAs that reflect the Provider's actual incident management process. Scope all audit rights to Customer-relevant systems only, with scheduled windows and advance notice. Replace real-time or continuous log feed requirements with periodic delivery or on-demand access within a defined SLA. Ensure all obligations are capped: unlimited access to internal infrastructure or source code is a security risk and should be replaced with scoped, third-party-auditor-mediated access. Attach a Technical Feasibility Statement for any sub-4-hour SLA obligations to document the operational basis."
+      },
+      "negotiation_topic": "AUDIT_RIGHTS",
+      "pipeline_steps": {
+        "stage_4": {
+          "stage": 4,
+          "stage_name": "Clause Extraction",
+          "source_file": "stage4_clauses.json",
+          "clause_id": "CL-104",
+          "page": 5,
+          "layout_type": "bullet_list"
+        },
+        "stage_4_5": {
+          "stage": 4.5,
+          "stage_name": "Obligation Analysis",
+          "source_file": "stage4_5_obligation_analysis.json",
+          "found": true,
+          "assessment": "OPERATIONAL_RISK",
+          "severity": "HIGH",
+          "reason": "Pattern match: 'real.?time\\s+(?:security\\s+)?(?:event\\s+)?(?:log\\s+)?(?:feed|stream|access|notif'",
+          "recommended_action": "Negotiate realistic, measurable obligations. Replace unrealistic deadlines, unlimited access rights, or undefined frequency requirements with specific, operationally feasible commitments and caps.",
+          "confidence": 0.7,
+          "analysis_source": "RULES"
+        },
+        "stage_5": {
+          "stage": 5,
+          "stage_name": "SR Regulatory Matching",
+          "source_file": "clause_sr_matches.json",
+          "linkage_method": "clause_direct",
+          "regulatory_matches": [
+            {
+              "sr_id": "SR-ISO27001-03",
+              "framework": "ISO27001",
+              "control_id": "ISO27001:2022 A.18.2",
+              "sr_title": "Audit Rights",
+              "match_type": "PARTIAL_MATCH",
+              "match_confidence": 0.78,
+              "extracted_evidence": "The Customer shall be granted unlimited, unrestricted audit access to all Provider systems, networks, source code repositories",
+              "linkage_method": "clause_direct"
+            }
+          ]
+        },
+        "stage_6": {
+          "stage": 6,
+          "stage_name": "Compliance Report",
+          "source_file": "stage6_compliance_CT-2026-001.json",
+          "compliance_findings": [
+            {
+              "source": "OBLIGATION_ANALYSIS",
+              "finding_type": "OPERATIONAL_RISK",
+              "severity": "HIGH",
+              "description": "Pattern match: 'real.?time\\s+(?:security\\s+)?(?:event\\s+)?(?:log\\s+)?(?:feed|stream|access|notif'"
+            }
+          ]
+        },
+        "stage_8": {
+          "stage": 8,
+          "stage_name": "Remediation Proposal",
+          "source_file": "stage8_remediation_proposals.json",
+          "found": true,
+          "finding_type": "OPERATIONAL_RISK",
+          "severity": "HIGH",
+          "problem_summary": "The clause imposes operationally unrealistic obligations \u2014 such as notification within minutes, unlimited or unscheduled audit access to all systems, or continuous real-time data feeds \u2014 that cannot be delivered reliably, create disproportionate security risk, and may be technically infeasible at scale. Undefined scope obligations (e.g. 'all systems', 'all stakeholders') create unbounded liability.",
+          "negotiation_guidance": "Replace all undefined or unrealistic time obligations with specific, tiered SLAs that reflect the Provider's actual incident management process. Scope all audit rights to Customer-relevant systems only, with scheduled windows and advance notice. Replace real-time or continuous log feed requirements with periodic delivery or on-demand access within a defined SLA. Ensure all obligations are capped: unlimited access to internal infrastructure or source code is a security risk and should be replaced with scoped, third-party-auditor-mediated access. Attach a Technical Feasibility Statement for any sub-4-hour SLA obligations to document the operational basis.",
+          "suggested_clause_preview": "Incident Notification: The Provider shall notify the Customer of any confirmed security incident materially affecting Customer data within four (4) business hours of the Provider's internal incident declaration. Notification shall include a preliminary impact assessment. A full incident report shall\u2026",
+          "proposal_source": "RULES"
+        },
+        "stage_9": {
+          "stage": 9,
+          "stage_name": "Negotiation Brief",
+          "source_file": "contract_negotiation_brief.json",
+          "found": true,
+          "negotiation_topic": "AUDIT_RIGHTS",
+          "negotiation_topic_label": "Audit Rights",
+          "topic_highest_severity": "HIGH",
+          "topic_issue_count": 2
+        }
+      }
+    },
+    {
+      "trace_id": "TRACE-005",
+      "clause_id": "CL-105",
+      "page": 6,
+      "layout_type": "paragraph",
+      "original_text_preview": "The Provider shall ensure compliance with relevant data protection standards and applicable security frameworks at all times. All data processing activities must conform to applicable requirements as \u2026",
+      "obligation_assessment": "SCOPE_UNDEFINED",
+      "obligation_severity": "MEDIUM",
+      "obligation_reason": "Pattern match: '(?:relevant|applicable)\\s+(?:security\\s+)?(?:standards?|frameworks?|requirements'",
+      "regulatory_matches": [
+        {
+          "framework": "GDPR",
+          "sr_id": "SR-GDPR-02",
+          "match_type": "PARTIAL_MATCH",
+          "match_confidence": 0.65
+        }
+      ],
+      "compliance_findings": [
+        {
+          "severity": "MEDIUM",
+          "finding_type": "SCOPE_UNDEFINED"
+        }
+      ],
+      "remediation": {
+        "suggested_clause": "The Provider shall comply with the data protection, security, and operational resilience standards enumerated in Schedule [A] (Applicable Regulatory Frameworks), as agreed by the parties in writing and attached hereto. Schedule [A] as at the Effective Date references the following instruments: [to be completed by the parties]. Where a change in applicable law or regulation requires amendment of Schedule [A], the Customer shall notify the Provider in writing no later than ninety (90) days prior to the effective date of such change. If the required amendment imposes material additional cost or operational burden on the Provider, the parties shall negotiate in good faith a corresponding adjustment to fees and timelines within thirty (30) days of such notification. No amendment to Schedule [A] shall take effect without the written countersignature of both parties.",
+        "negotiation_guidance": "Require the customer to enumerate all referenced legal instruments, standards, and frameworks in a contractual annex (e.g. Schedule A \u2014 Applicable Regulatory Frameworks). Any future changes to the applicable set must require written agreement by both parties, with a minimum 90-day implementation notice period and, where changes impose material additional cost, a right to renegotiate fees. Reject dynamic-scope language such as 'as may be amended from time to time' unless accompanied by a change management clause that gives the Provider adequate notice and a price adjustment mechanism."
+      },
+      "negotiation_topic": "DATA_PROTECTION",
+      "pipeline_steps": {
+        "stage_4": {
+          "stage": 4,
+          "stage_name": "Clause Extraction",
+          "source_file": "stage4_clauses.json",
+          "clause_id": "CL-105",
+          "page": 6,
+          "layout_type": "paragraph"
+        },
+        "stage_4_5": {
+          "stage": 4.5,
+          "stage_name": "Obligation Analysis",
+          "source_file": "stage4_5_obligation_analysis.json",
+          "found": true,
+          "assessment": "SCOPE_UNDEFINED",
+          "severity": "MEDIUM",
+          "reason": "Pattern match: '(?:relevant|applicable)\\s+(?:security\\s+)?(?:standards?|frameworks?|requirements'",
+          "recommended_action": "Request the customer to name the exact laws, standards, and frameworks referenced. Replace generic terms such as 'applicable law' or 'relevant standards' with enumerated, specific references.",
+          "confidence": 0.7,
+          "analysis_source": "RULES"
+        },
+        "stage_5": {
+          "stage": 5,
+          "stage_name": "SR Regulatory Matching",
+          "source_file": "clause_sr_matches.json",
+          "linkage_method": "clause_direct",
+          "regulatory_matches": [
+            {
+              "sr_id": "SR-GDPR-02",
+              "framework": "GDPR",
+              "control_id": "GDPR Art. 28",
+              "sr_title": "Data Processing Agreement (Art. 28)",
+              "match_type": "PARTIAL_MATCH",
+              "match_confidence": 0.65,
+              "extracted_evidence": "All data processing activities must conform to applicable requirements \u2026 data processing \u2026 processing",
+              "linkage_method": "clause_direct"
+            }
+          ]
+        },
+        "stage_6": {
+          "stage": 6,
+          "stage_name": "Compliance Report",
+          "source_file": "stage6_compliance_CT-2026-001.json",
+          "compliance_findings": [
+            {
+              "source": "OBLIGATION_ANALYSIS",
+              "finding_type": "SCOPE_UNDEFINED",
+              "severity": "MEDIUM",
+              "description": "Pattern match: '(?:relevant|applicable)\\s+(?:security\\s+)?(?:standards?|frameworks?|requirements'"
+            }
+          ]
+        },
+        "stage_8": {
+          "stage": 8,
+          "stage_name": "Remediation Proposal",
+          "source_file": "stage8_remediation_proposals.json",
+          "found": true,
+          "finding_type": "SCOPE_UNDEFINED",
+          "severity": "MEDIUM",
+          "problem_summary": "The clause references 'applicable laws', 'relevant regulations', or 'industry standards' without naming specific legal instruments, frameworks, or supervisory authorities. This creates an open-ended, indeterminate obligation that may expand without mutual agreement as laws change, and makes compliance verification impossible.",
+          "negotiation_guidance": "Require the customer to enumerate all referenced legal instruments, standards, and frameworks in a contractual annex (e.g. Schedule A \u2014 Applicable Regulatory Frameworks). Any future changes to the applicable set must require written agreement by both parties, with a minimum 90-day implementation notice period and, where changes impose material additional cost, a right to renegotiate fees. Reject dynamic-scope language such as 'as may be amended from time to time' unless accompanied by a change management clause that gives the Provider adequate notice and a price adjustment mechanism.",
+          "suggested_clause_preview": "The Provider shall comply with the data protection, security, and operational resilience standards enumerated in Schedule [A] (Applicable Regulatory Frameworks), as agreed by the parties in writing and attached hereto. Schedule [A] as at the Effective Date references the following instruments: [to b\u2026",
+          "proposal_source": "RULES"
+        },
+        "stage_9": {
+          "stage": 9,
+          "stage_name": "Negotiation Brief",
+          "source_file": "contract_negotiation_brief.json",
+          "found": true,
+          "negotiation_topic": "DATA_PROTECTION",
+          "negotiation_topic_label": "Data Protection",
+          "topic_highest_severity": "HIGH",
+          "topic_issue_count": 5
+        }
+      }
+    },
+    {
+      "trace_id": "TRACE-006",
+      "clause_id": "CL-106",
+      "page": 7,
+      "layout_type": "paragraph",
+      "original_text_preview": "The Provider shall determine the sensitivity classification of all Customer data processed under this Agreement and shall define appropriate data retention periods for each category of Customer data i\u2026",
+      "obligation_assessment": "CUSTOMER_RESPONSIBILITY",
+      "obligation_severity": "MEDIUM",
+      "obligation_reason": "Pattern match: 'provider\\s+shall\\s+(?:determine|decide|classify|assess)\\s+(?:the\\s+)?(?:sensitiv'",
+      "regulatory_matches": [
+        {
+          "framework": "GDPR",
+          "sr_id": "SR-GDPR-02",
+          "match_type": "PARTIAL_MATCH",
+          "match_confidence": 0.65
+        }
+      ],
+      "compliance_findings": [
+        {
+          "severity": "MEDIUM",
+          "finding_type": "CUSTOMER_RESPONSIBILITY"
+        }
+      ],
+      "remediation": {
+        "suggested_clause": "The Customer, acting as data controller within the meaning of GDPR Art. 4(7), shall remain solely responsible for: (i) determining and documenting the sensitivity classification of all personal data processed under this Agreement, as set out in the Data Classification Policy referenced in Schedule [B]; (ii) establishing the lawful basis for each category of processing under GDPR Art. 6 (and Art. 9 where special category data is involved) and documenting such basis in the Customer's Records of Processing Activities (RoPA); (iii) defining data retention periods for each category of Customer data, which the Provider shall implement on receipt of written instruction; and (iv) conducting any Data Protection Impact Assessment (DPIA) required under GDPR Art. 35. The Provider shall, upon written request and within fifteen (15) business days, supply the Customer with a description of the Provider's technical and organisational processing operations to assist the Customer in completing a DPIA. The Provider shall not be required to conduct, sign, or submit any DPIA on behalf of the Customer.",
+        "negotiation_guidance": "Reject all clauses that purport to transfer controller responsibilities to the Provider. Data classification, DPIA execution, lawful-basis determination, and retention policy definition must remain with the Customer. The Provider may offer supporting information (e.g. a description of technical processing operations to assist a DPIA), but cannot carry out the legal assessment. Propose a 'Controller Responsibilities Annex' that explicitly allocates these duties to the Customer and defines the Provider's supporting obligations (information supply, cooperation) with specific, bounded deliverables."
+      },
+      "negotiation_topic": "DATA_PROTECTION",
+      "pipeline_steps": {
+        "stage_4": {
+          "stage": 4,
+          "stage_name": "Clause Extraction",
+          "source_file": "stage4_clauses.json",
+          "clause_id": "CL-106",
+          "page": 7,
+          "layout_type": "paragraph"
+        },
+        "stage_4_5": {
+          "stage": 4.5,
+          "stage_name": "Obligation Analysis",
+          "source_file": "stage4_5_obligation_analysis.json",
+          "found": true,
+          "assessment": "CUSTOMER_RESPONSIBILITY",
+          "severity": "MEDIUM",
+          "reason": "Pattern match: 'provider\\s+shall\\s+(?:determine|decide|classify|assess)\\s+(?:the\\s+)?(?:sensitiv'",
+          "recommended_action": "Reject this obligation as misallocated. Data classification, DPIA execution, and legal basis determination are controller responsibilities under GDPR. Request removal from the provider obligation set.",
+          "confidence": 0.7,
+          "analysis_source": "RULES"
+        },
+        "stage_5": {
+          "stage": 5,
+          "stage_name": "SR Regulatory Matching",
+          "source_file": "clause_sr_matches.json",
+          "linkage_method": "clause_direct",
+          "regulatory_matches": [
+            {
+              "sr_id": "SR-GDPR-02",
+              "framework": "GDPR",
+              "control_id": "GDPR Art. 28",
+              "sr_title": "Data Processing Agreement (Art. 28)",
+              "match_type": "PARTIAL_MATCH",
+              "match_confidence": 0.65,
+              "extracted_evidence": "data processed under this Agreement \u2026 data controller \u2026 personal data under applicable data protection law",
+              "linkage_method": "clause_direct"
+            }
+          ]
+        },
+        "stage_6": {
+          "stage": 6,
+          "stage_name": "Compliance Report",
+          "source_file": "stage6_compliance_CT-2026-001.json",
+          "compliance_findings": [
+            {
+              "source": "OBLIGATION_ANALYSIS",
+              "finding_type": "CUSTOMER_RESPONSIBILITY",
+              "severity": "MEDIUM",
+              "description": "Pattern match: 'provider\\s+shall\\s+(?:determine|decide|classify|assess)\\s+(?:the\\s+)?(?:sensitiv'"
+            }
+          ]
+        },
+        "stage_8": {
+          "stage": 8,
+          "stage_name": "Remediation Proposal",
+          "source_file": "stage8_remediation_proposals.json",
+          "found": true,
+          "finding_type": "CUSTOMER_RESPONSIBILITY",
+          "severity": "MEDIUM",
+          "problem_summary": "The clause assigns to the Provider obligations that are legally the Customer's own controller responsibilities under GDPR \u2014 specifically, determining data classification, defining retention periods, establishing lawful bases for processing, and conducting Data Protection Impact Assessments (DPIA). Under GDPR Art. 4(7) and Art. 24, these are non-delegable controller duties. The Provider, acting as processor under Art. 28, cannot lawfully make these determinations on the Customer's behalf.",
+          "negotiation_guidance": "Reject all clauses that purport to transfer controller responsibilities to the Provider. Data classification, DPIA execution, lawful-basis determination, and retention policy definition must remain with the Customer. The Provider may offer supporting information (e.g. a description of technical processing operations to assist a DPIA), but cannot carry out the legal assessment. Propose a 'Controller Responsibilities Annex' that explicitly allocates these duties to the Customer and defines the Provider's supporting obligations (information supply, cooperation) with specific, bounded deliverables.",
+          "suggested_clause_preview": "The Customer, acting as data controller within the meaning of GDPR Art. 4(7), shall remain solely responsible for: (i) determining and documenting the sensitivity classification of all personal data processed under this Agreement, as set out in the Data Classification Policy referenced in Schedule [\u2026",
+          "proposal_source": "RULES"
+        },
+        "stage_9": {
+          "stage": 9,
+          "stage_name": "Negotiation Brief",
+          "source_file": "contract_negotiation_brief.json",
+          "found": true,
+          "negotiation_topic": "DATA_PROTECTION",
+          "negotiation_topic_label": "Data Protection",
+          "topic_highest_severity": "HIGH",
+          "topic_issue_count": 5
+        }
+      }
+    },
+    {
+      "trace_id": "TRACE-007",
+      "clause_id": "CL-107",
+      "page": 8,
+      "layout_type": "paragraph",
+      "original_text_preview": "In the event of a data breach or any security incident potentially affecting Customer data, the Provider shall immediately notify all affected parties, relevant regulatory authorities, and any other s\u2026",
+      "obligation_assessment": "OPERATIONAL_RISK",
+      "obligation_severity": "MEDIUM",
+      "obligation_reason": "Pattern match: 'immediately\\s+notif(?:y|ication)(?:\\s+all)?(?:\\s+affected)?\\s+parties'",
+      "regulatory_matches": [],
+      "compliance_findings": [
+        {
+          "severity": "MEDIUM",
+          "finding_type": "OPERATIONAL_RISK"
+        }
+      ],
+      "remediation": {
+        "suggested_clause": "Incident Notification: The Provider shall notify the Customer of any confirmed security incident materially affecting Customer data within four (4) business hours of the Provider's internal incident declaration. Notification shall include a preliminary impact assessment. A full incident report shall be delivered within forty-eight (48) hours. Audit Rights: The Customer or its appointed independent auditor may conduct one (1) compliance audit per calendar year upon thirty (30) calendar days' prior written notice, during normal business hours (Monday\u2013Friday, 09:00\u201317:00 CET), and subject to the Provider's information security and confidentiality requirements. The scope of each audit shall be limited to systems, processes, and records directly related to the services provided under this Agreement. Emergency audits following a declared data breach shall be scoped and scheduled by written agreement between the parties within five (5) business days of the breach notification. Log Access: The Provider shall make available to the Customer, within twenty-four (24) hours of a written request, aggregated security event logs relating to Customer data environments, in a mutually agreed machine-readable format. Continuous or real-time streaming of internal security event data is not included in the standard service scope and may be agreed as a separate, commercially scoped service.",
+        "negotiation_guidance": "Replace all undefined or unrealistic time obligations with specific, tiered SLAs that reflect the Provider's actual incident management process. Scope all audit rights to Customer-relevant systems only, with scheduled windows and advance notice. Replace real-time or continuous log feed requirements with periodic delivery or on-demand access within a defined SLA. Ensure all obligations are capped: unlimited access to internal infrastructure or source code is a security risk and should be replaced with scoped, third-party-auditor-mediated access. Attach a Technical Feasibility Statement for any sub-4-hour SLA obligations to document the operational basis."
+      },
+      "negotiation_topic": "INCIDENT_MANAGEMENT",
+      "pipeline_steps": {
+        "stage_4": {
+          "stage": 4,
+          "stage_name": "Clause Extraction",
+          "source_file": "stage4_clauses.json",
+          "clause_id": "CL-107",
+          "page": 8,
+          "layout_type": "paragraph"
+        },
+        "stage_4_5": {
+          "stage": 4.5,
+          "stage_name": "Obligation Analysis",
+          "source_file": "stage4_5_obligation_analysis.json",
+          "found": true,
+          "assessment": "OPERATIONAL_RISK",
+          "severity": "MEDIUM",
+          "reason": "Pattern match: 'immediately\\s+notif(?:y|ication)(?:\\s+all)?(?:\\s+affected)?\\s+parties'",
+          "recommended_action": "Negotiate realistic, measurable obligations. Replace unrealistic deadlines, unlimited access rights, or undefined frequency requirements with specific, operationally feasible commitments and caps.",
+          "confidence": 0.7,
+          "analysis_source": "RULES"
+        },
+        "stage_5": {
+          "stage": 5,
+          "stage_name": "SR Regulatory Matching",
+          "source_file": "clause_sr_matches.json",
+          "linkage_method": "clause_direct",
+          "regulatory_matches": []
+        },
+        "stage_6": {
+          "stage": 6,
+          "stage_name": "Compliance Report",
+          "source_file": "stage6_compliance_CT-2026-001.json",
+          "compliance_findings": [
+            {
+              "source": "OBLIGATION_ANALYSIS",
+              "finding_type": "OPERATIONAL_RISK",
+              "severity": "MEDIUM",
+              "description": "Pattern match: 'immediately\\s+notif(?:y|ication)(?:\\s+all)?(?:\\s+affected)?\\s+parties'"
+            }
+          ]
+        },
+        "stage_8": {
+          "stage": 8,
+          "stage_name": "Remediation Proposal",
+          "source_file": "stage8_remediation_proposals.json",
+          "found": true,
+          "finding_type": "OPERATIONAL_RISK",
+          "severity": "MEDIUM",
+          "problem_summary": "The clause imposes operationally unrealistic obligations \u2014 such as notification within minutes, unlimited or unscheduled audit access to all systems, or continuous real-time data feeds \u2014 that cannot be delivered reliably, create disproportionate security risk, and may be technically infeasible at scale. Undefined scope obligations (e.g. 'all systems', 'all stakeholders') create unbounded liability.",
+          "negotiation_guidance": "Replace all undefined or unrealistic time obligations with specific, tiered SLAs that reflect the Provider's actual incident management process. Scope all audit rights to Customer-relevant systems only, with scheduled windows and advance notice. Replace real-time or continuous log feed requirements with periodic delivery or on-demand access within a defined SLA. Ensure all obligations are capped: unlimited access to internal infrastructure or source code is a security risk and should be replaced with scoped, third-party-auditor-mediated access. Attach a Technical Feasibility Statement for any sub-4-hour SLA obligations to document the operational basis.",
+          "suggested_clause_preview": "Incident Notification: The Provider shall notify the Customer of any confirmed security incident materially affecting Customer data within four (4) business hours of the Provider's internal incident declaration. Notification shall include a preliminary impact assessment. A full incident report shall\u2026",
+          "proposal_source": "RULES"
+        },
+        "stage_9": {
+          "stage": 9,
+          "stage_name": "Negotiation Brief",
+          "source_file": "contract_negotiation_brief.json",
+          "found": true,
+          "negotiation_topic": "INCIDENT_MANAGEMENT",
+          "negotiation_topic_label": "Incident Management",
+          "topic_highest_severity": "MEDIUM",
+          "topic_issue_count": 1
+        }
+      }
+    },
+    {
+      "trace_id": "TRACE-008",
+      "clause_id": "CL-108",
+      "page": 9,
+      "layout_type": "paragraph",
+      "original_text_preview": "As the Customer is a financial entity regulated under DORA (Regulation EU 2022/2554), the Provider shall assume all ICT-related regulatory reporting obligations on behalf of the Customer, including th\u2026",
+      "obligation_assessment": "NON_TRANSFERABLE_REGULATION",
+      "obligation_severity": "HIGH",
+      "obligation_reason": "Pattern match: 'provider\\s+shall\\s+(?:assume|take\\s+over|fulfil|submit|file|report\\s+to)\\s+(?:al'",
+      "regulatory_matches": [
+        {
+          "framework": "DORA",
+          "sr_id": "SR-DORA-02",
+          "match_type": "DIRECT_MATCH",
+          "match_confidence": 0.9
+        },
+        {
+          "framework": "DORA",
+          "sr_id": "SR-DORA-01",
+          "match_type": "PARTIAL_MATCH",
+          "match_confidence": 0.68
+        }
+      ],
+      "compliance_findings": [
+        {
+          "severity": "HIGH",
+          "finding_type": "NON_TRANSFERABLE_REGULATION"
+        }
+      ],
+      "remediation": {
+        "suggested_clause": "The Customer acknowledges that all reporting and notification obligations owed to any competent supervisory authority (including but not limited to BaFin, BSI, and EBA) arising from the Customer's status as a regulated entity are borne exclusively by the Customer. The Provider shall support the Customer in discharging such obligations by: (i) notifying the Customer of any confirmed security incident materially affecting Customer data within four (4) hours of the Provider's internal incident declaration; (ii) providing a detailed incident report, including technical root-cause analysis and remediation measures, within forty-eight (48) hours of such declaration; (iii) supplying evidence, logs, and documentation reasonably required by the Customer to prepare and submit its own regulatory reports; and (iv) making available a designated point of contact to liaise with the Customer's compliance team during any regulatory investigation. The Provider shall have no obligation to submit reports or make representations directly to any regulatory authority on behalf of the Customer unless acting under a separately executed, duly notarised power of attorney that specifically authorises such action.",
+        "negotiation_guidance": "Reject any clause that makes the Provider the primary obligor toward a regulatory authority on the Customer's behalf. The Provider may agree to support the Customer operationally (e.g. timely incident notifications, supplying audit evidence, providing SIEM-compatible logs), but must not file reports to BaFin, BSI, EBA or any other authority in the Customer's name. Propose an Assistance Model: the Customer retains the obligation; the Provider commits to specific, scoped assistance actions within agreed timeframes. Ensure all reference to 'on behalf of' or 'in the name of' the Customer is removed or limited to duly executed power-of-attorney arrangements that are separately negotiated."
+      },
+      "negotiation_topic": "REGULATORY_COMPLIANCE",
+      "pipeline_steps": {
+        "stage_4": {
+          "stage": 4,
+          "stage_name": "Clause Extraction",
+          "source_file": "stage4_clauses.json",
+          "clause_id": "CL-108",
+          "page": 9,
+          "layout_type": "paragraph"
+        },
+        "stage_4_5": {
+          "stage": 4.5,
+          "stage_name": "Obligation Analysis",
+          "source_file": "stage4_5_obligation_analysis.json",
+          "found": true,
+          "assessment": "NON_TRANSFERABLE_REGULATION",
+          "severity": "HIGH",
+          "reason": "Pattern match: 'provider\\s+shall\\s+(?:assume|take\\s+over|fulfil|submit|file|report\\s+to)\\s+(?:al'",
+          "recommended_action": "Reject or renegotiate this clause. The customer cannot contractually transfer their own regulatory obligations to the service provider. Escalate to Legal before acceptance.",
+          "confidence": 0.7,
+          "analysis_source": "RULES"
+        },
+        "stage_5": {
+          "stage": 5,
+          "stage_name": "SR Regulatory Matching",
+          "source_file": "clause_sr_matches.json",
+          "linkage_method": "clause_direct",
+          "regulatory_matches": [
+            {
+              "sr_id": "SR-DORA-02",
+              "framework": "DORA",
+              "control_id": "DORA Art. 17, 19",
+              "sr_title": "ICT Incident Reporting to Authorities",
+              "match_type": "DIRECT_MATCH",
+              "match_confidence": 0.9,
+              "extracted_evidence": "Provider shall assume all ICT-related regulatory reporting obligations \u2026 direct submission of major incident reports to BaFin and the EBA \u2026 competent national authority",
+              "linkage_method": "clause_direct"
+            },
+            {
+              "sr_id": "SR-DORA-01",
+              "framework": "DORA",
+              "control_id": "DORA Art. 6-10",
+              "sr_title": "ICT Risk Management Framework",
+              "match_type": "PARTIAL_MATCH",
+              "match_confidence": 0.68,
+              "extracted_evidence": "all ICT-related regulatory reporting obligations on behalf of the Customer \u2026 concentration risk exposure in accordance with DORA Article 30",
+              "linkage_method": "clause_direct"
+            }
+          ]
+        },
+        "stage_6": {
+          "stage": 6,
+          "stage_name": "Compliance Report",
+          "source_file": "stage6_compliance_CT-2026-001.json",
+          "compliance_findings": [
+            {
+              "source": "OBLIGATION_ANALYSIS",
+              "finding_type": "NON_TRANSFERABLE_REGULATION",
+              "severity": "HIGH",
+              "description": "Pattern match: 'provider\\s+shall\\s+(?:assume|take\\s+over|fulfil|submit|file|report\\s+to)\\s+(?:al'"
+            }
+          ]
+        },
+        "stage_8": {
+          "stage": 8,
+          "stage_name": "Remediation Proposal",
+          "source_file": "stage8_remediation_proposals.json",
+          "found": true,
+          "finding_type": "NON_TRANSFERABLE_REGULATION",
+          "severity": "HIGH",
+          "problem_summary": "The clause purports to transfer the Customer's own statutory or regulatory reporting obligations directly to the Provider. Regulatory obligations arising from the Customer's status as a regulated entity (e.g. under DORA, NIS2, GDPR) are non-delegable: the regulated entity remains solely responsible to the competent authority. Such a transfer is legally ineffective and exposes the Provider to undefined regulatory liability.",
+          "negotiation_guidance": "Reject any clause that makes the Provider the primary obligor toward a regulatory authority on the Customer's behalf. The Provider may agree to support the Customer operationally (e.g. timely incident notifications, supplying audit evidence, providing SIEM-compatible logs), but must not file reports to BaFin, BSI, EBA or any other authority in the Customer's name. Propose an Assistance Model: the Customer retains the obligation; the Provider commits to specific, scoped assistance actions within agreed timeframes. Ensure all reference to 'on behalf of' or 'in the name of' the Customer is removed or limited to duly executed power-of-attorney arrangements that are separately negotiated.",
+          "suggested_clause_preview": "The Customer acknowledges that all reporting and notification obligations owed to any competent supervisory authority (including but not limited to BaFin, BSI, and EBA) arising from the Customer's status as a regulated entity are borne exclusively by the Customer. The Provider shall support the Cust\u2026",
+          "proposal_source": "RULES"
+        },
+        "stage_9": {
+          "stage": 9,
+          "stage_name": "Negotiation Brief",
+          "source_file": "contract_negotiation_brief.json",
+          "found": true,
+          "negotiation_topic": "REGULATORY_COMPLIANCE",
+          "negotiation_topic_label": "Regulatory Compliance",
+          "topic_highest_severity": "HIGH",
+          "topic_issue_count": 5
+        }
+      }
+    },
+    {
+      "trace_id": "TRACE-009",
+      "clause_id": "CL-109",
+      "page": 10,
+      "layout_type": "paragraph",
+      "original_text_preview": "The Provider shall implement appropriate technical and organizational measures to ensure the security of all data processed. The Provider shall apply industry best practices and state-of-the-art secur\u2026",
+      "obligation_assessment": "AMBIGUOUS_REQUIREMENT",
+      "obligation_severity": "MEDIUM",
+      "obligation_reason": "Pattern match: '\\bindustry\\s+best\\s+practices?\\b'",
+      "regulatory_matches": [],
+      "compliance_findings": [
+        {
+          "severity": "MEDIUM",
+          "finding_type": "AMBIGUOUS_REQUIREMENT"
+        }
+      ],
+      "remediation": {
+        "suggested_clause": "The Provider shall implement and maintain information security controls in accordance with ISO/IEC 27001:2022. Compliance shall be evidenced by a valid certification issued by an accredited third-party certification body, or, where certification is not yet obtained, a current Statement of Applicability signed by the Provider's Chief Information Security Officer. Any additional security requirements proposed by the Customer shall be documented in a mutually executed Security Requirements Schedule prior to taking effect and shall not impose obligations on the Provider materially beyond the referenced standard without corresponding adjustment to fees and timelines.",
+        "negotiation_guidance": "Request that the customer replace all vague performance terms with objectively verifiable criteria, named standards, or defined metrics. Any security or compliance obligation must be measurable to be enforceable. Propose a named-standard model (e.g. ISO/IEC 27001:2022) with certification as evidence of compliance. Reject open-ended language that could expand scope without mutual agreement."
+      },
+      "negotiation_topic": "SECURITY_CONTROLS",
+      "pipeline_steps": {
+        "stage_4": {
+          "stage": 4,
+          "stage_name": "Clause Extraction",
+          "source_file": "stage4_clauses.json",
+          "clause_id": "CL-109",
+          "page": 10,
+          "layout_type": "paragraph"
+        },
+        "stage_4_5": {
+          "stage": 4.5,
+          "stage_name": "Obligation Analysis",
+          "source_file": "stage4_5_obligation_analysis.json",
+          "found": true,
+          "assessment": "AMBIGUOUS_REQUIREMENT",
+          "severity": "MEDIUM",
+          "reason": "Pattern match: '\\bindustry\\s+best\\s+practices?\\b'",
+          "recommended_action": "Request concrete, measurable criteria. Replace vague terms such as 'best efforts', 'appropriate measures', or 'state of the art' with defined metrics, named standards, or objective test criteria.",
+          "confidence": 0.7,
+          "analysis_source": "RULES"
+        },
+        "stage_5": {
+          "stage": 5,
+          "stage_name": "SR Regulatory Matching",
+          "source_file": "clause_sr_matches.json",
+          "linkage_method": "clause_direct",
+          "regulatory_matches": []
+        },
+        "stage_6": {
+          "stage": 6,
+          "stage_name": "Compliance Report",
+          "source_file": "stage6_compliance_CT-2026-001.json",
+          "compliance_findings": [
+            {
+              "source": "OBLIGATION_ANALYSIS",
+              "finding_type": "AMBIGUOUS_REQUIREMENT",
+              "severity": "MEDIUM",
+              "description": "Pattern match: '\\bindustry\\s+best\\s+practices?\\b'"
+            }
+          ]
+        },
+        "stage_8": {
+          "stage": 8,
+          "stage_name": "Remediation Proposal",
+          "source_file": "stage8_remediation_proposals.json",
+          "found": true,
+          "finding_type": "AMBIGUOUS_REQUIREMENT",
+          "severity": "MEDIUM",
+          "problem_summary": "The clause uses vague, unmeasurable language (e.g. 'industry best practices', 'state of the art', 'appropriate measures') that creates an indeterminate obligation. Without objective criteria, compliance cannot be verified and disputes cannot be resolved.",
+          "negotiation_guidance": "Request that the customer replace all vague performance terms with objectively verifiable criteria, named standards, or defined metrics. Any security or compliance obligation must be measurable to be enforceable. Propose a named-standard model (e.g. ISO/IEC 27001:2022) with certification as evidence of compliance. Reject open-ended language that could expand scope without mutual agreement.",
+          "suggested_clause_preview": "The Provider shall implement and maintain information security controls in accordance with ISO/IEC 27001:2022. Compliance shall be evidenced by a valid certification issued by an accredited third-party certification body, or, where certification is not yet obtained, a current Statement of Applicabil\u2026",
+          "proposal_source": "RULES"
+        },
+        "stage_9": {
+          "stage": 9,
+          "stage_name": "Negotiation Brief",
+          "source_file": "contract_negotiation_brief.json",
+          "found": true,
+          "negotiation_topic": "SECURITY_CONTROLS",
+          "negotiation_topic_label": "Security Controls",
+          "topic_highest_severity": "HIGH",
+          "topic_issue_count": 3
+        }
+      }
+    },
+    {
+      "trace_id": "TRACE-010",
+      "clause_id": "CL-110",
+      "page": 11,
+      "layout_type": "table",
+      "original_text_preview": "Encryption Standard | Algorithm | Scope | Review Cycle\nData at rest | AES-256-GCM | All Customer data on Provider infrastructure | Annual\nData in transit | TLS 1.3 minimum | All API connections and in\u2026",
+      "obligation_assessment": "VALID",
+      "obligation_severity": "LOW",
+      "obligation_reason": "No obligation risk patterns detected.",
+      "regulatory_matches": [],
+      "compliance_findings": [],
+      "remediation": null,
+      "negotiation_topic": null,
+      "pipeline_steps": {
+        "stage_4": {
+          "stage": 4,
+          "stage_name": "Clause Extraction",
+          "source_file": "stage4_clauses.json",
+          "clause_id": "CL-110",
+          "page": 11,
+          "layout_type": "table"
+        },
+        "stage_4_5": {
+          "stage": 4.5,
+          "stage_name": "Obligation Analysis",
+          "source_file": "stage4_5_obligation_analysis.json",
+          "found": true,
+          "assessment": "VALID",
+          "severity": "LOW",
+          "reason": "No obligation risk patterns detected.",
+          "recommended_action": "No action required. Clause is clear and operationally feasible.",
+          "confidence": 0.75,
+          "analysis_source": "RULES"
+        },
+        "stage_5": {
+          "stage": 5,
+          "stage_name": "SR Regulatory Matching",
+          "source_file": "clause_sr_matches.json",
+          "linkage_method": "clause_direct",
+          "regulatory_matches": []
+        },
+        "stage_6": {
+          "stage": 6,
+          "stage_name": "Compliance Report",
+          "source_file": "stage6_compliance_CT-2026-001.json",
+          "compliance_findings": []
+        },
+        "stage_8": {
+          "stage": 8,
+          "stage_name": "Remediation Proposal",
+          "source_file": "stage8_remediation_proposals.json",
+          "found": false
+        },
+        "stage_9": {
+          "stage": 9,
+          "stage_name": "Negotiation Brief",
+          "source_file": "contract_negotiation_brief.json",
+          "found": false
+        }
+      }
+    }
+  ]
+}

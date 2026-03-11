@@ -1,0 +1,87 @@
+{
+  "report_id": "RPT-CT-2026-001-20260310",
+  "contract_id": "CT-2026-001",
+  "generated_at": "2026-03-10T10:54:15.968726+00:00",
+  "stage": 6,
+  "frameworks": {
+    "ISO27001": {
+      "total_sub_requirements": 1,
+      "matched_sub_requirements": 1,
+      "coverage_percent": 100.0,
+      "findings": []
+    },
+    "DORA": {
+      "total_sub_requirements": 1,
+      "matched_sub_requirements": 1,
+      "coverage_percent": 100.0,
+      "findings": []
+    },
+    "NIS2": {
+      "total_sub_requirements": 1,
+      "matched_sub_requirements": 1,
+      "coverage_percent": 100.0,
+      "findings": []
+    },
+    "GDPR": {
+      "total_sub_requirements": 1,
+      "matched_sub_requirements": 1,
+      "coverage_percent": 100.0,
+      "findings": []
+    }
+  },
+  "overall_compliance": {
+    "total_sub_requirements": 4,
+    "matched_sub_requirements": 4,
+    "coverage_percent": 100.0,
+    "overall_severity": "COMPLIANT",
+    "total_findings": 0,
+    "findings_by_severity": {
+      "HIGH": 0,
+      "MEDIUM": 0,
+      "LOW": 0
+    }
+  },
+  "detailed_findings": [],
+  "clause_evidence": [
+    {
+      "chunk_id": "C-001",
+      "page_number": 3,
+      "layout_type": "paragraph",
+      "sub_requirement_id": "SR-ISO27001-01",
+      "sub_requirement_title": "Information Security Policy",
+      "framework": "ISO27001",
+      "match_confidence": 0.92,
+      "raw_text_preview": "The Provider shall maintain an information security policy aligned with ISO27001 standards."
+    },
+    {
+      "chunk_id": "C-002",
+      "page_number": 5,
+      "layout_type": "bullet_list",
+      "sub_requirement_id": "SR-DORA-01",
+      "sub_requirement_title": "ICT Risk Management",
+      "framework": "DORA",
+      "match_confidence": 0.87,
+      "raw_text_preview": "\u2022 The Provider must ensure ICT risk assessments are conducted quarterly. \u2022 The Provider must document risk mitigation ac"
+    },
+    {
+      "chunk_id": "C-003",
+      "page_number": 7,
+      "layout_type": "table",
+      "sub_requirement_id": "SR-NIS2-01",
+      "sub_requirement_title": "Incident Reporting",
+      "framework": "NIS2",
+      "match_confidence": 0.95,
+      "raw_text_preview": "Incident | Reporting Timeframe | Responsible Party Breach | 24h | Provider System outage | 48h | Provider"
+    },
+    {
+      "chunk_id": "C-004",
+      "page_number": 10,
+      "layout_type": "paragraph",
+      "sub_requirement_id": "SR-GDPR-01",
+      "sub_requirement_title": "Data Processing Agreement",
+      "framework": "GDPR",
+      "match_confidence": 0.9,
+      "raw_text_preview": "The Data Processing Agreement ensures that personal data is processed in accordance with GDPR requirements."
+    }
+  ]
+}

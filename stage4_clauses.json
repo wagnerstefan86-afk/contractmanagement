@@ -1,0 +1,62 @@
+[
+  {
+    "clause_id": "CL-101",
+    "page": 2,
+    "layout_type": "paragraph",
+    "text": "The Provider shall maintain a monthly uptime SLA of 99.9% as measured by a mutually agreed third-party monitoring service. Service credits for SLA breaches shall be calculated as set forth in Annex B and applied as a deduction to the following month's invoice. The Provider shall publish a public status page updated in real time."
+  },
+  {
+    "clause_id": "CL-102",
+    "page": 3,
+    "layout_type": "paragraph",
+    "text": "The Provider shall at all times comply with all applicable laws, regulations, and industry best practices relevant to the provision of the services, including but not limited to all current and future regulatory requirements that may apply to the Customer's business sector, as well as any requirements imposed by applicable supervisory authorities from time to time."
+  },
+  {
+    "clause_id": "CL-103",
+    "page": 4,
+    "layout_type": "paragraph",
+    "text": "As the Provider constitutes an essential entity under the NIS2 Directive (EU 2022/2555) as implemented by the NIS2UmsuCG, the Provider shall submit incident reports directly to the competent national authority (Bundesamt für Sicherheit in der Informationstechnik, BSI) within the timeframes mandated by law: an early warning within 24 hours, a detailed notification within 72 hours, and a final report within one month."
+  },
+  {
+    "clause_id": "CL-104",
+    "page": 5,
+    "layout_type": "bullet_list",
+    "text": "Security incident response obligations:\n• The Provider shall notify the Customer of any detected security incident within 15 minutes of internal detection, regardless of severity classification.\n• The Customer shall be granted unlimited, unrestricted audit access to all Provider systems, networks, source code repositories, and internal infrastructure at any time and without prior notice.\n• The Provider shall deliver real-time security event log feeds to the Customer's SIEM platform within 30 seconds of event generation, 24 hours a day."
+  },
+  {
+    "clause_id": "CL-105",
+    "page": 6,
+    "layout_type": "paragraph",
+    "text": "The Provider shall ensure compliance with relevant data protection standards and applicable security frameworks at all times. All data processing activities must conform to applicable requirements as determined by the relevant supervisory authorities from time to time, and the Provider shall periodically review and update its practices accordingly."
+  },
+  {
+    "clause_id": "CL-106",
+    "page": 7,
+    "layout_type": "paragraph",
+    "text": "The Provider shall determine the sensitivity classification of all Customer data processed under this Agreement and shall define appropriate data retention periods for each category of Customer data in accordance with the Customer's business requirements. Furthermore, the Provider shall decide which data qualifies as personal data under applicable data protection law and shall perform the Customer's data protection impact assessments where required."
+  },
+  {
+    "clause_id": "CL-107",
+    "page": 8,
+    "layout_type": "paragraph",
+    "text": "In the event of a data breach or any security incident potentially affecting Customer data, the Provider shall immediately notify all affected parties, relevant regulatory authorities, and any other stakeholders as may be required, and shall ensure complete remediation and full forensic documentation within a commercially reasonable timeframe as determined solely by the Customer."
+  },
+  {
+    "clause_id": "CL-108",
+    "page": 9,
+    "layout_type": "paragraph",
+    "text": "As the Customer is a financial entity regulated under DORA (Regulation EU 2022/2554), the Provider shall assume all ICT-related regulatory reporting obligations on behalf of the Customer, including the direct submission of major incident reports to BaFin and the EBA, management of the Customer's concentration risk exposure in accordance with DORA Article 30, and representation of the Customer in all supervisory proceedings related to ICT operational resilience."
+  },
+  {
+    "clause_id": "CL-109",
+    "page": 10,
+    "layout_type": "paragraph",
+    "text": "The Provider shall implement appropriate technical and organizational measures to ensure the security of all data processed. The Provider shall apply industry best practices and state-of-the-art security controls at all times, and shall ensure ongoing compliance with all commonly accepted information security standards as they evolve, as well as with any reasonable security requirements the Customer may specify from time to time."
+  },
+  {
+    "clause_id": "CL-110",
+    "page": 11,
+    "layout_type": "table",
+    "text": "Encryption Standard | Algorithm | Scope | Review Cycle\nData at rest | AES-256-GCM | All Customer data on Provider infrastructure | Annual\nData in transit | TLS 1.3 minimum | All API connections and inter-service communication | Quarterly\nKey management | FIPS 140-2 Level 2 HSM | All cryptographic key material | Annual\nCertificate validity | 90-day maximum | All TLS/mTLS certificates | Automated rotation"
+  }
+]

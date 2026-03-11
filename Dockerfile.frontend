@@ -1,0 +1,42 @@
+# ============================================================
+# Contract Analysis Platform — Frontend (Next.js)
+# NOT production hardened. For test-instance deployment only.
+#
+# NEXT_PUBLIC_API_URL is baked in at build time.
+# Set it to the URL the browser will use to reach the backend.
+# Example:  docker compose build --build-arg NEXT_PUBLIC_API_URL=http://192.168.1.10:8765
+# ============================================================
+FROM node:20-alpine AS deps
+WORKDIR /app
+COPY frontend/package.json frontend/package-lock.json* ./
+RUN npm install --frozen-lockfile 2>/dev/null || npm install
+
+# ── Build ─────────────────────────────────────────────────────────────────────
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY frontend/ .
+
+# Accept the backend URL as a build-time argument.
+# Must be reachable from the end-user's browser — not the Docker network name.
+ARG NEXT_PUBLIC_API_URL=http://localhost:8765
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
+RUN npm run build
+
+# ── Runtime ───────────────────────────────────────────────────────────────────
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Copy built artefacts
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
