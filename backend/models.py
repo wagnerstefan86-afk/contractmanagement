@@ -120,7 +120,7 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow)
 
     customer:  Mapped["Customer"]       = relationship("Customer",  back_populates="users")
-    contracts: Mapped[list["Contract"]] = relationship("Contract",  back_populates="uploaded_by_user")
+    contracts: Mapped[list["Contract"]] = relationship("Contract",  back_populates="uploaded_by_user", foreign_keys="[Contract.uploaded_by]")
 
 
 # ── contracts ──────────────────────────────────────────────────────────────────
@@ -323,7 +323,7 @@ class ContractWorkflowEvent(Base):
     __tablename__ = "contract_workflow_events"
 
     id:                  Mapped[int]           = mapped_column(Integer, primary_key=True, autoincrement=True)
-    contract_id:         Mapped[str]           = mapped_column(String(50), nullable=False, index=True)
+    contract_id:         Mapped[str]           = mapped_column(String(50), ForeignKey("contracts.contract_id", ondelete="CASCADE"), nullable=False, index=True)
     changed_by_user_id:  Mapped[int|None]      = mapped_column(Integer, ForeignKey("users.id", ondelete="SET NULL"))
     old_status:          Mapped[str|None]      = mapped_column(String(30))
     new_status:          Mapped[str]           = mapped_column(String(30), nullable=False)
@@ -333,4 +333,4 @@ class ContractWorkflowEvent(Base):
     created_at:          Mapped[datetime]      = mapped_column(DateTime(timezone=True), default=_utcnow)
 
     contract:      Mapped["Contract|None"] = relationship("Contract", back_populates="workflow_events")
-    changed_by:    Mapped["User|None"]     = relationship("User")
+    changed_by:    Mapped["User|None"]     = relationship("User", foreign_keys="[ContractWorkflowEvent.changed_by_user_id]")
