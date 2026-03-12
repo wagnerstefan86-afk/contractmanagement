@@ -264,6 +264,7 @@ def _resolve_vendor_risk_tier(
 def _classify_with_llm(
     aggregated_text: str,
     rule_hints: dict,
+    api_key: Optional[str] = None,
 ) -> Optional[dict]:
     """
     Call claude-opus-4-6 with adaptive thinking and structured JSON output.
@@ -275,7 +276,7 @@ def _classify_with_llm(
                     "Install with: pip install anthropic")
         return None
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         log.warning("ANTHROPIC_API_KEY not set — skipping LLM pass.")
         return None
@@ -430,6 +431,7 @@ def run(
     contract_id: str,
     output_path: str,
     skip_llm: bool,
+    api_key: Optional[str] = None,
 ) -> dict:
     # 1. Load and aggregate
     log.info(f"Loading chunks from: {input_path}")
@@ -468,7 +470,7 @@ def run(
             "vendor_risk_tier_hint": vendor_risk_tier_rb,
             "keyword_signals":       {k: v[:4] for k, v in all_signals.items() if v},
         }
-        llm_result = _classify_with_llm(aggregated_text, rule_hints)
+        llm_result = _classify_with_llm(aggregated_text, rule_hints, api_key=api_key)
     else:
         log.info("LLM pass skipped (--no-llm)")
 

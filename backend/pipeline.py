@@ -376,6 +376,7 @@ def analyze_contract(
             contract_id  = contract_id,
             output_path  = str(metadata_path),
             skip_llm     = False,
+            api_key      = _overrides.get("api_key") or None,
         )
 
         # ── Initialise LLM provider (shared across stages 4.5, 5, 8) ─────────
