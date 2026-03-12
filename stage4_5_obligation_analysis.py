@@ -309,16 +309,18 @@ AI_NEW_DETECTION_THRESHOLD   = 0.60   # AI may create NEW finding on VALID claus
 def _llm_classify_batch(
     clauses:  list[dict],
     provider: "BaseLLMProvider",
-) -> list[Optional[dict]]:
+) -> list[list[dict]]:
     """
     Classify clauses via LLM provider, one call per clause.
-    Returns a list aligned with input; None entries mean the call failed.
+    Returns a list aligned with input; each entry is a list of finding dicts
+    (may be empty if the call failed — rule-based fallback applies).
+    The LLM returns {"findings": [...]} and may emit multiple findings per clause.
     """
     if not LLM_MODULE_AVAILABLE:
         log.warning("llm module not available — skipping LLM pass.")
-        return [None] * len(clauses)
+        return [[] for _ in clauses]
 
-    results: list[Optional[dict]] = []
+    results: list[list[dict]] = []
 
     for i, clause in enumerate(clauses):
         clause_id = clause["clause_id"]
@@ -332,23 +334,31 @@ def _llm_classify_batch(
                 user_message   = user_msg,
                 json_schema    = OBLIGATION_OUTPUT_SCHEMA,
                 prompt_version = PROMPT_VERSION_OBLIGATION,
-                max_tokens     = 512,
+                max_tokens     = 1024,
             )
         except RuntimeError as exc:
             log.error(f"Unrecoverable LLM error — aborting LLM pass: {exc}")
-            return [None] * len(clauses)
+            return [[] for _ in clauses]
 
         if response is None:
             log.warning(f"    {clause_id}: LLM call failed after retries — using rule-based.")
-            results.append(None)
+            results.append([])
             continue
 
-        result = response.content
+        findings = response.content.get("findings", [])
+        if not findings:
+            log.warning(f"    {clause_id}: LLM returned empty findings array — using rule-based.")
+            results.append([])
+            continue
+
         log.info(
-            f"    {clause_id}: {result.get('assessment')} "
-            f"[{result.get('severity')}] conf={result.get('confidence', 0):.2f}"
+            f"    {clause_id}: {len(findings)} finding(s) — "
+            + ", ".join(
+                f"{f.get('assessment')}[{f.get('severity')}] conf={f.get('confidence', 0):.2f}"
+                for f in findings
+            )
         )
-        results.append(result)
+        results.append(findings)
 
     return results
 
@@ -374,6 +384,7 @@ def _merge(rule: dict, llm: Optional[dict]) -> tuple[dict, str]:
         return {
             "assessment":         llm["assessment"],
             "severity":           llm["severity"],
+            "sub_topic":          llm.get("sub_topic", ""),
             "reason":             llm["reason"],
             "recommended_action": llm["recommended_action"],
             "evidence_phrases":   llm.get("evidence_phrases", []),
@@ -392,6 +403,7 @@ def _merge(rule: dict, llm: Optional[dict]) -> tuple[dict, str]:
         return {
             "assessment":         llm["assessment"],
             "severity":           llm["severity"],
+            "sub_topic":          llm.get("sub_topic", ""),
             "reason":             llm["reason"],
             "recommended_action": llm["recommended_action"],
             "evidence_phrases":   llm.get("evidence_phrases", []),
@@ -407,11 +419,74 @@ def _merge(rule: dict, llm: Optional[dict]) -> tuple[dict, str]:
     return {
         "assessment":         rule["assessment"],
         "severity":           rule["severity"],
+        "sub_topic":          rule.get("sub_topic", ""),
         "reason":             rule["reason"].replace("[RULE] ", ""),
         "recommended_action": rule["recommended_action"],
         "evidence_phrases":   rule.get("evidence_phrases", []),
         "confidence":         rule["confidence"],
     }, "rule_based"
+
+
+def _build_finding(llm_f: dict) -> dict:
+    """Build a normalised finding dict from a raw LLM finding entry."""
+    return {
+        "assessment":         llm_f["assessment"],
+        "severity":           llm_f["severity"],
+        "sub_topic":          llm_f.get("sub_topic", ""),
+        "reason":             llm_f["reason"],
+        "recommended_action": llm_f["recommended_action"],
+        "evidence_phrases":   llm_f.get("evidence_phrases", []),
+        "confidence":         round(llm_f.get("confidence", 0.0), 3),
+    }
+
+
+def _merge_multi(
+    rule:         dict,
+    llm_findings: list[dict],
+) -> list[tuple[dict, str]]:
+    """
+    Merge one rule-based result with a list of LLM findings for a single clause.
+
+    Returns a list of (merged_result, source_label) tuples — potentially multiple
+    per clause.  The list always contains at least one element (the rule-based
+    result), unless the rule produces VALID and no LLM finding meets the threshold.
+
+    Merge logic:
+    1. If the LLM produces a finding of the SAME type as the rule AND its
+       confidence >= LLM_CONFIDENCE_THRESHOLD (0.75) → that LLM finding
+       replaces the rule result ("llm" source).
+    2. If the LLM produces findings of DIFFERENT types (or rule was VALID)
+       AND confidence >= AI_NEW_DETECTION_THRESHOLD (0.60) → each such finding
+       is added as an extra "ai_new_detection" entry.
+    3. If no LLM finding qualifies → only the original rule result is returned.
+    """
+    if not llm_findings:
+        return [_merge(rule, None)]
+
+    rule_type    = rule["assessment"]
+    rule_matched: Optional[dict] = None
+    extra: list[tuple[dict, str]] = []
+
+    for llm_f in llm_findings:
+        f_conf = llm_f.get("confidence", 0.0)
+
+        if llm_f["assessment"] == rule_type:
+            # Candidate to override/refine the rule finding for this type
+            if rule_matched is None or f_conf > rule_matched.get("confidence", 0.0):
+                rule_matched = llm_f
+        else:
+            # Different type — treat as new detection if threshold met
+            if llm_f["assessment"] != "VALID" and f_conf >= AI_NEW_DETECTION_THRESHOLD:
+                log.info(
+                    f"  AI multi-finding: {llm_f['assessment']} [{llm_f.get('severity')}] "
+                    f"sub_topic={llm_f.get('sub_topic','')} conf={f_conf:.2f}"
+                )
+                extra.append((_build_finding(llm_f), "ai_new_detection"))
+
+    # Main finding: rule type, possibly overridden by matched LLM finding
+    main, src = _merge(rule, rule_matched)
+
+    return [(main, src)] + extra
 
 
 # ---------------------------------------------------------------------------
@@ -460,7 +535,7 @@ def run(
     rule_results = [_rule_classify(c["text"]) for c in clauses]
 
     # ── Pass 2: LLM ──────────────────────────────────────────────────────
-    llm_results: list[Optional[dict]] = [None] * len(clauses)
+    llm_results: list[list[dict]] = [[] for _ in clauses]
     provider = None
 
     if not skip_llm:
@@ -489,62 +564,68 @@ def run(
     output: list[dict] = []
     stats: dict[str, int] = {}
 
-    for clause, rule_r, llm_r in zip(clauses, rule_results, llm_results):
-        merged, source = _merge(rule_r, llm_r)
-        stats[merged["assessment"]] = stats.get(merged["assessment"], 0) + 1
+    for clause, rule_r, llm_findings in zip(clauses, rule_results, llm_results):
+        for merged, source in _merge_multi(rule_r, llm_findings):
+            stats[merged["assessment"]] = stats.get(merged["assessment"], 0) + 1
 
-        if not include_valid and merged["assessment"] == "VALID":
-            continue
+            if not include_valid and merged["assessment"] == "VALID":
+                continue
 
-        # Build _ai_metadata
-        if source in ("llm", "ai_new_detection") and provider is not None:
-            ai_meta = {
-                "llm_used":       True,
-                "provider":       provider.provider_name,
-                "model":          provider.model_name,
-                "prompt_version": PROMPT_VERSION_OBLIGATION if LLM_MODULE_AVAILABLE else None,
-                "confidence":     merged["confidence"],
-                "detection_type": "new_detection" if source == "ai_new_detection" else "refinement",
-            }
-        else:
-            ai_meta = DETERMINISTIC_AI_META
+            # Build _ai_metadata
+            if source in ("llm", "ai_new_detection") and provider is not None:
+                ai_meta = {
+                    "llm_used":       True,
+                    "provider":       provider.provider_name,
+                    "model":          provider.model_name,
+                    "prompt_version": PROMPT_VERSION_OBLIGATION if LLM_MODULE_AVAILABLE else None,
+                    "confidence":     merged["confidence"],
+                    "detection_type": "new_detection" if source == "ai_new_detection" else "refinement",
+                }
+            else:
+                ai_meta = DETERMINISTIC_AI_META
 
-        # ── Explainability fields ──────────────────────────────────────────
-        ai_attempted = source in ("llm", "ai_new_detection")
-        conf_bkt     = confidence_bucket(merged["confidence"]) if ai_attempted else None
-        baseline     = {
-            "assessment": rule_r["assessment"],
-            "severity":   rule_r["severity"],
-            "confidence": rule_r["confidence"],
-        } if ai_attempted else None
-        delta        = decision_delta_assessment(
-            rule_r["assessment"], rule_r["severity"],
-            merged["assessment"], merged["severity"],
-            ai_attempted,
-        )
-        priority     = review_priority_obligation(
-            merged["assessment"], merged["severity"], conf_bkt
-        )
-        trace        = build_obligation_trace(llm_r, source)
+            # ── Explainability fields ──────────────────────────────────────
+            ai_attempted = source in ("llm", "ai_new_detection")
+            conf_bkt     = confidence_bucket(merged["confidence"]) if ai_attempted else None
+            baseline     = {
+                "assessment": rule_r["assessment"],
+                "severity":   rule_r["severity"],
+                "confidence": rule_r["confidence"],
+            } if ai_attempted else None
+            delta        = decision_delta_assessment(
+                rule_r["assessment"], rule_r["severity"],
+                merged["assessment"], merged["severity"],
+                ai_attempted,
+            )
+            priority     = review_priority_obligation(
+                merged["assessment"], merged["severity"], conf_bkt
+            )
+            # For trace: pass the matched LLM finding (if any) for this specific merged result
+            trace_llm = next(
+                (f for f in llm_findings if f.get("assessment") == merged["assessment"]),
+                llm_findings[0] if llm_findings else None,
+            )
+            trace = build_obligation_trace(trace_llm, source)
 
-        output.append({
-            "clause_id":          clause["clause_id"],
-            "page":               clause.get("page"),
-            "layout_type":        clause.get("layout_type"),
-            "assessment":         merged["assessment"],
-            "severity":           merged["severity"],
-            "reason":             merged["reason"],
-            "recommended_action": merged["recommended_action"],
-            "evidence_phrases":   merged["evidence_phrases"],
-            "_confidence":        merged["confidence"],
-            "_source":            source,
-            "_ai_metadata":       ai_meta,
-            "_baseline_result":   baseline,
-            "_decision_delta":    delta,
-            "_confidence_bucket": conf_bkt,
-            "_review_priority":   priority,
-            "_ai_trace":          trace,
-        })
+            output.append({
+                "clause_id":          clause["clause_id"],
+                "page":               clause.get("page"),
+                "layout_type":        clause.get("layout_type"),
+                "assessment":         merged["assessment"],
+                "severity":           merged["severity"],
+                "sub_topic":          merged.get("sub_topic", ""),
+                "reason":             merged["reason"],
+                "recommended_action": merged["recommended_action"],
+                "evidence_phrases":   merged["evidence_phrases"],
+                "_confidence":        merged["confidence"],
+                "_source":            source,
+                "_ai_metadata":       ai_meta,
+                "_baseline_result":   baseline,
+                "_decision_delta":    delta,
+                "_confidence_bucket": conf_bkt,
+                "_review_priority":   priority,
+                "_ai_trace":          trace,
+            })
 
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
@@ -583,15 +664,15 @@ def run(
     print(f"{'='*62}\n")
 
     if output:
-        print(f"  {'Clause':<10} {'Assessment':<30} {'Sev':<6} {'Src':<10} p.")
-        print(f"  {'-'*64}")
+        print(f"  {'Clause':<10} {'Assessment':<30} {'Sev':<6} {'Src':<16} {'Sub-topic'}")
+        print(f"  {'-'*80}")
         for r in output:
-            sev  = SEV_ICON.get(r["severity"], r["severity"])
-            page = str(r["page"]) if r["page"] else "—"
-            src  = r["_source"]
+            sev      = SEV_ICON.get(r["severity"], r["severity"])
+            src      = r["_source"]
+            sub      = r.get("sub_topic", "") or ""
             print(
                 f"  {r['clause_id']:<10} {r['assessment']:<30} "
-                f"{sev:<6} {src:<10} {page}"
+                f"{sev:<6} {src:<16} {sub}"
             )
         print()
 

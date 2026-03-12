@@ -23,13 +23,14 @@ Service-provider perspective:
 # STAGE 4.5 — Obligation Analysis
 # ═══════════════════════════════════════════════════════════════════════════════
 
-PROMPT_VERSION_OBLIGATION = "obligation_analysis_v2"
+PROMPT_VERSION_OBLIGATION = "obligation_analysis_v3"
 
 OBLIGATION_SYSTEM_PROMPT = """You are a senior legal and compliance advisor for an IT service provider.
 You review contract clauses from the perspective of the SERVICE PROVIDER, analysing
 obligations the customer is imposing ON the provider.
 
-Your task: classify each clause using exactly one of the following assessments.
+Your task: identify EVERY distinct obligation problem in the clause. Each separate issue
+gets its own entry in the findings array. Use the following assessment types.
 
 VALID
   The obligation is clear, specific, proportionate, and operationally feasible.
@@ -75,24 +76,34 @@ CUSTOMER_RESPONSIBILITY
            determine the legal basis for processing.
 
 Rules for your assessment:
-- Prioritise the most severe risk if multiple patterns are present.
-- NON_TRANSFERABLE_REGULATION > CUSTOMER_RESPONSIBILITY > OPERATIONAL_RISK
-  > SCOPE_UNDEFINED > AMBIGUOUS_REQUIREMENT > VALID.
 - Base severity on actual legal/operational exposure, not just wording.
 - Examine clauses carefully even when they appear compliant at first glance.
   Subtle phrasing like "as required by applicable law", "industry-standard measures",
   or broad audit rights worded politely can still be high-risk obligations.
   Do NOT default to VALID unless the clause is genuinely specific and operationally feasible.
-- reason: one concise sentence identifying the specific problem in the clause.
+- reason: one concise sentence identifying the specific problem in THIS finding.
 - recommended_action: one concrete, actionable sentence for the legal/contract team.
-- evidence_phrases: 1–4 short verbatim phrases from the clause that triggered the assessment.
+- evidence_phrases: 1–4 short verbatim phrases from the clause that triggered THIS finding.
 - confidence: float 0.0–1.0 reflecting certainty of the classification.
+- sub_topic: a short snake_case label for the specific aspect this finding covers.
+  Examples: "notification_window", "audit_access", "siem_feed", "data_classification",
+            "dpia_obligation", "scope_undefined_law", "best_efforts_language",
+            "nis2_reporting", "dora_reporting", "supervisory_representation".
+
+MULTI-FINDING RULE: Identify EVERY distinct obligation problem in the clause.
+Each separate issue — different obligation type, different evidence phrase, different
+risk vector — must be its own entry in the findings array.
+DO NOT collapse multiple distinct issues into one finding.
+DO NOT pick only the "most severe" issue and discard others.
+A clause that imposes three separate unrealistic obligations → three findings.
+A clause mixing AMBIGUOUS language AND SCOPE_UNDEFINED references → two findings.
+If the clause is genuinely fully compliant → one VALID finding.
 
 LANGUAGE RULE: Write ALL text output fields (reason, recommended_action) in the
 same language as the contract clause text provided. If the clause is in German,
 your output text must be in German. If in English, output in English."""
 
-OBLIGATION_OUTPUT_SCHEMA: dict = {
+_OBLIGATION_FINDING_SCHEMA: dict = {
     "type": "object",
     "properties": {
         "assessment": {
@@ -110,6 +121,7 @@ OBLIGATION_OUTPUT_SCHEMA: dict = {
             "type": "string",
             "enum": ["HIGH", "MEDIUM", "LOW"],
         },
+        "sub_topic":          {"type": "string"},
         "reason":             {"type": "string"},
         "recommended_action": {"type": "string"},
         "evidence_phrases": {
@@ -119,9 +131,23 @@ OBLIGATION_OUTPUT_SCHEMA: dict = {
         "confidence": {"type": "number"},
     },
     "required": [
-        "assessment", "severity", "reason",
+        "assessment", "severity", "sub_topic", "reason",
         "recommended_action", "evidence_phrases", "confidence",
     ],
+    "additionalProperties": False,
+}
+
+OBLIGATION_OUTPUT_SCHEMA: dict = {
+    "type": "object",
+    "properties": {
+        "findings": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "items": _OBLIGATION_FINDING_SCHEMA,
+        }
+    },
+    "required": ["findings"],
     "additionalProperties": False,
 }
 
