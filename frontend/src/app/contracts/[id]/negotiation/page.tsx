@@ -256,13 +256,15 @@ function NegCard({
         {item.affected_clauses && item.affected_clauses.length > 0 && (
           <p style={{ fontSize: "0.8rem", color: "var(--color-muted)", marginBottom: "0.25rem" }}>
             Klauseln: {item.affected_clauses.map((c) => (
-              <Link
-                key={c}
-                href={`/contracts/${contractId}/versions/${versionId ?? 0}/clauses/${encodeURIComponent(c)}`}
-                className="mono link"
-                style={{ fontSize: "0.8rem", marginRight: "0.3rem" }}
-                onClick={(e) => e.stopPropagation()}
-              >{c}</Link>
+              versionId
+                ? <Link
+                    key={c}
+                    href={`/contracts/${contractId}/versions/${versionId}/clauses/${encodeURIComponent(c)}`}
+                    className="mono link"
+                    style={{ fontSize: "0.8rem", marginRight: "0.3rem" }}
+                    onClick={(e) => e.stopPropagation()}
+                  >{c}</Link>
+                : <span key={c} className="mono" style={{ fontSize: "0.8rem", marginRight: "0.3rem" }}>{c}</span>
             ))}
           </p>
         )}

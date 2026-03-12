@@ -120,34 +120,34 @@ ASSESSMENT_SEVERITY: dict[str, str] = {
     "VALID":                       "LOW",
 }
 
-# Boilerplate recommended action per type (rule-based fallback)
+# Boilerplate recommended action per type (rule-based fallback — German)
 ASSESSMENT_ACTIONS: dict[str, str] = {
     "NON_TRANSFERABLE_REGULATION": (
-        "Reject or renegotiate this clause. The customer cannot contractually transfer "
-        "their own regulatory obligations to the service provider. Escalate to Legal "
-        "before acceptance."
+        "Klausel ablehnen oder neu verhandeln. Der Auftraggeber kann eigene Regulierungspflichten "
+        "nicht vertraglich auf den Dienstleister übertragen. Vor Annahme die Rechtsabteilung "
+        "einschalten."
     ),
     "OPERATIONAL_RISK": (
-        "Negotiate realistic, measurable obligations. Replace unrealistic deadlines, "
-        "unlimited access rights, or undefined frequency requirements with specific, "
-        "operationally feasible commitments and caps."
+        "Realistische, messbare Verpflichtungen aushandeln. Unrealistische Fristen, unbegrenzte "
+        "Zugriffsrechte oder undefinierte Frequenzanforderungen durch spezifische, operativ "
+        "umsetzbare Verpflichtungen mit klaren Obergrenzen ersetzen."
     ),
     "CUSTOMER_RESPONSIBILITY": (
-        "Reject this obligation as misallocated. Data classification, DPIA execution, "
-        "and legal basis determination are controller responsibilities under GDPR. "
-        "Request removal from the provider obligation set."
+        "Diese Verpflichtung als fehlerhaft zugewiesen ablehnen. Datenklassifizierung, "
+        "DSFA-Durchführung und Bestimmung der Rechtsgrundlage sind Controller-Pflichten nach DSGVO. "
+        "Streichung aus dem Pflichtenset des Anbieters beantragen."
     ),
     "SCOPE_UNDEFINED": (
-        "Request the customer to name the exact laws, standards, and frameworks "
-        "referenced. Replace generic terms such as 'applicable law' or 'relevant "
-        "standards' with enumerated, specific references."
+        "Den Auftraggeber auffordern, alle referenzierten Gesetze, Standards und Rahmenwerke "
+        "namentlich zu benennen. Allgemeine Begriffe wie 'anwendbares Recht' oder 'einschlägige "
+        "Standards' durch abschließende, spezifische Aufzählungen ersetzen."
     ),
     "AMBIGUOUS_REQUIREMENT": (
-        "Request concrete, measurable criteria. Replace vague terms such as 'best "
-        "efforts', 'appropriate measures', or 'state of the art' with defined metrics, "
-        "named standards, or objective test criteria."
+        "Konkrete, messbare Kriterien anfordern. Vage Begriffe wie 'Best Efforts', "
+        "'angemessene Maßnahmen' oder 'Stand der Technik' durch definierte Metriken, "
+        "benannte Standards oder objektiv prüfbare Kriterien ersetzen."
     ),
-    "VALID": "No action required. Clause is clear and operationally feasible.",
+    "VALID": "Kein Handlungsbedarf. Klausel ist klar und operativ umsetzbar.",
 }
 
 # ---------------------------------------------------------------------------
@@ -302,7 +302,8 @@ def _rule_classify(text: str) -> dict:
 # LLM classifier
 # ---------------------------------------------------------------------------
 
-LLM_CONFIDENCE_THRESHOLD = 0.75
+LLM_CONFIDENCE_THRESHOLD     = 0.75   # LLM overrides rule when confidence >= this
+AI_NEW_DETECTION_THRESHOLD   = 0.60   # AI may create NEW finding on VALID clause >= this
 
 
 def _llm_classify_batch(
@@ -354,21 +355,53 @@ def _llm_classify_batch(
 
 def _merge(rule: dict, llm: Optional[dict]) -> tuple[dict, str]:
     """
-    LLM result dominates when confidence >= threshold.
+    Merge rule-based and LLM results into a single classification.
+
+    Priority rules:
+    1. LLM confidence >= LLM_CONFIDENCE_THRESHOLD (0.75)  → LLM overrides rule.
+    2. Rule said VALID + LLM says non-VALID + LLM confidence >= AI_NEW_DETECTION_THRESHOLD (0.60)
+       → AI new detection: the LLM identified a risk the rules missed.
+       This is the key mechanism for expanding AI coverage beyond rule-flagged clauses.
+    3. Otherwise → rule-based result.
+
     Returns (merged_result, source_label).
+    source_label: "llm" | "ai_new_detection" | "rule_based"
     """
-    if llm and llm.get("confidence", 0.0) >= LLM_CONFIDENCE_THRESHOLD:
+    llm_conf = llm.get("confidence", 0.0) if llm else 0.0
+
+    # Case 1: high-confidence LLM override (agrees or refines rule result)
+    if llm and llm_conf >= LLM_CONFIDENCE_THRESHOLD:
         return {
             "assessment":         llm["assessment"],
             "severity":           llm["severity"],
             "reason":             llm["reason"],
             "recommended_action": llm["recommended_action"],
             "evidence_phrases":   llm.get("evidence_phrases", []),
-            "confidence":         round(llm["confidence"], 3),
+            "confidence":         round(llm_conf, 3),
         }, "llm"
-    if llm and llm.get("confidence", 0.0) > 0:
+
+    # Case 2: AI detects a NEW issue in a clause the rules cleared as VALID
+    if (llm is not None
+            and rule["assessment"] == "VALID"
+            and llm.get("assessment", "VALID") != "VALID"
+            and llm_conf >= AI_NEW_DETECTION_THRESHOLD):
+        log.info(
+            f"  AI new detection: {llm['assessment']} [{llm.get('severity')}] "
+            f"conf={llm_conf:.2f} on rule-VALID clause"
+        )
+        return {
+            "assessment":         llm["assessment"],
+            "severity":           llm["severity"],
+            "reason":             llm["reason"],
+            "recommended_action": llm["recommended_action"],
+            "evidence_phrases":   llm.get("evidence_phrases", []),
+            "confidence":         round(llm_conf, 3),
+        }, "ai_new_detection"
+
+    # Fallback: sub-threshold LLM result — rule wins
+    if llm and llm_conf > 0:
         log.debug(
-            f"LLM confidence {llm.get('confidence', 0):.2f} < {LLM_CONFIDENCE_THRESHOLD} "
+            f"LLM confidence {llm_conf:.2f} < {LLM_CONFIDENCE_THRESHOLD} "
             f"— rule-based takes precedence."
         )
     return {
@@ -464,19 +497,20 @@ def run(
             continue
 
         # Build _ai_metadata
-        if source == "llm" and provider is not None:
+        if source in ("llm", "ai_new_detection") and provider is not None:
             ai_meta = {
                 "llm_used":       True,
                 "provider":       provider.provider_name,
                 "model":          provider.model_name,
                 "prompt_version": PROMPT_VERSION_OBLIGATION if LLM_MODULE_AVAILABLE else None,
                 "confidence":     merged["confidence"],
+                "detection_type": "new_detection" if source == "ai_new_detection" else "refinement",
             }
         else:
             ai_meta = DETERMINISTIC_AI_META
 
         # ── Explainability fields ──────────────────────────────────────────
-        ai_attempted = (source == "llm")
+        ai_attempted = source in ("llm", "ai_new_detection")
         conf_bkt     = confidence_bucket(merged["confidence"]) if ai_attempted else None
         baseline     = {
             "assessment": rule_r["assessment"],

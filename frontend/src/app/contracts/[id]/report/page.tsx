@@ -5,7 +5,7 @@ import Link from "next/link";
 import AuthGuard from "@/components/AuthGuard";
 import Nav from "@/components/Nav";
 import { SessionUser } from "@/lib/session";
-import { getReport, ReportOut } from "@/lib/api";
+import { getReport, getContract, ContractOut, ReportOut } from "@/lib/api";
 
 function riskBadge(severity: string) {
   const s = (severity ?? "").toUpperCase();
@@ -69,16 +69,22 @@ interface Metadata {
 }
 
 function ReportContent({ user, contractId }: { user: SessionUser; contractId: string }) {
-  const [report,  setReport]  = useState<ReportOut | null>(null);
-  const [error,   setError]   = useState("");
-  const [loading, setLoading] = useState(true);
+  const [report,   setReport]   = useState<ReportOut | null>(null);
+  const [contract, setContract] = useState<ContractOut | null>(null);
+  const [error,    setError]    = useState("");
+  const [loading,  setLoading]  = useState(true);
 
   useEffect(() => {
-    getReport(contractId)
-      .then(setReport)
+    Promise.all([
+      getReport(contractId),
+      getContract(contractId).catch(() => null),
+    ])
+      .then(([rep, con]) => { setReport(rep); setContract(con); })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [contractId]);
+
+  const versionId = contract?.current_version_id ?? null;
 
   if (loading) return <div className="page"><Nav user={user} /><main className="main"><div className="loading">Loading…</div></main></div>;
   if (error)   return <div className="page"><Nav user={user} /><main className="main"><div className="error-box">{error}</div></main></div>;
@@ -210,7 +216,11 @@ function ReportContent({ user, contractId }: { user: SessionUser; contractId: st
                 <tbody>
                   {sortedRisk.map((item, i) => (
                     <tr key={i}>
-                      <td className="mono">{item.clause_id}</td>
+                      <td className="mono">
+                        {versionId
+                          ? <Link href={`/contracts/${contractId}/versions/${versionId}/clauses/${encodeURIComponent(item.clause_id)}`} className="link mono">{item.clause_id}</Link>
+                          : item.clause_id}
+                      </td>
                       <td>{item.page ?? "—"}</td>
                       <td>{item.topic ?? item.obligation ?? "—"}</td>
                       <td><span className={riskBadge(item.severity ?? "")}>{item.severity ?? "—"}</span></td>
@@ -267,7 +277,19 @@ function ReportContent({ user, contractId }: { user: SessionUser; contractId: st
                     )}
                     {(clauses.length > 0 || item.owner_role || item.estimated_effort) && (
                       <p style={{ fontSize: "0.8rem", color: "var(--color-muted)", marginTop: "0.25rem" }}>
-                        {clauses.length > 0 && <>Clauses: <span className="mono">{clauses.join(", ")}</span>{" "}</>}
+                        {clauses.length > 0 && (
+                          <>Clauses:{" "}
+                            {clauses.map((c, ci) => (
+                              <span key={c}>
+                                {versionId
+                                  ? <Link href={`/contracts/${contractId}/versions/${versionId}/clauses/${encodeURIComponent(c)}`} className="link mono">{c}</Link>
+                                  : <span className="mono">{c}</span>}
+                                {ci < clauses.length - 1 ? ", " : ""}
+                              </span>
+                            ))}
+                            {" "}
+                          </>
+                        )}
                         {item.owner_role && <>· {item.owner_role}{" "}</>}
                         {item.estimated_effort && <>· {item.estimated_effort}</>}
                       </p>

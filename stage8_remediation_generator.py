@@ -92,165 +92,168 @@ except ImportError:
 RULE_TEMPLATES: dict[str, dict[str, str]] = {
     "AMBIGUOUS_REQUIREMENT": {
         "problem_summary": (
-            "The clause uses vague, unmeasurable language (e.g. 'industry best practices', "
-            "'state of the art', 'appropriate measures') that creates an indeterminate obligation. "
-            "Without objective criteria, compliance cannot be verified and disputes cannot be resolved."
+            "Die Klausel verwendet vage, nicht messbare Sprache (z.B. 'Best Practices', 'Stand der "
+            "Technik', 'angemessene Maßnahmen'), die eine unbestimmte Verpflichtung begründet. "
+            "Ohne objektive Kriterien kann die Erfüllung weder überprüft noch rechtlich durchgesetzt werden."
         ),
         "negotiation_guidance": (
-            "Request that the customer replace all vague performance terms with objectively verifiable "
-            "criteria, named standards, or defined metrics. Any security or compliance obligation must "
-            "be measurable to be enforceable. Propose a named-standard model (e.g. ISO/IEC 27001:2022) "
-            "with certification as evidence of compliance. Reject open-ended language that could expand "
-            "scope without mutual agreement."
+            "Den Auftraggeber auffordern, alle unklaren Leistungsmerkmale durch objektiv prüfbare "
+            "Kriterien, konkrete Standards oder messbare Kennzahlen zu ersetzen. Sicherheits- und "
+            "Compliance-Verpflichtungen müssen messbar sein. Empfehlung: Modell benannter Standards "
+            "(z.B. ISO/IEC 27001:2022) mit Zertifizierung als Nachweis. Offene Formulierungen, die "
+            "den Umfang ohne Gegenseitigkeit erweitern können, ablehnen."
         ),
         "suggested_clause": (
-            "The Provider shall implement and maintain information security controls in accordance with "
-            "ISO/IEC 27001:2022. Compliance shall be evidenced by a valid certification issued by an "
-            "accredited third-party certification body, or, where certification is not yet obtained, a "
-            "current Statement of Applicability signed by the Provider's Chief Information Security "
-            "Officer. Any additional security requirements proposed by the Customer shall be documented "
-            "in a mutually executed Security Requirements Schedule prior to taking effect and shall not "
-            "impose obligations on the Provider materially beyond the referenced standard without "
-            "corresponding adjustment to fees and timelines."
+            "Der Anbieter implementiert und unterhält Informationssicherheitsmaßnahmen gemäß "
+            "ISO/IEC 27001:2022. Die Konformität wird durch eine gültige Zertifizierung eines "
+            "akkreditierten Drittprüfers oder eine aktuelle, vom CISO unterzeichnete Erklärung "
+            "zum Anwendungsbereich (Statement of Applicability) nachgewiesen. Zusätzliche "
+            "Sicherheitsanforderungen des Auftraggebers sind vor Inkrafttreten in einem beiderseitig "
+            "unterzeichneten Sicherheitsanforderungsplan zu dokumentieren und dürfen keine Verpflichtungen "
+            "begründen, die wesentlich über den genannten Standard hinausgehen, ohne entsprechende "
+            "Anpassung von Vergütung und Fristen."
         ),
         "fallback_option": (
-            "Accept ISO/IEC 27001:2022 compliance as the baseline, with a defined review cycle "
-            "for adding named standards by mutual written agreement."
+            "ISO/IEC 27001:2022-Konformität als Ausgangsnorm akzeptieren, mit definiertem "
+            "Überprüfungszyklus zur Ergänzung benannter Standards durch schriftliche Einigung."
         ),
     },
 
     "NON_TRANSFERABLE_REGULATION": {
         "problem_summary": (
-            "The clause purports to transfer the Customer's own statutory or regulatory reporting "
-            "obligations directly to the Provider. Regulatory obligations arising from the Customer's "
-            "status as a regulated entity (e.g. under DORA, NIS2, GDPR) are non-delegable: the "
-            "regulated entity remains solely responsible to the competent authority. Such a transfer "
-            "is legally ineffective and exposes the Provider to undefined regulatory liability."
+            "Die Klausel überträgt eigene gesetzliche Berichts- und Meldepflichten des Auftraggebers "
+            "unmittelbar auf den Anbieter. Regulatorische Pflichten aus dem Status des Auftraggebers "
+            "als reguliertes Unternehmen (z.B. nach DORA, NIS2, DSGVO) sind nicht delegierbar: das "
+            "regulierte Unternehmen bleibt gegenüber der zuständigen Behörde allein verantwortlich. "
+            "Eine solche Übertragung ist rechtlich unwirksam und setzt den Anbieter einer undefinierten "
+            "Regulierungshaftung aus."
         ),
         "negotiation_guidance": (
-            "Reject any clause that makes the Provider the primary obligor toward a regulatory authority "
-            "on the Customer's behalf. The Provider may agree to support the Customer operationally "
-            "(e.g. timely incident notifications, supplying audit evidence, providing SIEM-compatible "
-            "logs), but must not file reports to BaFin, BSI, EBA or any other authority in the "
-            "Customer's name. Propose an Assistance Model: the Customer retains the obligation; the "
-            "Provider commits to specific, scoped assistance actions within agreed timeframes."
+            "Jede Klausel ablehnen, die den Anbieter zum primären Verpflichteten gegenüber einer "
+            "Regulierungsbehörde im Namen des Auftraggebers macht. Der Anbieter kann operationelle "
+            "Unterstützung anbieten (z.B. fristgerechte Meldungen, Bereitstellung von Prüfungsnachweisen, "
+            "SIEM-kompatible Protokolle), darf aber keine Berichte an BaFin, BSI, EBA oder andere "
+            "Behörden im Namen des Auftraggebers einreichen. Gegenvorschlag: Unterstützungsmodell — "
+            "der Auftraggeber behält die Pflicht, der Anbieter verpflichtet sich zu spezifischen, "
+            "abgegrenzten Hilfsleistungen in vereinbarten Fristen."
         ),
         "suggested_clause": (
-            "The Customer acknowledges that all reporting and notification obligations owed to any "
-            "competent supervisory authority (including but not limited to BaFin, BSI, and EBA) arising "
-            "from the Customer's status as a regulated entity are borne exclusively by the Customer. "
-            "The Provider shall support the Customer in discharging such obligations by: "
-            "(i) notifying the Customer of any confirmed security incident materially affecting Customer "
-            "data within four (4) hours of the Provider's internal incident declaration; "
-            "(ii) providing a detailed incident report within forty-eight (48) hours of such declaration; "
-            "(iii) supplying evidence, logs, and documentation reasonably required by the Customer to "
-            "prepare and submit its own regulatory reports; and "
-            "(iv) making available a designated point of contact during any regulatory investigation. "
-            "The Provider shall have no obligation to submit reports directly to any regulatory authority "
-            "on behalf of the Customer unless acting under a separately executed, duly notarised power "
-            "of attorney that specifically authorises such action."
+            "Der Auftraggeber bestätigt, dass alle Melde- und Benachrichtigungspflichten gegenüber "
+            "zuständigen Aufsichtsbehörden (einschließlich, aber nicht beschränkt auf BaFin, BSI und EBA), "
+            "die sich aus seinem Status als reguliertes Unternehmen ergeben, ausschließlich vom "
+            "Auftraggeber zu erfüllen sind. Der Anbieter unterstützt den Auftraggeber bei der Erfüllung "
+            "dieser Pflichten, indem er: (i) den Auftraggeber über jeden bestätigten Sicherheitsvorfall, "
+            "der Auftraggeberdaten wesentlich betrifft, innerhalb von vier (4) Stunden nach interner "
+            "Vorfalldeklaration benachrichtigt; (ii) innerhalb von achtundvierzig (48) Stunden einen "
+            "detaillierten Vorfallbericht bereitstellt; (iii) Belege, Protokolle und Dokumentation, die "
+            "der Auftraggeber für eigene Behördenmeldungen benötigt, in angemessenem Umfang bereitstellt; "
+            "und (iv) während einer Behördenuntersuchung einen benannten Ansprechpartner zur Verfügung "
+            "stellt. Der Anbieter ist nicht verpflichtet, Berichte direkt an eine Regulierungsbehörde "
+            "im Namen des Auftraggebers einzureichen."
         ),
         "fallback_option": (
-            "Accept a provider support obligation (notification, logs, named contact) with an explicit "
-            "disclaimer that the Customer bears all primary regulatory reporting obligations."
+            "Unterstützungspflicht des Anbieters (Benachrichtigung, Protokolle, benannter "
+            "Ansprechpartner) mit ausdrücklichem Hinweis akzeptieren, dass der Auftraggeber "
+            "alle primären Meldepflichten gegenüber Behörden trägt."
         ),
     },
 
     "OPERATIONAL_RISK": {
         "problem_summary": (
-            "The clause imposes operationally unrealistic obligations — such as notification within "
-            "minutes, unlimited or unscheduled audit access to all systems, or continuous real-time "
-            "data feeds — that cannot be delivered reliably, create disproportionate security risk, "
-            "and may be technically infeasible at scale."
+            "Die Klausel enthält operativ unrealistische Verpflichtungen — wie Benachrichtigungen "
+            "innerhalb von Minuten, uneingeschränkten oder unangekündigten Prüfzugang zu allen Systemen "
+            "oder kontinuierliche Echtzeit-Datenfeeds — die nicht zuverlässig erfüllbar sind, ein "
+            "unverhältnismäßiges Sicherheitsrisiko schaffen und technisch nicht skalierbar sind."
         ),
         "negotiation_guidance": (
-            "Replace all undefined or unrealistic time obligations with specific, tiered SLAs. "
-            "Scope all audit rights to Customer-relevant systems only, with scheduled windows and "
-            "advance notice. Replace real-time or continuous log feed requirements with periodic "
-            "delivery or on-demand access within a defined SLA. Ensure all obligations are capped: "
-            "unlimited access to internal infrastructure or source code is a security risk."
+            "Alle undefinierten oder unrealistischen Zeitverpflichtungen durch spezifische, gestufte "
+            "SLAs ersetzen. Prüfrechte auf auftraggeberbezogene Systeme beschränken, mit vereinbarten "
+            "Zeitfenstern und Vorabankündigung. Anforderungen nach Echtzeit- oder Dauerprotokoll-Feeds "
+            "durch periodische Bereitstellung oder abrufbasierten Zugang mit definiertem SLA ersetzen. "
+            "Sicherstellen, dass alle Verpflichtungen begrenzt sind — uneingeschränkter Zugang zu "
+            "interner Infrastruktur oder Quellcode stellt ein Sicherheitsrisiko dar."
         ),
         "suggested_clause": (
-            "Incident Notification: The Provider shall notify the Customer of any confirmed security "
-            "incident materially affecting Customer data within four (4) business hours of the "
-            "Provider's internal incident declaration. A full incident report shall be delivered within "
-            "forty-eight (48) hours. "
-            "Audit Rights: The Customer or its appointed independent auditor may conduct one (1) "
-            "compliance audit per calendar year upon thirty (30) calendar days' prior written notice, "
-            "during normal business hours, subject to the Provider's information security requirements. "
-            "The scope shall be limited to systems directly related to the services under this Agreement. "
-            "Log Access: The Provider shall make available, within twenty-four (24) hours of a written "
-            "request, aggregated security event logs relating to Customer data environments. Continuous "
-            "or real-time streaming of internal security data is not included in the standard scope."
+            "Vorfallbenachrichtigung: Der Anbieter benachrichtigt den Auftraggeber über jeden "
+            "bestätigten Sicherheitsvorfall, der Auftraggeberdaten wesentlich betrifft, innerhalb "
+            "von vier (4) Geschäftsstunden nach interner Vorfalldeklaration. Ein vollständiger "
+            "Vorfallbericht wird innerhalb von achtundvierzig (48) Stunden bereitgestellt. "
+            "Prüfrechte: Der Auftraggeber oder ein beauftragter unabhängiger Prüfer kann einmal (1) "
+            "pro Kalenderjahr eine Compliance-Prüfung mit dreißig (30) Kalendertagen schriftlicher "
+            "Vorankündigung, während üblicher Geschäftszeiten, im Einklang mit den Sicherheits"
+            "anforderungen des Anbieters durchführen. Der Prüfungsumfang ist auf Systeme zu beschränken, "
+            "die direkt mit den vertraglichen Leistungen zusammenhängen. Protokollzugang: Der Anbieter "
+            "stellt auf schriftliche Anforderung innerhalb von vierundzwanzig (24) Stunden aggregierte "
+            "Sicherheitsereignisprotokolle zu Auftraggeberumgebungen bereit. Kontinuierliches oder "
+            "Echtzeit-Streaming interner Sicherheitsdaten ist nicht im Standardleistungsumfang enthalten."
         ),
         "fallback_option": (
-            "Accept a 4-hour initial notification SLA with 48-hour full report, and annual audit "
-            "rights with 30 days' notice and defined scope limitations."
+            "SLA von 4 Stunden für erste Benachrichtigung mit 48-Stunden-Vollbericht sowie jährliche "
+            "Prüfrechte mit 30 Tagen Vorankündigung und definierten Umfangsbeschränkungen akzeptieren."
         ),
     },
 
     "SCOPE_UNDEFINED": {
         "problem_summary": (
-            "The clause references 'applicable laws', 'relevant regulations', or 'industry standards' "
-            "without naming specific legal instruments, frameworks, or supervisory authorities. This "
-            "creates an open-ended, indeterminate obligation that may expand without mutual agreement."
+            "Die Klausel verweist auf 'anwendbares Recht', 'einschlägige Vorschriften' oder "
+            "'Branchenstandards', ohne konkrete Rechtsinstrumente, Rahmenwerke oder Aufsichtsbehörden "
+            "zu benennen. Dies begründet eine offene, unbestimmte Verpflichtung, die sich ohne "
+            "beiderseitige Einigung ausdehnen kann."
         ),
         "negotiation_guidance": (
-            "Require the customer to enumerate all referenced legal instruments, standards, and "
-            "frameworks in a contractual annex. Any future changes to the applicable set must require "
-            "written agreement by both parties, with a minimum 90-day implementation notice period and "
-            "a right to renegotiate fees where changes impose material additional cost."
+            "Den Auftraggeber verpflichten, alle referenzierten Rechtsinstrumente, Standards und "
+            "Rahmenwerke in einem Vertragsanhang aufzulisten. Änderungen an dieser Aufzählung sind "
+            "nur mit schriftlicher Zustimmung beider Parteien zulässig, mit mindestens 90 Tagen "
+            "Umsetzungsfrist und dem Recht zur Nachverhandlung der Vergütung bei wesentlichen Mehrkosten."
         ),
         "suggested_clause": (
-            "The Provider shall comply with the data protection, security, and operational resilience "
-            "standards enumerated in Schedule [A] (Applicable Regulatory Frameworks), as agreed by "
-            "the parties in writing and attached hereto. "
-            "Where a change in applicable law or regulation requires amendment of Schedule [A], the "
-            "Customer shall notify the Provider in writing no later than ninety (90) days prior to the "
-            "effective date of such change. If the required amendment imposes material additional cost "
-            "or operational burden on the Provider, the parties shall negotiate in good faith a "
-            "corresponding adjustment to fees and timelines within thirty (30) days of such notification. "
-            "No amendment to Schedule [A] shall take effect without the written countersignature of "
-            "both parties."
+            "Der Anbieter erfüllt die Datenschutz-, Sicherheits- und Resilienzstandards gemäß "
+            "Anlage [A] (Anwendbare Regulatorische Rahmenwerke), wie von den Parteien schriftlich "
+            "vereinbart und dem Vertrag beigefügt. Erfordert eine Änderung geltender Gesetze oder "
+            "Vorschriften eine Anpassung der Anlage [A], teilt der Auftraggeber dies dem Anbieter "
+            "spätestens neunzig (90) Tage vor dem Inkrafttreten schriftlich mit. Verursacht die "
+            "Anpassung wesentliche Mehrkosten oder operationellen Mehraufwand, verhandeln die Parteien "
+            "binnen dreißig (30) Tagen nach Mitteilung in gutem Glauben eine entsprechende Anpassung "
+            "der Vergütung und Fristen. Keine Änderung der Anlage [A] tritt ohne beiderseitige "
+            "schriftliche Unterzeichnung in Kraft."
         ),
         "fallback_option": (
-            "Accept a defined list of named frameworks in the agreement body with a change management "
-            "clause requiring 90-day notice and mutual written consent for additions."
+            "Definierte Liste benannter Rahmenwerke im Vertragstext mit Änderungsklausel akzeptieren, "
+            "die 90 Tage Vorankündigung und beiderseitige schriftliche Zustimmung für Ergänzungen erfordert."
         ),
     },
 
     "CUSTOMER_RESPONSIBILITY": {
         "problem_summary": (
-            "The clause assigns to the Provider obligations that are legally the Customer's own "
-            "controller responsibilities under GDPR — specifically, determining data classification, "
-            "defining retention periods, establishing lawful bases for processing, and conducting "
-            "Data Protection Impact Assessments (DPIA). These are non-delegable controller duties."
+            "Die Klausel überträgt dem Anbieter Verpflichtungen, die nach DSGVO eigene "
+            "Controller-Pflichten des Auftraggebers sind — insbesondere die Datenklassifizierung, "
+            "Festlegung von Aufbewahrungsfristen, Bestimmung der Rechtsgrundlage sowie die Durchführung "
+            "von Datenschutz-Folgenabschätzungen (DSFA). Diese Pflichten sind nicht delegierbar."
         ),
         "negotiation_guidance": (
-            "Reject all clauses that purport to transfer controller responsibilities to the Provider. "
-            "Data classification, DPIA execution, lawful-basis determination, and retention policy "
-            "definition must remain with the Customer. The Provider may offer supporting information "
-            "(e.g. a description of technical processing operations to assist a DPIA), but cannot "
-            "carry out the legal assessment."
+            "Alle Klauseln ablehnen, die Controller-Verantwortlichkeiten auf den Anbieter übertragen. "
+            "Datenklassifizierung, DSFA-Durchführung, Bestimmung der Rechtsgrundlage und Festlegung "
+            "der Aufbewahrungsfristen verbleiben beim Auftraggeber. Der Anbieter kann unterstützende "
+            "Informationen liefern (z.B. Beschreibung technischer Verarbeitungsvorgänge für eine DSFA), "
+            "darf die rechtliche Beurteilung jedoch nicht vornehmen."
         ),
         "suggested_clause": (
-            "The Customer, acting as data controller within the meaning of GDPR Art. 4(7), shall "
-            "remain solely responsible for: "
-            "(i) determining and documenting the sensitivity classification of all personal data "
-            "processed under this Agreement; "
-            "(ii) establishing the lawful basis for each category of processing under GDPR Art. 6 "
-            "and documenting such basis in the Customer's Records of Processing Activities; "
-            "(iii) defining data retention periods for each category of Customer data, which the "
-            "Provider shall implement on receipt of written instruction; and "
-            "(iv) conducting any Data Protection Impact Assessment required under GDPR Art. 35. "
-            "The Provider shall, upon written request and within fifteen (15) business days, supply "
-            "a description of the Provider's technical and organisational processing operations to "
-            "assist the Customer in completing a DPIA. The Provider shall not be required to conduct, "
-            "sign, or submit any DPIA on behalf of the Customer."
+            "Der Auftraggeber, handelnd als Verantwortlicher im Sinne von Art. 4 Nr. 7 DSGVO, ist "
+            "allein verantwortlich für: (i) Festlegung und Dokumentation der Sensibilitätsklassifizierung "
+            "aller im Rahmen dieses Vertrags verarbeiteten personenbezogenen Daten; (ii) Bestimmung der "
+            "Rechtsgrundlage für jede Verarbeitungskategorie gemäß Art. 6 DSGVO sowie Dokumentation in "
+            "den Verarbeitungsverzeichnissen des Auftraggebers; (iii) Festlegung der Aufbewahrungsfristen "
+            "für jede Kategorie von Auftraggeberdaten, die der Anbieter auf schriftliche Weisung "
+            "umsetzt; und (iv) Durchführung jeder nach Art. 35 DSGVO erforderlichen Datenschutz-"
+            "Folgenabschätzung. Der Anbieter stellt auf schriftliche Anforderung und innerhalb von "
+            "fünfzehn (15) Geschäftstagen eine Beschreibung seiner technischen und organisatorischen "
+            "Verarbeitungsvorgänge zur Verfügung. Der Anbieter ist nicht verpflichtet, eine DSFA im "
+            "Namen des Auftraggebers durchzuführen, zu unterzeichnen oder einzureichen."
         ),
         "fallback_option": (
-            "Accept a DPIA cooperation clause under which the Provider supplies processing details "
-            "within 15 business days of request, while the Customer remains the DPIA author."
+            "DSFA-Mitwirkungsklausel akzeptieren, nach der der Anbieter innerhalb von 15 "
+            "Geschäftstagen Verarbeitungsdetails bereitstellt, während der Auftraggeber "
+            "Autor der DSFA bleibt."
         ),
     },
 }
@@ -289,15 +292,15 @@ def _rule_proposal(finding: dict) -> dict:
     tmpl  = RULE_TEMPLATES.get(ftype)
     if not tmpl:
         return {
-            "problem_summary":      finding.get("reason", "No rule template available."),
-            "negotiation_guidance": finding.get("recommended_action", "Review with legal counsel."),
+            "problem_summary":      finding.get("reason", "Kein Regeltemplate verfügbar."),
+            "negotiation_guidance": finding.get("recommended_action", "Rechtliche Prüfung empfohlen."),
             "suggested_clause": (
-                "The parties shall negotiate specific, measurable obligations to replace this clause. "
-                "Any obligation must be: (i) precisely scoped; (ii) time-bounded; (iii) operationally "
-                "feasible for the Provider; and (iv) verifiable by objective criteria."
+                "Die Parteien verhandeln konkrete, messbare Pflichten als Ersatz für diese Klausel. "
+                "Jede Verpflichtung muss: (i) präzise abgegrenzt; (ii) zeitlich befristet; (iii) für "
+                "den Dienstleister operativ umsetzbar; und (iv) anhand objektiver Kriterien überprüfbar sein."
             ),
             "fallback_option": (
-                "Agree in writing on a defined scope and timeline before this clause takes effect."
+                "Schriftliche Einigung über einen definierten Umfang und Zeitplan, bevor diese Klausel in Kraft tritt."
             ),
         }
     return {
