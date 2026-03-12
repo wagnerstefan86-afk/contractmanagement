@@ -24,6 +24,7 @@ Contract endpoints (tenant-scoped)
 POST   /contracts/upload     ADMIN | ANALYST — upload + queue ingestion (creates case + v1)
 GET    /contracts            ALL roles       — list tenant's contracts
 GET    /contracts/{id}       ALL roles       — single contract
+DELETE /contracts/{id}       ADMIN           — delete contract + all data
 POST   /contracts/{id}/analyze  ADMIN | ANALYST — queue audit pipeline (uses current version)
 GET    /contracts/{id}/analyses ALL roles    — list analysis runs
 GET    /contracts/{id}/analyses/{aid}  ALL roles — single analysis status
@@ -2584,6 +2585,42 @@ def get_contract(
     contract: Contract = Depends(get_tenant_contract),
 ) -> Contract:
     return contract
+
+
+@app.delete(
+    "/contracts/{contract_id}",
+    status_code=204,
+    tags=["contracts"],
+    summary="Delete a contract and all associated data (ADMIN only)",
+)
+def delete_contract(
+    contract: Contract = Depends(get_tenant_contract),
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> None:
+    # Collect disk paths before DB delete
+    paths_to_delete: list[Path] = []
+    for version in contract.versions:
+        if version.file_path:
+            paths_to_delete.append(Path(version.file_path))
+    for analysis in contract.analyses:
+        if analysis.output_dir:
+            paths_to_delete.append(Path(analysis.output_dir))
+    if contract.file_path:
+        paths_to_delete.append(Path(contract.file_path))
+
+    db.delete(contract)
+    db.commit()
+
+    # Best-effort disk cleanup
+    for p in paths_to_delete:
+        try:
+            if p.is_dir():
+                shutil.rmtree(p, ignore_errors=True)
+            elif p.exists():
+                p.unlink()
+        except Exception:
+            pass
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

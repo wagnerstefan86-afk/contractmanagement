@@ -223,6 +223,10 @@ export function listContracts(skip = 0, limit = 50, filters: Omit<ContractListFi
   return request<ContractListOut>(`/contracts?${params}`);
 }
 
+export function deleteContract(contractId: string): Promise<void> {
+  return request<void>(`/contracts/${contractId}`, { method: "DELETE" });
+}
+
 export function uploadContract(file: File): Promise<ContractOut> {
   const form = new FormData();
   form.append("file", file);

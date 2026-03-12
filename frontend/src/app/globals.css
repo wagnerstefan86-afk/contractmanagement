@@ -143,6 +143,13 @@ a:hover { text-decoration: underline; }
 }
 .btn-ghost:hover:not(:disabled) { background: var(--color-border); color: var(--color-text); text-decoration: none; }
 
+.btn-danger {
+  background: #dc2626;
+  color: #fff;
+  border-color: #dc2626;
+}
+.btn-danger:hover:not(:disabled) { background: #b91c1c; border-color: #b91c1c; text-decoration: none; color: #fff; }
+
 .btn-sm { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
 .btn-full { width: 100%; justify-content: center; }
 

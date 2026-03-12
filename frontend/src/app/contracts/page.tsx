@@ -7,6 +7,7 @@ import Nav from "@/components/Nav";
 import { SessionUser } from "@/lib/session";
 import {
   listContracts,
+  deleteContract,
   ContractSummaryOut,
   ReviewStatus,
   ReviewDecision,
@@ -128,6 +129,7 @@ function ContractsContent({ user }: { user: SessionUser }) {
   const [skip,           setSkip]           = useState(0);
   const [loading,        setLoading]        = useState(true);
   const [error,          setError]          = useState("");
+  const [deleting,       setDeleting]       = useState<string | null>(null);
   const [reviewStatus,   setReviewStatus]   = useState<ReviewStatus | "">("");
   const [reviewDecision, setReviewDecision] = useState<ReviewDecision | "">("");
 
@@ -153,6 +155,19 @@ function ContractsContent({ user }: { user: SessionUser }) {
     setReviewStatus(rs);
     setReviewDecision(rd);
     load(0, rs, rd);
+  }
+
+  async function handleDelete(contractId: string) {
+    if (!window.confirm(`Delete contract ${contractId}? This cannot be undone.`)) return;
+    setDeleting(contractId);
+    try {
+      await deleteContract(contractId);
+      load(skip, reviewStatus, reviewDecision);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Delete failed.");
+    } finally {
+      setDeleting(null);
+    }
   }
 
   const pages = Math.ceil(total / PAGE_SIZE);
@@ -247,10 +262,19 @@ function ContractsContent({ user }: { user: SessionUser }) {
                       <td className="text-muted">
                         {new Date(c.created_at).toLocaleDateString()}
                       </td>
-                      <td>
+                      <td className="actions-cell">
                         <Link href={`/contracts/${c.contract_id}`} className="btn btn-sm btn-outline">
                           View
                         </Link>
+                        {user.role === "ADMIN" && (
+                          <button
+                            className="btn btn-sm btn-danger"
+                            disabled={deleting === c.contract_id}
+                            onClick={() => handleDelete(c.contract_id)}
+                          >
+                            {deleting === c.contract_id ? "…" : "Delete"}
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

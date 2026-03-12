@@ -370,6 +370,7 @@ def analyze_contract(
             return AnalysisResult(report=None, error=ing.error)
 
         # ── Stage 3: Contract Classification ─────────────────────────────────
+        _overrides = llm_overrides or {}
         _cb("stage3_classification")
         _stage3.run(
             input_path   = str(clauses_path),
@@ -383,7 +384,6 @@ def analyze_contract(
         # llm_overrides carries DB-backed admin config (provider, model, api_key,
         # timeout, app_enabled).  Falls back to env-var defaults when not supplied.
         llm_provider: Optional[Any] = None
-        _overrides = llm_overrides or {}
         try:
             from llm.config import get_llm_provider as _get_llm
             if _overrides.get("app_enabled", True):
