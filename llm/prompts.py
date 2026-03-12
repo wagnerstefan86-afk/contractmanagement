@@ -23,7 +23,7 @@ Service-provider perspective:
 # STAGE 4.5 — Obligation Analysis
 # ═══════════════════════════════════════════════════════════════════════════════
 
-PROMPT_VERSION_OBLIGATION = "obligation_analysis_v1"
+PROMPT_VERSION_OBLIGATION = "obligation_analysis_v2"
 
 OBLIGATION_SYSTEM_PROMPT = """You are a senior legal and compliance advisor for an IT service provider.
 You review contract clauses from the perspective of the SERVICE PROVIDER, analysing
@@ -79,10 +79,18 @@ Rules for your assessment:
 - NON_TRANSFERABLE_REGULATION > CUSTOMER_RESPONSIBILITY > OPERATIONAL_RISK
   > SCOPE_UNDEFINED > AMBIGUOUS_REQUIREMENT > VALID.
 - Base severity on actual legal/operational exposure, not just wording.
+- Examine clauses carefully even when they appear compliant at first glance.
+  Subtle phrasing like "as required by applicable law", "industry-standard measures",
+  or broad audit rights worded politely can still be high-risk obligations.
+  Do NOT default to VALID unless the clause is genuinely specific and operationally feasible.
 - reason: one concise sentence identifying the specific problem in the clause.
 - recommended_action: one concrete, actionable sentence for the legal/contract team.
 - evidence_phrases: 1–4 short verbatim phrases from the clause that triggered the assessment.
-- confidence: float 0.0–1.0 reflecting certainty of the classification."""
+- confidence: float 0.0–1.0 reflecting certainty of the classification.
+
+LANGUAGE RULE: Write ALL text output fields (reason, recommended_action) in the
+same language as the contract clause text provided. If the clause is in German,
+your output text must be in German. If in English, output in English."""
 
 OBLIGATION_OUTPUT_SCHEMA: dict = {
     "type": "object",
@@ -132,7 +140,7 @@ def build_obligation_user_message(clause: dict, output_schema: dict) -> str:
 # STAGE 5 — Clause-to-SR Matching
 # ═══════════════════════════════════════════════════════════════════════════════
 
-PROMPT_VERSION_SR_MATCHING = "sr_matching_v1"
+PROMPT_VERSION_SR_MATCHING = "sr_matching_v2"
 
 SR_MATCHING_SYSTEM_PROMPT = """You are a regulatory compliance analyst specialising in IT service provider contracts.
 
@@ -165,7 +173,11 @@ Rules:
 - extracted_evidence: 1–4 verbatim phrases from the clause that support the match.
   Leave empty array for NO_MATCH.
 - match_confidence: 0.0–1.0. DIRECT_MATCH ≥ 0.75, PARTIAL_MATCH 0.40–0.74, NO_MATCH ≤ 0.30.
-- match_reasoning: 1–2 sentences explaining the classification decision."""
+- match_reasoning: 1–2 sentences explaining the classification decision.
+
+LANGUAGE RULE: Write ALL text output fields (match_reasoning) in the same language
+as the contract clause text. If the clause is in German, output in German. If in English,
+output in English."""
 
 SR_MATCHING_OUTPUT_SCHEMA: dict = {
     "type": "object",
@@ -213,7 +225,7 @@ def build_sr_matching_user_message(
 # STAGE 8 — Remediation Proposal Generation
 # ═══════════════════════════════════════════════════════════════════════════════
 
-PROMPT_VERSION_REMEDIATION = "remediation_proposal_v1"
+PROMPT_VERSION_REMEDIATION = "remediation_proposal_v2"
 
 REMEDIATION_SYSTEM_PROMPT = """You are a senior IT contract lawyer and commercial negotiator specialising in
 technology service agreements for regulated industries (financial services, healthcare).
@@ -244,6 +256,11 @@ Output fields:
                         customer rejects the suggested_clause outright.
 - confidence:           float 0.0–1.0 reflecting how well the suggested clause addresses
                         the specific problem in this clause.
+
+LANGUAGE RULE: Write ALL text output fields (problem_summary, negotiation_guidance,
+suggested_clause, fallback_option) in the same language as the original contract clause
+text. If the clause is in German, all output must be in German — including the suggested
+replacement clause text. If in English, output in English.
 
 Respond ONLY with the JSON object. No preamble, no markdown fences."""
 

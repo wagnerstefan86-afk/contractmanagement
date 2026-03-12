@@ -15,6 +15,17 @@ function riskBadge(severity: string) {
   return "badge badge--gray";
 }
 
+interface TopRiskArea {
+  topic?:          string;
+  topic_label?:    string;
+  clause_count?:   number;
+  max_score?:      number;
+  avg_score?:      number;
+  priority?:       string;
+  related_actions?: string[];
+  risk_summary?:   string;
+}
+
 interface RiskItem {
   clause_id:        string;
   page?:            number;
@@ -29,14 +40,20 @@ interface RiskItem {
 }
 
 interface ActionItem {
-  action_id?:          string;
-  action_type?:        string;
-  priority?:           string;
-  finding_type?:       string;
-  topic?:              string;
-  obligation?:         string;
-  recommended_action?: string;
-  affected_clause?:    string;
+  action_id?:               string;
+  action_type?:             string;
+  priority?:                string;
+  finding_type?:            string;
+  finding_label?:           string;
+  topic?:                   string | string[];
+  obligation?:              string;
+  recommended_action?:      string;
+  affected_clauses?:        string[];
+  affected_clause?:         string;
+  owner_role?:              string;
+  estimated_effort?:        string;
+  expected_risk_reduction?: string;
+  linked_neg_item?:         string;
 }
 
 interface Metadata {
@@ -70,12 +87,20 @@ function ReportContent({ user, contractId }: { user: SessionUser; contractId: st
   const r            = report.report;
   const meta         = (r.metadata ?? {}) as Metadata;
   const riskDist     = (r.risk_distribution ?? []) as RiskItem[];
-  const topRiskAreas = r.top_risk_areas as string[] | undefined;
-  const actionPlan   = r.action_plan_overview as Record<string, unknown> | undefined;
 
+  // top_risk_areas is an array of objects, not strings
+  const topRiskAreas = Array.isArray(r.top_risk_areas)
+    ? (r.top_risk_areas as TopRiskArea[])
+    : undefined;
+
+  // action_plan_overview is a list of action objects (not a dict wrapping a list)
   const actionItems: ActionItem[] = (() => {
-    if (!actionPlan) return [];
-    const items = actionPlan.actions ?? actionPlan.items ?? actionPlan.action_items;
+    const raw = r.action_plan_overview;
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw as ActionItem[];
+    // Fallback: legacy dict shape with .actions / .items
+    const dict = raw as Record<string, unknown>;
+    const items = dict.actions ?? dict.items ?? dict.action_items;
     if (Array.isArray(items)) return items as ActionItem[];
     return [];
   })();
@@ -138,19 +163,34 @@ function ReportContent({ user, contractId }: { user: SessionUser; contractId: st
           </div>
         )}
 
-        {/* Key risk areas — actionable list */}
+        {/* Key risk areas */}
         {topRiskAreas && topRiskAreas.length > 0 && (
           <div className="section">
             <h2>Key risk areas requiring attention</h2>
             <div style={{ display: "grid", gap: "0.5rem" }}>
               {topRiskAreas.map((area, i) => (
-                <div key={i} className="info-box" style={{ margin: 0 }}>{area}</div>
+                <div key={i} className="info-box" style={{ margin: 0 }}>
+                  <div style={{ display: "flex", gap: "0.5rem", alignItems: "baseline", flexWrap: "wrap", marginBottom: "0.25rem" }}>
+                    <strong>{area.topic_label ?? area.topic ?? "—"}</strong>
+                    {area.priority && (
+                      <span className={riskBadge(area.priority)}>{area.priority}</span>
+                    )}
+                    {area.clause_count != null && (
+                      <span className="text-muted" style={{ fontSize: "0.8rem" }}>
+                        {area.clause_count} clause{area.clause_count !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </div>
+                  {area.risk_summary && (
+                    <p style={{ margin: 0, fontSize: "0.875rem" }}>{area.risk_summary}</p>
+                  )}
+                </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Risk findings — sorted HIGH first, with recommended action column */}
+        {/* Risk findings — sorted HIGH first */}
         {sortedRisk.length > 0 && (
           <div className="section">
             <h2>Risk findings ({sortedRisk.length})</h2>
@@ -190,41 +230,50 @@ function ReportContent({ user, contractId }: { user: SessionUser; contractId: st
         )}
 
         {/* Action plan */}
-        {actionPlan && (
+        {actionItems.length > 0 && (
           <div className="section">
             <h2>Action plan</h2>
-            {actionItems.length > 0 ? (
-              <div style={{ display: "grid", gap: "0.75rem" }}>
-                {actionItems.map((item, i) => (
+            <div style={{ display: "grid", gap: "0.75rem" }}>
+              {actionItems.map((item, i) => {
+                const topics = Array.isArray(item.topic)
+                  ? item.topic
+                  : item.topic ? [item.topic] : [];
+                const clauses = item.affected_clauses ?? (item.affected_clause ? [item.affected_clause] : []);
+                return (
                   <div key={i} style={{ padding: "0.75rem", background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: "0.5rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.25rem" }}>
                       {item.action_id && <span className="mono" style={{ fontSize: "0.8rem" }}>{item.action_id}</span>}
                       {item.priority && <span className={riskBadge(item.priority)}>{item.priority}</span>}
-                      {item.topic && <span className="tag">{item.topic}</span>}
+                      {topics.map((t) => <span key={t} className="tag">{t.replace(/_/g, " ")}</span>)}
                       {item.finding_type && <span className="tag">{item.finding_type.replace(/_/g, " ")}</span>}
                     </div>
-                    {item.obligation && <p style={{ margin: "0.25rem 0", fontSize: "0.9rem" }}>{item.obligation}</p>}
+                    {item.finding_label && (
+                      <p style={{ margin: "0.25rem 0", fontSize: "0.9rem", fontWeight: 500 }}>{item.finding_label}</p>
+                    )}
+                    {item.obligation && (
+                      <p style={{ margin: "0.25rem 0", fontSize: "0.9rem" }}>{item.obligation}</p>
+                    )}
                     {item.recommended_action && (
                       <div className="info-box" style={{ margin: "0.25rem 0 0" }}>
                         <strong>Action:</strong> {item.recommended_action}
                       </div>
                     )}
-                    {item.affected_clause && (
+                    {item.expected_risk_reduction && (
                       <p style={{ fontSize: "0.8rem", color: "var(--color-muted)", marginTop: "0.25rem" }}>
-                        Clause: <span className="mono">{item.affected_clause}</span>
+                        {item.expected_risk_reduction}
+                      </p>
+                    )}
+                    {(clauses.length > 0 || item.owner_role || item.estimated_effort) && (
+                      <p style={{ fontSize: "0.8rem", color: "var(--color-muted)", marginTop: "0.25rem" }}>
+                        {clauses.length > 0 && <>Clauses: <span className="mono">{clauses.join(", ")}</span>{" "}</>}
+                        {item.owner_role && <>· {item.owner_role}{" "}</>}
+                        {item.estimated_effort && <>· {item.estimated_effort}</>}
                       </p>
                     )}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <details>
-                <summary style={{ cursor: "pointer", color: "var(--color-primary)", fontSize: "0.85rem" }}>
-                  Show raw action plan data
-                </summary>
-                <pre className="json-block" style={{ marginTop: "0.5rem" }}>{JSON.stringify(actionPlan, null, 2)}</pre>
-              </details>
-            )}
+                );
+              })}
+            </div>
           </div>
         )}
       </main>
