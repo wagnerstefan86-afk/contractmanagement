@@ -297,6 +297,13 @@ class FindingReview(Base):
     clause_id:        Mapped[str|None] = mapped_column(String(50))
     text_preview:     Mapped[str|None] = mapped_column(Text)
 
+    # Auto-populated from analysis outputs
+    recommended_action:  Mapped[str|None] = mapped_column(Text)
+    assigned_owner_role: Mapped[str|None] = mapped_column(String(100))
+    confidence_bucket:   Mapped[str|None] = mapped_column(String(50))
+    ai_used:             Mapped[bool|None] = mapped_column(Boolean)
+    review_priority:     Mapped[str|None] = mapped_column(String(20))
+
     # Review disposition
     status:            Mapped[str] = mapped_column(String(30), nullable=False, default="open")
     reviewer_user_id:  Mapped[int|None] = mapped_column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
@@ -334,3 +341,24 @@ class ContractWorkflowEvent(Base):
 
     contract:      Mapped["Contract|None"] = relationship("Contract", back_populates="workflow_events")
     changed_by:    Mapped["User|None"]     = relationship("User", foreign_keys="[ContractWorkflowEvent.changed_by_user_id]")
+
+
+# ── app_settings ───────────────────────────────────────────────────────────────
+
+class AppSetting(Base):
+    """
+    Per-tenant application configuration stored in the database.
+    Used for operational switches that admins control without restarting the service.
+
+    Keys (namespaced with module prefix):
+      llm.app_enabled  — whether AI-assisted analysis is enabled at the app level
+    """
+    __tablename__ = "app_settings"
+
+    id:          Mapped[int]      = mapped_column(Integer, primary_key=True, autoincrement=True)
+    customer_id: Mapped[int]      = mapped_column(
+        Integer, ForeignKey("customers.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    key:         Mapped[str]      = mapped_column(String(100), nullable=False)
+    value:       Mapped[str|None] = mapped_column(Text)
+    updated_at:  Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow)

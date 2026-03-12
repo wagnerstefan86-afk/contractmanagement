@@ -424,6 +424,12 @@ export interface FindingReviewOut {
   severity:           string | null;
   clause_id:          string | null;
   text_preview:       string | null;
+  // Auto-populated enrichment fields
+  recommended_action:  string | null;
+  assigned_owner_role: string | null;
+  confidence_bucket:   string | null;
+  ai_used:             boolean | null;
+  review_priority:     string | null;
   status:             FindingStatus;
   reviewer_user_id:   number | null;
   assigned_user_id:   number | null;
@@ -894,13 +900,26 @@ export function getRiskSummary(): Promise<RiskSummaryOut> {
 // ── Admin: LLM config ─────────────────────────────────────────────────────────
 
 export interface LLMConfigOut {
-  llm_enabled:     boolean;
-  provider:        string;
-  model:           string | null;
-  timeout_seconds: number;
-  key_configured:  boolean;
+  // Level A — system capability (from environment)
+  system_llm_enabled: boolean;
+  key_configured:     boolean;
+  provider:           string;
+  model:              string | null;
+  effective_model:    string;
+  timeout_seconds:    number;
+  // Level B — application setting (persisted in DB)
+  app_llm_enabled:    boolean;
+  // Effective = system AND app
+  effective_enabled:  boolean;
 }
 
 export function getLLMConfig(): Promise<LLMConfigOut> {
   return request<LLMConfigOut>("/admin/llm-config");
+}
+
+export function updateLLMConfig(app_llm_enabled: boolean): Promise<LLMConfigOut> {
+  return request<LLMConfigOut>("/admin/llm-config", {
+    method: "PATCH",
+    body: JSON.stringify({ app_llm_enabled }),
+  });
 }

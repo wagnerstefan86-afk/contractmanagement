@@ -105,7 +105,7 @@ from .deps import (
     require_analyst_above,
     require_any_role,
 )
-from .models import Analysis, Contract, ContractVersion, ContractWorkflowEvent, Customer, FindingReview, User, UserRole
+from .models import Analysis, AppSetting, Contract, ContractVersion, ContractWorkflowEvent, Customer, FindingReview, User, UserRole
 from .pipeline import analyze_contract, ingest_contract, validate_org_profile
 from .schemas import (
     ADMIN_ONLY_STATUSES,
@@ -136,6 +136,8 @@ from .schemas import (
     FindingsSummaryWithReadinessOut,
     FindingTypeItem,
     HistoryOut,
+    LLMAppSettingUpdate,
+    LLMConfigOut,
     LoginIn,
     NegotiationItemOut,
     NegotiationOut,
@@ -371,6 +373,34 @@ def _migrate_tables() -> None:
         conn.execute(text(
             "CREATE UNIQUE INDEX IF NOT EXISTS uq_finding_reviews_version_key "
             "ON finding_reviews (version_id, finding_key)"
+        ))
+
+        # ── finding_reviews: add enrichment columns (v2.5) ────────────────────
+        for col_sql in [
+            "ALTER TABLE finding_reviews ADD COLUMN recommended_action  TEXT",
+            "ALTER TABLE finding_reviews ADD COLUMN assigned_owner_role VARCHAR(100)",
+            "ALTER TABLE finding_reviews ADD COLUMN confidence_bucket   VARCHAR(50)",
+            "ALTER TABLE finding_reviews ADD COLUMN ai_used             BOOLEAN",
+            "ALTER TABLE finding_reviews ADD COLUMN review_priority     VARCHAR(20)",
+        ]:
+            try:
+                conn.execute(text(col_sql))
+            except Exception:
+                pass  # column already exists — SQLite has no IF NOT EXISTS for ADD COLUMN
+
+        # ── app_settings: new in v2.5 ─────────────────────────────────────────
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS app_settings (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                customer_id INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+                key         VARCHAR(100) NOT NULL,
+                value       TEXT,
+                updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        """))
+        conn.execute(text(
+            "CREATE UNIQUE INDEX IF NOT EXISTS uq_app_settings_customer_key "
+            "ON app_settings (customer_id, key)"
         ))
 
         conn.commit()
@@ -616,6 +646,25 @@ def _bg_analyze(
         db.close()
 
 
+def _derive_assigned_owner(finding_type: str, topic: str | None) -> str:
+    """Deterministic owner role assignment from finding type and topic keywords."""
+    t  = (topic        or "").lower()
+    ft = (finding_type or "").lower()
+    if any(k in t for k in ("privacy", "gdpr", "personal data", "subprocessor", "data protection", "dpa", "ccpa", "special category")):
+        return "Privacy / Legal"
+    if any(k in t for k in ("regulation", "regulatory", "compliance", "dora", "nis2", "pci", "hipaa", "sanction", "penalty", "obligation")):
+        return "Legal / Compliance"
+    if any(k in t for k in ("security", "access control", "encryption", "authentication", "incident", "backup", "vulnerability", "audit log", "monitoring")):
+        return "InfoSec / Service Owner"
+    if any(k in t for k in ("liability", "indemnif", "intellectual property", "ip", "confidential", "non-disclosure", "termination")):
+        return "Legal / Compliance"
+    if ft == "negotiation":
+        return "InfoSec / Service Owner"
+    if ft == "risk":
+        return "InfoSec / Service Owner"
+    return "InfoSec / Service Owner"
+
+
 def _make_finding_key(clause_id: str | None, finding_type: str, topic: str | None) -> str:
     """Deterministic key: '{clause_id}__{finding_type}__{topic}' (lowercased, stripped)."""
     parts = [
@@ -641,8 +690,56 @@ def _generate_finding_reviews(
     now = _utcnow()
 
     # Collect findings from risk report
-    report = _safe_read_json(output_dir / "contract_risk_report.json") or {}
+    report    = _safe_read_json(output_dir / "contract_risk_report.json") or {}
     risk_items = report.get("risk_distribution", [])
+
+    # Build recommended_action lookup from action_plan (clause_id+topic → action)
+    action_plan_raw = (
+        _safe_read_json(output_dir / "action_plan.json")
+        or report.get("action_plan_overview")
+        or {}
+    )
+    # action_plan may be a dict with an "actions" list, or a list directly
+    action_list: list[dict] = []
+    if isinstance(action_plan_raw, list):
+        action_list = action_plan_raw
+    elif isinstance(action_plan_raw, dict):
+        action_list = (
+            action_plan_raw.get("actions")
+            or action_plan_raw.get("action_items")
+            or action_plan_raw.get("items")
+            or []
+        )
+    # Also check top-level report action_plan_overview
+    if not action_list and isinstance(report.get("action_plan_overview"), dict):
+        apo = report["action_plan_overview"]
+        action_list = apo.get("actions") or apo.get("action_items") or apo.get("items") or []
+    elif not action_list and isinstance(report.get("action_plan_overview"), list):
+        action_list = report["action_plan_overview"]
+
+    # Map (clause_id, topic) → recommended_action
+    action_map: dict[tuple[str, str], str] = {}
+    for a in action_list:
+        if not isinstance(a, dict):
+            continue
+        cid   = (a.get("affected_clause") or a.get("clause_id") or "").lower().strip()
+        topic = (a.get("topic") or "").lower().strip()
+        rec   = a.get("recommended_action") or a.get("action") or ""
+        if rec:
+            action_map[(cid, topic)] = rec
+            if cid:
+                action_map[(cid, "")] = rec  # fallback: clause only
+
+    def _lookup_action(clause_id: str | None, topic: str | None) -> str | None:
+        cid = (clause_id or "").lower().strip()
+        top = (topic     or "").lower().strip()
+        return (
+            action_map.get((cid, top))
+            or action_map.get((cid, ""))
+            or action_map.get(("", top))
+            or None
+        )
+
     rows_to_add: list[dict] = []
     seen_keys: set[str] = set()
 
@@ -654,13 +751,20 @@ def _generate_finding_reviews(
         if key in seen_keys:
             continue
         seen_keys.add(key)
+        recommended_action = (
+            item.get("linked_action")
+            or _lookup_action(clause_id, topic)
+        )
         rows_to_add.append({
-            "finding_key":  key,
-            "finding_type": "risk",
-            "topic":        topic,
-            "severity":     severity,
-            "clause_id":    clause_id,
-            "text_preview": (item.get("text_preview") or "")[:500] or None,
+            "finding_key":       key,
+            "finding_type":      "risk",
+            "topic":             topic,
+            "severity":          severity,
+            "clause_id":         clause_id,
+            "text_preview":      (item.get("text_preview") or "")[:500] or None,
+            "recommended_action": (recommended_action or "")[:1000] or None,
+            "assigned_owner_role": _derive_assigned_owner("risk", topic),
+            "review_priority":   severity,
         })
 
     # Also collect negotiation items (finding_type = "negotiation")
@@ -672,6 +776,8 @@ def _generate_finding_reviews(
         if affected:
             clause_id = affected[0] if isinstance(affected[0], str) else None
         topic     = item.get("topic") or None
+        if isinstance(topic, list):
+            topic = ", ".join(topic)
         severity  = (item.get("priority") or "").upper() or None
         key = _make_finding_key(
             item.get("negotiation_id") or item.get("action_id") or clause_id,
@@ -681,13 +787,21 @@ def _generate_finding_reviews(
         if key in seen_keys:
             continue
         seen_keys.add(key)
+        recommended_action = (
+            item.get("recommended_clause_text")
+            or item.get("negotiation_argument")
+            or _lookup_action(clause_id, topic)
+        )
         rows_to_add.append({
-            "finding_key":  key,
-            "finding_type": "negotiation",
-            "topic":        topic,
-            "severity":     severity,
-            "clause_id":    clause_id,
-            "text_preview": (item.get("problem_summary") or "")[:500] or None,
+            "finding_key":        key,
+            "finding_type":       "negotiation",
+            "topic":              topic,
+            "severity":           severity,
+            "clause_id":          clause_id,
+            "text_preview":       (item.get("problem_summary") or "")[:500] or None,
+            "recommended_action": (recommended_action or "")[:1000] or None,
+            "assigned_owner_role": _derive_assigned_owner("negotiation", topic),
+            "review_priority":    severity,
         })
 
     for row in rows_to_add:
@@ -696,20 +810,31 @@ def _generate_finding_reviews(
             FindingReview.finding_key == row["finding_key"],
         ).first()
         if existing is not None:
+            # Back-fill enrichment fields if they are still empty
+            changed = False
+            for field in ("recommended_action", "assigned_owner_role", "review_priority"):
+                if not getattr(existing, field) and row.get(field):
+                    setattr(existing, field, row[field])
+                    changed = True
+            if changed:
+                existing.updated_at = now
             continue
         fr = FindingReview(
-            contract_id  = contract_id,
-            version_id   = version_id,
-            analysis_id  = analysis_id,
-            finding_key  = row["finding_key"],
-            finding_type = row["finding_type"],
-            topic        = row["topic"],
-            severity     = row["severity"],
-            clause_id    = row["clause_id"],
-            text_preview = row["text_preview"],
-            status       = "open",
-            created_at   = now,
-            updated_at   = now,
+            contract_id         = contract_id,
+            version_id          = version_id,
+            analysis_id         = analysis_id,
+            finding_key         = row["finding_key"],
+            finding_type        = row["finding_type"],
+            topic               = row["topic"],
+            severity            = row["severity"],
+            clause_id           = row["clause_id"],
+            text_preview        = row["text_preview"],
+            recommended_action  = row.get("recommended_action"),
+            assigned_owner_role = row.get("assigned_owner_role"),
+            review_priority     = row.get("review_priority"),
+            status              = "open",
+            created_at          = now,
+            updated_at          = now,
         )
         db.add(fr)
 
@@ -1473,25 +1598,65 @@ def health_check() -> dict:
     return {"status": "ok", "timestamp": _utcnow().isoformat()}
 
 
-@app.get("/admin/llm-config", tags=["admin"], summary="Get current LLM configuration (ADMIN only)")
-def get_llm_config(current_user: User = Depends(require_admin)) -> dict:
-    """Returns the active LLM configuration. The API key itself is never returned — only
-    whether one is configured. Changes require restarting the service with updated
-    environment variables."""
+@app.get(
+    "/admin/llm-config",
+    response_model=LLMConfigOut,
+    tags=["admin"],
+    summary="Get two-level LLM configuration (ADMIN only)",
+)
+def get_llm_config(
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> LLMConfigOut:
+    """
+    Returns the two-level LLM configuration:
+    - Level A (system): env-var capability
+    - Level B (app): admin-controlled operational toggle stored in DB
+    - Effective: system AND app
+    """
     key_configured = bool(
         os.environ.get("LLM_API_KEY")
         or os.environ.get("ANTHROPIC_API_KEY")
         or os.environ.get("OPENAI_API_KEY")
     )
-    default_model = "claude-opus-4-6" if LLM_PROVIDER == "anthropic" else "gpt-4o"
-    return {
-        "llm_enabled":     LLM_ENABLED,
-        "provider":        LLM_PROVIDER,
-        "model":           LLM_MODEL or None,
-        "effective_model": LLM_MODEL or default_model,
-        "timeout_seconds": LLM_TIMEOUT_SECONDS,
-        "key_configured":  key_configured,
-    }
+    default_model    = "claude-opus-4-6" if LLM_PROVIDER == "anthropic" else "gpt-4o"
+    system_capable   = LLM_ENABLED and key_configured
+
+    # App-level setting defaults to True (enabled) unless explicitly disabled
+    app_setting_raw  = _get_app_setting(current_user.customer_id, "llm.app_enabled", db)
+    app_llm_enabled  = (app_setting_raw != "false") if app_setting_raw is not None else True
+
+    return LLMConfigOut(
+        system_llm_enabled = LLM_ENABLED,
+        key_configured     = key_configured,
+        provider           = LLM_PROVIDER,
+        model              = LLM_MODEL or None,
+        effective_model    = LLM_MODEL or default_model,
+        timeout_seconds    = LLM_TIMEOUT_SECONDS,
+        app_llm_enabled    = app_llm_enabled,
+        effective_enabled  = system_capable and app_llm_enabled,
+    )
+
+
+@app.patch(
+    "/admin/llm-config",
+    response_model=LLMConfigOut,
+    tags=["admin"],
+    summary="Update app-level LLM operational toggle (ADMIN only)",
+)
+def update_llm_config(
+    body: LLMAppSettingUpdate,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> LLMConfigOut:
+    """Toggle the application-level LLM enabled switch. Does not change env vars."""
+    _set_app_setting(
+        current_user.customer_id,
+        "llm.app_enabled",
+        "true" if body.app_llm_enabled else "false",
+        db,
+    )
+    return get_llm_config(current_user, db)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -3079,6 +3244,34 @@ def _finding_review_out(fr: "FindingReview") -> FindingReviewOut:
     d.reviewer_name = fr.reviewer.name if fr.reviewer else None
     d.assignee_name = fr.assignee.name if fr.assignee else None
     return d
+
+
+def _get_app_setting(customer_id: int, key: str, db: "Session") -> str | None:
+    """Return the value of an app_setting row, or None if not set."""
+    row = db.query(AppSetting).filter(
+        AppSetting.customer_id == customer_id,
+        AppSetting.key         == key,
+    ).first()
+    return row.value if row else None
+
+
+def _set_app_setting(customer_id: int, key: str, value: str, db: "Session") -> None:
+    """Upsert an app_setting row."""
+    row = db.query(AppSetting).filter(
+        AppSetting.customer_id == customer_id,
+        AppSetting.key         == key,
+    ).first()
+    if row:
+        row.value      = value
+        row.updated_at = _utcnow()
+    else:
+        db.add(AppSetting(
+            customer_id = customer_id,
+            key         = key,
+            value       = value,
+            updated_at  = _utcnow(),
+        ))
+    db.commit()
 
 
 @app.get(

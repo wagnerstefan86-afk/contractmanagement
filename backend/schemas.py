@@ -492,6 +492,12 @@ class FindingReviewOut(_OrmBase):
     severity:           str | None
     clause_id:          str | None
     text_preview:       str | None
+    # Auto-populated enrichment fields
+    recommended_action:  str | None = None
+    assigned_owner_role: str | None = None
+    confidence_bucket:   str | None = None
+    ai_used:             bool | None = None
+    review_priority:     str | None = None
     status:             str
     reviewer_user_id:   int | None
     assigned_user_id:   int | None
@@ -720,6 +726,30 @@ class ClosureBundleOut(BaseModel):
     version_id:  int
     manifest:    ClosureBundleManifestOut
     has_zip:     bool                          # Whether the ZIP archive exists
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# LLM CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class LLMConfigOut(BaseModel):
+    """Two-level LLM configuration status."""
+    # Level A — system capability (from environment)
+    system_llm_enabled:  bool    # LLM_ENABLED env var
+    key_configured:      bool    # whether an API key is present
+    provider:            str
+    model:               str | None
+    effective_model:     str
+    timeout_seconds:     int
+    # Level B — application setting (persisted in DB)
+    app_llm_enabled:     bool    # admin-controlled toggle
+    # Effective status = system AND app
+    effective_enabled:   bool
+
+
+class LLMAppSettingUpdate(BaseModel):
+    """Body for PATCH /admin/llm-config."""
+    app_llm_enabled: bool
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

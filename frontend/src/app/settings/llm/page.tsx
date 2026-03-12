@@ -1,42 +1,55 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import AuthGuard from "@/components/AuthGuard";
 import Nav from "@/components/Nav";
 import { SessionUser } from "@/lib/session";
-import { getLLMConfig, LLMConfigOut } from "@/lib/api";
+import { getLLMConfig, updateLLMConfig, LLMConfigOut } from "@/lib/api";
 
 function LLMSettingsContent({ user }: { user: SessionUser }) {
-  const isAdmin = user.role === "ADMIN";
   const [config,  setConfig]  = useState<LLMConfigOut | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving,  setSaving]  = useState(false);
   const [error,   setError]   = useState("");
+  const [saved,   setSaved]   = useState(false);
 
   useEffect(() => {
-    if (!isAdmin) return;
     getLLMConfig()
       .then(setConfig)
-      .catch((err: Error) => setError(err.message))
+      .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [isAdmin]);
+  }, []);
 
-  if (!isAdmin) {
-    return (
-      <div className="page">
-        <Nav user={user} />
-        <main className="main">
-          <div className="page-header">
-            <div>
-              <div className="breadcrumb">Settings</div>
-              <h1>LLM Configuration</h1>
-            </div>
-          </div>
-          <div className="warn-box">ADMIN access required to view LLM configuration.</div>
-        </main>
-      </div>
-    );
+  async function handleToggle(newVal: boolean) {
+    if (!config) return;
+    setSaving(true);
+    setError("");
+    setSaved(false);
+    try {
+      const updated = await updateLLMConfig(newVal);
+      setConfig(updated);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Save failed.");
+    } finally {
+      setSaving(false);
+    }
   }
+
+  const isAdmin = user.role === "ADMIN";
+
+  if (loading) return (
+    <div className="page"><Nav user={user} /><main className="main"><div className="loading">Loading…</div></main></div>
+  );
+
+  if (!config) return (
+    <div className="page"><Nav user={user} />
+      <main className="main">
+        {error && <div className="error-box">{error}</div>}
+      </main>
+    </div>
+  );
 
   return (
     <div className="page">
@@ -44,146 +57,164 @@ function LLMSettingsContent({ user }: { user: SessionUser }) {
       <main className="main">
         <div className="page-header">
           <div>
-            <div className="breadcrumb">
-              <Link href="/settings/customer-profile">Settings</Link>
-            </div>
             <h1>LLM Configuration</h1>
-            <p className="page-subtitle">
-              Current AI/LLM provider settings for the analysis pipeline.
-              Changes require updating environment variables and restarting the backend service.
-            </p>
+            <p className="page-subtitle">AI-assisted analysis settings — admin controlled</p>
           </div>
         </div>
 
-        {error && <div className="error-box">{error}</div>}
-        {loading && <div className="loading">Loading LLM configuration…</div>}
+        {error && <div className="error-box" style={{ marginBottom: "1rem" }}>{error}</div>}
+        {saved && <div className="success-box" style={{ marginBottom: "1rem" }}>Setting saved.</div>}
 
-        {!loading && config && (
-          <>
-            <div className="profile-section">
-              <h2 className="profile-section-title">Pipeline Status</h2>
-              <div className="stats-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
-                <div className="stat-card">
-                  <div className="stat-label">LLM enabled</div>
-                  <div className="stat-value">
-                    <span className={config.llm_enabled ? "badge badge--green" : "badge badge--gray"}>
-                      {config.llm_enabled ? "Enabled" : "Disabled"}
-                    </span>
-                  </div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">API key</div>
-                  <div className="stat-value">
-                    <span className={config.key_configured ? "badge badge--green" : "badge badge--red"}>
-                      {config.key_configured ? "Configured" : "Not configured"}
-                    </span>
-                  </div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">Provider</div>
-                  <div className="stat-value" style={{ fontSize: "0.9rem", fontWeight: 600 }}>
-                    {config.provider}
-                  </div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">Request timeout</div>
-                  <div className="stat-value" style={{ fontSize: "0.9rem" }}>
-                    {config.timeout_seconds}s
-                  </div>
-                </div>
+        {/* ── Effective status ──────────────────────────────────────────────── */}
+        <div className="section">
+          <h2>Effective AI status</h2>
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-label">Effective AI analysis</div>
+              <div className="stat-value">
+                {config.effective_enabled
+                  ? <span className="badge badge--green">ENABLED</span>
+                  : <span className="badge badge--red">DISABLED</span>}
               </div>
             </div>
-
-            <div className="profile-section">
-              <h2 className="profile-section-title">Model</h2>
-              <table className="detail-table">
-                <tbody>
-                  <tr>
-                    <th>Configured model</th>
-                    <td className="mono">{config.model ?? <span className="text-muted">(using provider default)</span>}</td>
-                  </tr>
-                  <tr>
-                    <th>Effective model</th>
-                    <td className="mono">{((config as unknown as Record<string, unknown>).effective_model as string) ?? config.model ?? "—"}</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className="stat-card">
+              <div className="stat-label">System capability (env)</div>
+              <div className="stat-value">
+                {config.system_llm_enabled && config.key_configured
+                  ? <span className="badge badge--green">Available</span>
+                  : <span className="badge badge--red">Unavailable</span>}
+              </div>
             </div>
-
-            {!config.llm_enabled && (
-              <div className="warn-box">
-                <strong>LLM is disabled.</strong>{" "}
-                The pipeline runs in deterministic (rule-based) mode only.
-                Set <code>LLM_ENABLED=true</code> and configure an API key to enable AI-augmented analysis.
+            <div className="stat-card">
+              <div className="stat-label">App-level switch (DB)</div>
+              <div className="stat-value">
+                {config.app_llm_enabled
+                  ? <span className="badge badge--blue">On</span>
+                  : <span className="badge badge--gray">Off</span>}
               </div>
-            )}
-
-            {config.llm_enabled && !config.key_configured && (
-              <div className="warn-box">
-                <strong>API key not configured.</strong>{" "}
-                LLM is enabled but no API key is set. Set <code>LLM_API_KEY</code>,{" "}
-                <code>ANTHROPIC_API_KEY</code>, or <code>OPENAI_API_KEY</code> in the backend environment.
-              </div>
-            )}
-
-            {config.llm_enabled && config.key_configured && (
-              <div className="info-box">
-                LLM analysis is active. Stages 4.5, 5, and 8 use AI-augmented analysis
-                with deterministic fallback on timeout or error.
-              </div>
-            )}
-
-            <div className="profile-section">
-              <h2 className="profile-section-title">How to change configuration</h2>
-              <p className="profile-section-desc">
-                LLM settings are controlled via environment variables.
-                Update the backend container environment and restart:
-              </p>
-              <table className="detail-table">
-                <thead>
-                  <tr><th>Variable</th><th>Current effect</th><th>Example values</th></tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="mono">LLM_ENABLED</td>
-                    <td>{config.llm_enabled ? "true — AI enabled" : "false — deterministic only"}</td>
-                    <td className="mono">true / false</td>
-                  </tr>
-                  <tr>
-                    <td className="mono">LLM_PROVIDER</td>
-                    <td>{config.provider}</td>
-                    <td className="mono">anthropic / openai</td>
-                  </tr>
-                  <tr>
-                    <td className="mono">LLM_MODEL</td>
-                    <td>{config.model ? config.model : "using provider default"}</td>
-                    <td className="mono">claude-opus-4-6 / gpt-4o</td>
-                  </tr>
-                  <tr>
-                    <td className="mono">LLM_API_KEY</td>
-                    <td>{config.key_configured ? "configured" : "not set"}</td>
-                    <td className="mono">sk-... / ant-...</td>
-                  </tr>
-                  <tr>
-                    <td className="mono">ANTHROPIC_API_KEY</td>
-                    <td>provider-specific key for Anthropic</td>
-                    <td className="mono">ant-...</td>
-                  </tr>
-                  <tr>
-                    <td className="mono">OPENAI_API_KEY</td>
-                    <td>provider-specific key for OpenAI</td>
-                    <td className="mono">sk-...</td>
-                  </tr>
-                  <tr>
-                    <td className="mono">LLM_TIMEOUT_SECONDS</td>
-                    <td>{config.timeout_seconds}s per request</td>
-                    <td className="mono">30 / 60 / 120</td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
-          </>
+            <div className="stat-card">
+              <div className="stat-label">API key configured</div>
+              <div className="stat-value">
+                {config.key_configured
+                  ? <span className="badge badge--green">Yes</span>
+                  : <span className="badge badge--red">No</span>}
+              </div>
+            </div>
+          </div>
+
+          {config.app_llm_enabled && !config.system_llm_enabled && (
+            <div className="warn-box" style={{ marginTop: "1rem" }}>
+              <strong>System capability unavailable.</strong>{" "}
+              App switch is ON but LLM_ENABLED env var is false — AI analysis will not run.
+            </div>
+          )}
+          {config.app_llm_enabled && config.system_llm_enabled && !config.key_configured && (
+            <div className="warn-box" style={{ marginTop: "1rem" }}>
+              <strong>No API key configured.</strong>{" "}
+              App switch is ON but no API key is set. Pipeline will run in deterministic fallback mode.
+            </div>
+          )}
+          {!config.app_llm_enabled && (
+            <div className="info-box" style={{ marginTop: "1rem" }}>
+              AI-assisted analysis is <strong>disabled at the app level</strong>.
+              The pipeline will run in deterministic (rule-based) mode only.
+            </div>
+          )}
+        </div>
+
+        {/* ── App-level toggle ─────────────────────────────────────────────── */}
+        {isAdmin && (
+          <div className="section">
+            <h2>Operational toggle</h2>
+            <p className="page-subtitle" style={{ marginBottom: "1rem" }}>
+              Enable or disable AI-assisted analysis for all users.
+              This setting is stored in the database and takes effect on the next analysis run.
+            </p>
+            <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+              <button
+                className={`btn ${config.app_llm_enabled ? "btn-primary" : "btn-outline"}`}
+                onClick={() => handleToggle(true)}
+                disabled={saving || config.app_llm_enabled}
+              >
+                Enable AI analysis
+              </button>
+              <button
+                className={`btn ${!config.app_llm_enabled ? "btn-primary" : "btn-outline"}`}
+                onClick={() => handleToggle(false)}
+                disabled={saving || !config.app_llm_enabled}
+              >
+                Disable AI analysis
+              </button>
+              {saving && <span className="text-muted" style={{ fontSize: "0.85rem" }}>Saving…</span>}
+            </div>
+          </div>
         )}
+
+        {/* ── System configuration details ─────────────────────────────────── */}
+        <div className="section">
+          <h2>System configuration</h2>
+          <p className="page-subtitle" style={{ marginBottom: "1rem" }}>
+            These values come from environment variables and require a service restart to change.
+          </p>
+          <div className="table-scroll">
+            <table className="table">
+              <thead>
+                <tr><th>Setting</th><th>Value</th><th>Source</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>LLM_ENABLED</td>
+                  <td>{config.system_llm_enabled
+                    ? <span className="badge badge--green">true</span>
+                    : <span className="badge badge--red">false</span>}
+                  </td>
+                  <td className="text-muted">env var</td>
+                </tr>
+                <tr>
+                  <td>Provider</td>
+                  <td className="mono">{config.provider}</td>
+                  <td className="text-muted">LLM_PROVIDER</td>
+                </tr>
+                <tr>
+                  <td>Configured model</td>
+                  <td className="mono">{config.model ?? <span className="text-muted">(using provider default)</span>}</td>
+                  <td className="text-muted">LLM_MODEL</td>
+                </tr>
+                <tr>
+                  <td>Effective model</td>
+                  <td className="mono">{config.effective_model}</td>
+                  <td className="text-muted">resolved</td>
+                </tr>
+                <tr>
+                  <td>API key</td>
+                  <td>{config.key_configured
+                    ? <span className="badge badge--green">Configured ••••••••</span>
+                    : <span className="badge badge--red">Not set</span>}
+                  </td>
+                  <td className="text-muted">LLM_API_KEY / ANTHROPIC_API_KEY / OPENAI_API_KEY</td>
+                </tr>
+                <tr>
+                  <td>Request timeout</td>
+                  <td>{config.timeout_seconds}s</td>
+                  <td className="text-muted">LLM_TIMEOUT_SECONDS</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ── How it works ─────────────────────────────────────────────────── */}
+        <div className="section">
+          <h2>How effective status is determined</h2>
+          <div className="info-box">
+            <strong>effective_enabled = system_capability AND app_setting</strong>
+            <br />
+            System capability requires both <code>LLM_ENABLED=true</code> and an API key to be set.
+            The app-level switch (above) can further disable AI analysis without changing environment variables.
+            When AI is disabled, the pipeline runs in fully deterministic rule-based mode with no external API calls.
+          </div>
+        </div>
       </main>
     </div>
   );
