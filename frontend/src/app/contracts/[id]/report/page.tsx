@@ -217,7 +217,7 @@ function ReportContent({ user, contractId }: { user: SessionUser; contractId: st
                       <td>{item.risk_score ?? "—"}</td>
                       <td className="preview-cell">
                         {item.linked_action
-                          ? <span style={{ color: "var(--color-primary)" }}>{item.linked_action}</span>
+                          ? <Link href={`/contracts/${contractId}/negotiation#${item.linked_action}`} className="link mono">{item.linked_action}</Link>
                           : <span className="text-muted">—</span>}
                       </td>
                       <td className="preview-cell">{item.text_preview ?? "—"}</td>
@@ -242,7 +242,9 @@ function ReportContent({ user, contractId }: { user: SessionUser; contractId: st
                 return (
                   <div key={i} style={{ padding: "0.75rem", background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: "0.5rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.25rem" }}>
-                      {item.action_id && <span className="mono" style={{ fontSize: "0.8rem" }}>{item.action_id}</span>}
+                      {item.action_id && (
+                        <Link href={`/contracts/${contractId}/negotiation#${item.action_id}`} className="link mono" style={{ fontSize: "0.8rem" }}>{item.action_id}</Link>
+                      )}
                       {item.priority && <span className={riskBadge(item.priority)}>{item.priority}</span>}
                       {topics.map((t) => <span key={t} className="tag">{t.replace(/_/g, " ")}</span>)}
                       {item.finding_type && <span className="tag">{item.finding_type.replace(/_/g, " ")}</span>}

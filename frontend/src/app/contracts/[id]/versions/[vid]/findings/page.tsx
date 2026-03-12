@@ -20,7 +20,7 @@ import {
   READINESS_BADGE,
 } from "@/lib/api";
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── German label helpers ───────────────────────────────────────────────────────
 
 function severityBadge(s: string | null | undefined) {
   const u = (s ?? "").toUpperCase();
@@ -43,28 +43,43 @@ function statusBadge(s: FindingStatus) {
 
 function statusLabel(s: string): string {
   const labels: Record<string, string> = {
-    open:           "Open",
-    in_review:      "In Review",
-    in_negotiation: "In Negotiation",
-    resolved:       "Resolved",
-    accepted_risk:  "Accepted Risk",
-    not_applicable: "Not Applicable",
-    deferred:       "Deferred",
+    open:           "Offen",
+    in_review:      "In Prüfung",
+    in_negotiation: "In Verhandlung",
+    resolved:       "Erledigt",
+    accepted_risk:  "Risiko akzeptiert",
+    not_applicable: "Nicht anwendbar",
+    deferred:       "Zurückgestellt",
   };
   return labels[s] ?? s.replace(/_/g, " ");
 }
 
+const TOPIC_DE: Record<string, string> = {
+  REGULATORY_COMPLIANCE: "Reg. Compliance",
+  DATA_PROTECTION:       "Datenschutz",
+  SECURITY_CONTROLS:     "Sicherheit",
+  AUDIT_RIGHTS:          "Prüfungsrechte",
+  INCIDENT_MANAGEMENT:   "Vorfallmgmt.",
+  SERVICE_LEVELS:        "Service-Level",
+  OTHER:                 "Sonstiges",
+};
+
+function topicLabel(t: string | null | undefined): string {
+  if (!t) return "—";
+  return TOPIC_DE[t] ?? t.replace(/_/g, " ");
+}
+
+// German reviewer decision options
 const REVIEWER_DECISIONS: { label: string; value: FindingStatus; description: string }[] = [
-  { label: "Accept risk",             value: "accepted_risk",  description: "Risk accepted — no contract change needed" },
-  { label: "Request contract change", value: "in_negotiation", description: "Request vendor to amend this clause" },
-  { label: "Escalate to legal",       value: "in_review",      description: "Flag for legal team review" },
-  { label: "Customer responsibility", value: "not_applicable", description: "Responsibility accepted on our side" },
-  { label: "Not applicable",          value: "not_applicable", description: "Finding does not apply to our context" },
-  { label: "Needs clarification",     value: "deferred",       description: "Defer pending further information" },
-  { label: "Resolved",                value: "resolved",       description: "Issue has been resolved" },
+  { label: "Risiko akzeptieren",         value: "accepted_risk",  description: "Risiko akzeptiert — keine Vertragsänderung erforderlich" },
+  { label: "Vertragsänderung anfordern", value: "in_negotiation", description: "Vertragsänderung beim Anbieter einfordern" },
+  { label: "An Rechtsabteilung",         value: "in_review",      description: "Zur rechtlichen Prüfung weiterleiten" },
+  { label: "Nicht anwendbar",            value: "not_applicable", description: "Befund ist auf diesen Kontext nicht anwendbar" },
+  { label: "Klärung erforderlich",       value: "deferred",       description: "Zurückstellen bis zur Klärung" },
+  { label: "Erledigt",                   value: "resolved",       description: "Problem wurde behoben" },
 ];
 
-// ── Approval readiness banner ─────────────────────────────────────────────────
+// ── Approval readiness banner ──────────────────────────────────────────────────
 
 function ReadinessBanner({
   readiness, contractId, versionId, onQuickFilter,
@@ -85,29 +100,29 @@ function ReadinessBanner({
   return (
     <div className={bannerClass[r]} style={{ marginBottom: "1.5rem" }}>
       <div className="readiness-header">
-        <span>Approval Readiness:</span>
+        <span>Freigabefähigkeit:</span>
         <span className={READINESS_BADGE[r]}>{READINESS_LABEL[r]}</span>
-        <span className="meta-chip">HIGH unresolved: <strong>{c.high_open}</strong></span>
-        <span className="meta-chip">MEDIUM unresolved: <strong>{c.medium_open}</strong></span>
-        <span className="meta-chip">Resolved: <strong>{c.resolved}</strong></span>
+        <span className="meta-chip">HOCH offen: <strong>{c.high_open}</strong></span>
+        <span className="meta-chip">MITTEL offen: <strong>{c.medium_open}</strong></span>
+        <span className="meta-chip">Erledigt: <strong>{c.resolved}</strong></span>
       </div>
       <div className="readiness-quick-filters">
-        <span style={{ fontSize: "0.85rem", color: "var(--color-muted)", marginRight: "0.5rem" }}>Quick filters:</span>
-        <button className="btn btn-xs btn-outline" onClick={() => onQuickFilter("HIGH", "open")}>HIGH open</button>
-        <button className="btn btn-xs btn-outline" onClick={() => onQuickFilter("MEDIUM", "open")}>MEDIUM open</button>
-        <button className="btn btn-xs btn-outline" onClick={() => onQuickFilter("", "accepted_risk")}>Accepted risk</button>
-        <button className="btn btn-xs btn-ghost" onClick={() => onQuickFilter("", "")}>Clear</button>
+        <span style={{ fontSize: "0.85rem", color: "var(--color-muted)", marginRight: "0.5rem" }}>Schnellfilter:</span>
+        <button className="btn btn-xs btn-outline" onClick={() => onQuickFilter("HIGH", "open")}>HIGH offen</button>
+        <button className="btn btn-xs btn-outline" onClick={() => onQuickFilter("MEDIUM", "open")}>MEDIUM offen</button>
+        <button className="btn btn-xs btn-outline" onClick={() => onQuickFilter("", "accepted_risk")}>Risiko akzeptiert</button>
+        <button className="btn btn-xs btn-ghost" onClick={() => onQuickFilter("", "")}>Zurücksetzen</button>
         <Link href={`/contracts/${contractId}/versions/${versionId}/report`} className="btn btn-xs btn-outline" style={{ marginLeft: "0.5rem" }}>
-          ← Risk report
+          ← Risikobericht
         </Link>
       </div>
     </div>
   );
 }
 
-// ── Expanded finding detail ───────────────────────────────────────────────────
+// ── Review card (expanded finding detail) ─────────────────────────────────────
 
-function FindingDetail({
+function ReviewCard({
   finding, contractId, versionId, isViewer, onSaved,
 }: {
   finding: FindingReviewOut;
@@ -138,8 +153,7 @@ function FindingDetail({
 
   async function handleDecision() {
     if (!decision) return;
-    setSaving(true);
-    setSaveError("");
+    setSaving(true); setSaveError("");
     try {
       const body: FindingReviewUpdate = {
         status: decision,
@@ -151,38 +165,38 @@ function FindingDetail({
       setTimeout(() => setSaved(false), 3000);
       onSaved(updated);
     } catch (e: unknown) {
-      setSaveError(e instanceof Error ? e.message : "Save failed.");
+      setSaveError(e instanceof Error ? e.message : "Speichern fehlgeschlagen.");
     } finally {
       setSaving(false);
     }
   }
 
-  // Find the best SR match for AI context
   const srMatches = clauseDetail?.sr_matches ?? [];
-  const bestMatch = srMatches.find((m) => m.match_type === "DIRECT_MATCH") ?? srMatches[0] ?? null;
-  const ai = bestMatch?.ai_metadata as Record<string, unknown> | null ?? null;
+  const ai = clauseDetail?.obligation_assessment as Record<string, unknown> | null ?? null;
   const obligationAssessment = clauseDetail?.obligation_assessment;
-  const riskScore = clauseDetail?.risk_score;
 
   return (
-    <div className="finding-detail">
-      {/* ── Clause text ─────────────────────────────────────────────────── */}
+    <div className="finding-detail" style={{ display: "grid", gap: "0.875rem" }}>
+
+      {/* ── 1. Vertragsklausel (original language) ─────────────────────── */}
       {finding.clause_id && (
-        <div className="neg-section">
-          <h4>
-            Clause{" "}
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.35rem" }}>
+            <span style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--color-muted)" }}>
+              Vertragsklausel
+            </span>
             <Link
               href={`/contracts/${contractId}/versions/${versionId}/clauses/${encodeURIComponent(finding.clause_id)}`}
               className="link"
-              style={{ fontSize: "0.85rem" }}
+              style={{ fontSize: "0.8rem" }}
             >
               {finding.clause_id} →
             </Link>
-          </h4>
+          </div>
           {loadingClause ? (
-            <div className="text-muted" style={{ fontSize: "0.85rem" }}>Loading clause…</div>
+            <div className="text-muted" style={{ fontSize: "0.85rem" }}>Lädt Klausel…</div>
           ) : clauseDetail?.text ? (
-            <blockquote className="clause-excerpt" style={{ maxHeight: "8rem", overflowY: "auto" }}>
+            <blockquote className="clause-excerpt" style={{ maxHeight: "8rem", overflowY: "auto", fontSize: "0.875rem" }}>
               {clauseDetail.text}
             </blockquote>
           ) : (
@@ -191,107 +205,77 @@ function FindingDetail({
         </div>
       )}
 
-      {/* ── Obligation / risk context ────────────────────────────────────── */}
-      {obligationAssessment && (
-        <div className="neg-section">
-          <h4>Obligation assessment</h4>
-          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.25rem" }}>
-            <span className="tag">{obligationAssessment.assessment?.replace(/_/g, " ")}</span>
-            {obligationAssessment.severity && (
-              <span className={severityBadge(obligationAssessment.severity)}>{obligationAssessment.severity}</span>
-            )}
-          </div>
-          {obligationAssessment.reason && <p style={{ fontSize: "0.9rem" }}>{obligationAssessment.reason}</p>}
-          {obligationAssessment.recommended_action && (
-            <div className="info-box" style={{ margin: "0.25rem 0 0" }}>
-              <strong>Action:</strong> {obligationAssessment.recommended_action}
+      {/* ── 2. Verpflichtungsanalyse ───────────────────────────────────── */}
+      {(obligationAssessment || finding.recommended_action) && (
+        <div style={{ padding: "0.6rem 0.75rem", background: "var(--color-surface)", borderRadius: "0.375rem", border: "1px solid var(--color-border)" }}>
+          <p style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--color-muted)", marginBottom: "0.35rem" }}>
+            Verpflichtungsanalyse
+          </p>
+          {obligationAssessment && (
+            <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginBottom: "0.3rem" }}>
+              <span className="tag">{obligationAssessment.assessment?.replace(/_/g, " ")}</span>
+              {obligationAssessment.severity && (
+                <span className={severityBadge(obligationAssessment.severity)}>{obligationAssessment.severity}</span>
+              )}
+              {(ai as any)?.llm_used === true  && <span className="badge badge--blue"  style={{ fontSize: "0.7rem" }}>KI</span>}
+              {(ai as any)?.llm_used === false && <span className="badge badge--gray"  style={{ fontSize: "0.7rem" }}>Regelbasiert</span>}
+            </div>
+          )}
+          {obligationAssessment?.reason && (
+            <p style={{ fontSize: "0.875rem", marginBottom: "0.3rem" }}>{obligationAssessment.reason}</p>
+          )}
+          {/* Recommended action */}
+          {finding.recommended_action && (
+            <div className="info-box" style={{ margin: "0.3rem 0 0", fontSize: "0.875rem" }}>
+              <strong>Empfohlene Maßnahme:</strong> {finding.recommended_action}
             </div>
           )}
         </div>
       )}
 
-      {/* ── Framework / SR matches ───────────────────────────────────────── */}
+      {/* ── 3. Regulatorische Treffer ──────────────────────────────────── */}
       {srMatches.length > 0 && (
-        <div className="neg-section">
-          <h4>Framework matches</h4>
-          {srMatches.slice(0, 4).map((m, i) => (
-            <div key={i} style={{ marginBottom: "0.5rem", padding: "0.4rem 0.6rem", background: "var(--color-surface)", borderRadius: "0.375rem", border: "1px solid var(--color-border)" }}>
-              <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", alignItems: "center" }}>
-                <span className="mono" style={{ fontSize: "0.8rem" }}>{m.sr_id}</span>
+        <div>
+          <p style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--color-muted)", marginBottom: "0.35rem" }}>
+            Regulatorische Treffer ({srMatches.length})
+          </p>
+          <div style={{ display: "grid", gap: "0.3rem" }}>
+            {srMatches.slice(0, 4).map((m, i) => (
+              <div key={i} style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", alignItems: "center", padding: "0.35rem 0.5rem", background: "var(--color-surface)", borderRadius: "0.375rem", border: "1px solid var(--color-border)", fontSize: "0.8rem" }}>
+                <span className="mono" style={{ fontSize: "0.78rem" }}>{m.sr_id}</span>
                 <span className="tag">{m.framework}</span>
                 {m.match_type === "DIRECT_MATCH"
-                  ? <span className="badge badge--green" style={{ fontSize: "0.75rem" }}>Direct</span>
-                  : <span className="badge badge--gray" style={{ fontSize: "0.75rem" }}>Indirect</span>}
-                {m.confidence_bucket && <span className="meta-chip" style={{ fontSize: "0.75rem" }}>{m.confidence_bucket}</span>}
-                {m.review_priority && <span className={severityBadge(m.review_priority)} style={{ fontSize: "0.75rem" }}>{m.review_priority}</span>}
+                  ? <span className="badge badge--green" style={{ fontSize: "0.7rem" }}>Direkter Treffer</span>
+                  : <span className="badge badge--gray"  style={{ fontSize: "0.7rem" }}>Indirekter Treffer</span>}
+                {m.confidence_bucket && <span className="meta-chip" style={{ fontSize: "0.7rem" }}>{m.confidence_bucket}</span>}
                 {m.decision_delta && m.decision_delta !== "none" && (
-                  <span className="badge badge--yellow" style={{ fontSize: "0.75rem" }}>delta: {m.decision_delta}</span>
+                  <span className="badge badge--yellow" style={{ fontSize: "0.7rem" }}>delta: {m.decision_delta}</span>
+                )}
+                {m.sr_title && <span style={{ color: "var(--color-muted)", fontSize: "0.78rem" }}>{m.sr_title}</span>}
+                {m.extracted_evidence && (
+                  <span style={{ fontStyle: "italic", fontSize: "0.75rem" }}>&ldquo;{m.extracted_evidence}&rdquo;</span>
                 )}
               </div>
-              {m.sr_title && <p style={{ fontSize: "0.85rem", marginTop: "0.2rem", color: "var(--color-muted)" }}>{m.sr_title}</p>}
-              {m.extracted_evidence && (
-                <p style={{ fontSize: "0.8rem", marginTop: "0.2rem", fontStyle: "italic" }}>&ldquo;{m.extracted_evidence}&rdquo;</p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* ── AI assessment ───────────────────────────────────────────────── */}
-      {ai && (
-        <div className="neg-section">
-          <h4>AI assessment</h4>
-          <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginBottom: "0.4rem" }}>
-            {ai.llm_used === true  && <span className="badge badge--blue" style={{ fontSize: "0.75rem" }}>AI used</span>}
-            {ai.llm_used === false && <span className="badge badge--gray" style={{ fontSize: "0.75rem" }}>Deterministic</span>}
-            {ai.provider != null   && <span className="tag" style={{ fontSize: "0.75rem" }}>{String(ai.provider)}</span>}
-            {ai.model    != null   && <span className="tag" style={{ fontSize: "0.75rem" }}>{String(ai.model)}</span>}
-            {ai.confidence != null && <span className="meta-chip" style={{ fontSize: "0.75rem" }}>confidence: {String(ai.confidence)}</span>}
+            ))}
           </div>
-          {bestMatch?.baseline_result && (
-            <p style={{ fontSize: "0.85rem" }}>
-              Baseline: <strong>{bestMatch.baseline_result}</strong>
-              {bestMatch.decision_delta && bestMatch.decision_delta !== "none" && (
-                <> · AI override: <strong style={{ color: "var(--color-warning)" }}>{bestMatch.decision_delta}</strong></>
-              )}
-            </p>
-          )}
-          {bestMatch?.match_reasoning && (
-            <p style={{ fontSize: "0.85rem", marginTop: "0.25rem", color: "var(--color-muted)" }}>{bestMatch.match_reasoning}</p>
-          )}
         </div>
       )}
 
-      {/* ── Recommended action ──────────────────────────────────────────── */}
-      {finding.recommended_action && (
-        <div className="neg-section">
-          <h4>Recommended action</h4>
-          <div className="info-box" style={{ margin: 0 }}>{finding.recommended_action}</div>
-        </div>
-      )}
-
-      {/* ── Risk metadata ───────────────────────────────────────────────── */}
-      {riskScore && (
-        <div className="neg-meta-row">
-          {riskScore.risk_score != null && <span className="meta-chip">Risk score: {riskScore.risk_score}</span>}
-          {riskScore.priority && <span className={severityBadge(riskScore.priority)}>{riskScore.priority}</span>}
-          {riskScore.obligation && <span className="meta-chip">Obligation: {riskScore.obligation}</span>}
-        </div>
-      )}
-
-      {/* ── Reviewer decision ───────────────────────────────────────────── */}
+      {/* ── 4. Prüferentscheidung ──────────────────────────────────────── */}
       {!isViewer && (
-        <div className="neg-section" style={{ borderTop: "2px solid var(--color-border)", paddingTop: "0.75rem", marginTop: "0.75rem" }}>
-          <h4>Reviewer decision</h4>
-          {saved && <div className="success-box" style={{ marginBottom: "0.5rem" }}>Decision recorded.</div>}
-          {saveError && <div className="error-box" style={{ marginBottom: "0.5rem" }}>{saveError}</div>}
+        <div style={{ borderTop: "2px solid var(--color-border)", paddingTop: "0.75rem" }}>
+          <p style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--color-muted)", marginBottom: "0.5rem" }}>
+            Prüferentscheidung
+          </p>
+          {saved     && <div className="success-box" style={{ marginBottom: "0.5rem" }}>Entscheidung gespeichert.</div>}
+          {saveError && <div className="error-box"   style={{ marginBottom: "0.5rem" }}>{saveError}</div>}
 
-          <div style={{ display: "grid", gap: "0.5rem", gridTemplateColumns: "1fr 1fr", marginBottom: "0.5rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.35rem", marginBottom: "0.5rem" }}>
             {REVIEWER_DECISIONS.map((d) => (
               <button
                 key={`${d.label}-${d.value}`}
-                className={`btn btn-sm ${decision === d.value && d.label === REVIEWER_DECISIONS.find(x => x.value === decision && x.label === d.label)?.label ? "btn-primary" : "btn-outline"}`}
-                style={{ textAlign: "left", justifyContent: "flex-start" }}
+                className={`btn btn-sm ${decision === d.value && REVIEWER_DECISIONS.find(x => x.value === decision && x.label === d.label) ? "btn-primary" : "btn-outline"}`}
+                style={{ textAlign: "left", justifyContent: "flex-start", fontSize: "0.78rem" }}
                 onClick={() => setDecision(d.value)}
                 disabled={saving}
                 title={d.description}
@@ -302,35 +286,36 @@ function FindingDetail({
           </div>
 
           {decision && (
-            <p style={{ fontSize: "0.8rem", color: "var(--color-muted)", marginBottom: "0.5rem" }}>
+            <p style={{ fontSize: "0.8rem", color: "var(--color-muted)", marginBottom: "0.4rem" }}>
               {REVIEWER_DECISIONS.find((d) => d.value === decision)?.description}
             </p>
           )}
 
-          <textarea
-            className="workflow-notes"
-            rows={2}
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            disabled={saving}
-            placeholder="Review comment (optional)…"
-            style={{ marginBottom: "0.4rem" }}
-          />
-          <textarea
-            className="workflow-notes"
-            rows={2}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            disabled={saving}
-            placeholder="Disposition reason (optional)…"
-            style={{ marginBottom: "0.5rem" }}
-          />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.4rem", marginBottom: "0.5rem" }}>
+            <textarea
+              className="workflow-notes"
+              rows={2}
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              disabled={saving}
+              placeholder="Prüfungskommentar (optional)…"
+            />
+            <textarea
+              className="workflow-notes"
+              rows={2}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              disabled={saving}
+              placeholder="Begründung der Entscheidung (optional)…"
+            />
+          </div>
+
           <button
             className="btn btn-sm btn-primary"
             onClick={handleDecision}
             disabled={!decision || saving}
           >
-            {saving ? "Saving…" : "Record decision"}
+            {saving ? "Speichern…" : "Entscheidung erfassen"}
           </button>
         </div>
       )}
@@ -350,7 +335,6 @@ function FindingRow({
   onSaved: (updated: FindingReviewOut) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-
   const priority = (finding.review_priority ?? finding.severity ?? "").toUpperCase();
 
   return (
@@ -360,65 +344,50 @@ function FindingRow({
         style={{ cursor: "pointer" }}
         onClick={() => setExpanded((x) => !x)}
       >
-        {/* Priority */}
+        <td>{priority && <span className={severityBadge(priority)}>{priority}</span>}</td>
         <td>
-          {priority && <span className={severityBadge(priority)}>{priority}</span>}
+          {finding.clause_id
+            ? <span className="mono" style={{ fontSize: "0.85rem" }}>{finding.clause_id}</span>
+            : "—"}
         </td>
-        {/* Clause */}
-        <td>
-          {finding.clause_id ? (
-            <span className="mono" style={{ fontSize: "0.85rem" }}>{finding.clause_id}</span>
-          ) : "—"}
-        </td>
-        {/* Preview */}
         <td className="preview-cell" style={{ maxWidth: "14rem" }}>
           <span style={{ fontSize: "0.82rem" }}>{finding.text_preview ?? "—"}</span>
         </td>
-        {/* Topic */}
         <td>
           {finding.topic
-            ? <span className="tag" style={{ fontSize: "0.8rem" }}>{finding.topic}</span>
+            ? <span className="tag" style={{ fontSize: "0.78rem" }}>{topicLabel(finding.topic)}</span>
             : <span className="text-muted">—</span>}
         </td>
-        {/* Severity */}
-        <td>
-          <span className={severityBadge(finding.severity)}>{finding.severity ?? "—"}</span>
-        </td>
-        {/* Recommended action (compact) */}
-        <td className="preview-cell" style={{ maxWidth: "14rem" }}>
+        <td><span className={severityBadge(finding.severity)}>{finding.severity ?? "—"}</span></td>
+        <td className="preview-cell" style={{ maxWidth: "13rem" }}>
           {finding.recommended_action
-            ? <span style={{ fontSize: "0.82rem" }}>{finding.recommended_action.slice(0, 120)}{finding.recommended_action.length > 120 ? "…" : ""}</span>
+            ? <span style={{ fontSize: "0.82rem" }}>{finding.recommended_action.slice(0, 100)}{finding.recommended_action.length > 100 ? "…" : ""}</span>
             : <span className="text-muted">—</span>}
         </td>
-        {/* AI used */}
         <td style={{ whiteSpace: "nowrap" }}>
-          {finding.ai_used === true  && <span className="badge badge--blue"  style={{ fontSize: "0.7rem" }}>AI</span>}
-          {finding.ai_used === false && <span className="badge badge--gray"  style={{ fontSize: "0.7rem" }}>det.</span>}
-          {finding.ai_used == null   && <span className="text-muted"        style={{ fontSize: "0.7rem" }}>—</span>}
+          {finding.ai_used === true  && <span className="badge badge--blue" style={{ fontSize: "0.7rem" }}>KI</span>}
+          {finding.ai_used === false && <span className="badge badge--gray" style={{ fontSize: "0.7rem" }}>det.</span>}
+          {finding.ai_used == null   && <span className="text-muted"       style={{ fontSize: "0.7rem" }}>—</span>}
           {finding.confidence_bucket && (
             <span className="meta-chip" style={{ fontSize: "0.7rem", marginLeft: "0.25rem" }}>{finding.confidence_bucket}</span>
           )}
         </td>
-        {/* Status */}
-        <td>
-          <span className={statusBadge(finding.status)}>{statusLabel(finding.status)}</span>
-        </td>
-        {/* Owner */}
+        <td><span className={statusBadge(finding.status)}>{statusLabel(finding.status)}</span></td>
         <td style={{ fontSize: "0.82rem" }}>
-          {finding.assigned_owner_role ?? finding.assignee_name ?? "—"}
+          {finding.assigned_owner_role ?? (finding as any).assignee_name ?? "—"}
         </td>
-        {/* Expand toggle */}
         <td style={{ whiteSpace: "nowrap" }}>
           <button className="btn btn-xs btn-ghost" onClick={(e) => { e.stopPropagation(); setExpanded((x) => !x); }}>
             {expanded ? "▲" : "▼"}
           </button>
         </td>
       </tr>
+
       {expanded && (
         <tr>
-          <td colSpan={9} style={{ padding: "0", background: "var(--color-surface-raised)" }}>
+          <td colSpan={10} style={{ padding: "0", background: "var(--color-surface-raised)" }}>
             <div style={{ padding: "1rem 1.25rem", borderBottom: "1px solid var(--color-border)" }}>
-              <FindingDetail
+              <ReviewCard
                 finding={finding}
                 contractId={contractId}
                 versionId={versionId}
@@ -433,7 +402,7 @@ function FindingRow({
   );
 }
 
-// ── Main content ──────────────────────────────────────────────────────────────
+// ── Main content ───────────────────────────────────────────────────────────────
 
 function FindingsContent({
   user, contractId, versionId,
@@ -451,8 +420,7 @@ function FindingsContent({
   const [filterTopic,    setFilterTopic]    = useState("");
 
   async function load() {
-    setLoading(true);
-    setError("");
+    setLoading(true); setError("");
     try {
       const [read, lst] = await Promise.all([
         getApprovalReadiness(contractId, versionId).catch(() => null),
@@ -466,7 +434,7 @@ function FindingsContent({
       setFindings(lst.findings);
       setTotal(lst.total);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to load findings.");
+      setError(e instanceof Error ? e.message : "Laden der Befunde fehlgeschlagen.");
     } finally {
       setLoading(false);
     }
@@ -486,16 +454,13 @@ function FindingsContent({
 
   const isViewer = user.role === "VIEWER";
 
-  // Sort: open HIGH first, then MEDIUM, then others
   const SEVERITY_ORDER: Record<string, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 };
   const STATUS_ORDER:   Record<string, number>  = { open: 0, in_review: 1, in_negotiation: 2, deferred: 3, resolved: 4, accepted_risk: 5, not_applicable: 6 };
   const sorted = [...findings].sort((a, b) => {
     const sa = SEVERITY_ORDER[(a.review_priority ?? a.severity ?? "").toUpperCase()] ?? 9;
     const sb = SEVERITY_ORDER[(b.review_priority ?? b.severity ?? "").toUpperCase()] ?? 9;
     if (sa !== sb) return sa - sb;
-    const oa = STATUS_ORDER[a.status] ?? 9;
-    const ob = STATUS_ORDER[b.status] ?? 9;
-    return oa - ob;
+    return (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9);
   });
 
   return (
@@ -505,15 +470,15 @@ function FindingsContent({
         <div className="page-header">
           <div>
             <Link href={`/contracts/${contractId}`} className="breadcrumb">← {contractId}</Link>
-            <h1>Finding Reviews — v{versionId}</h1>
-            <p className="page-subtitle">Expand each row to view clause context, framework matches, and record your decision.</p>
+            <h1>Prüf-Warteschlange — v{versionId}</h1>
+            <p className="page-subtitle">Klappen Sie Zeilen auf, um Klauseltext, Verpflichtungsanalyse und Regulierungstreffer einzusehen und Entscheidungen zu erfassen.</p>
           </div>
           <div style={{ display: "flex", gap: "0.5rem" }}>
             <Link href={`/contracts/${contractId}/versions/${versionId}/clauses`} className="btn btn-outline">
-              Clause explorer →
+              Klausel-Explorer →
             </Link>
             <Link href={`/contracts/${contractId}/versions/${versionId}/report`} className="btn btn-outline">
-              ← Risk report
+              ← Risikobericht
             </Link>
           </div>
         </div>
@@ -530,32 +495,32 @@ function FindingsContent({
         {/* Filters */}
         <div className="filter-row">
           <select className="filter-select" value={filterSeverity} onChange={(e) => setFilterSeverity(e.target.value)}>
-            <option value="">All severities</option>
-            <option value="HIGH">High</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="LOW">Low</option>
+            <option value="">Alle Schweregrade</option>
+            <option value="HIGH">Hoch</option>
+            <option value="MEDIUM">Mittel</option>
+            <option value="LOW">Niedrig</option>
           </select>
           <select className="filter-select" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-            <option value="">All statuses</option>
-            <option value="open">Open</option>
-            <option value="in_review">In Review</option>
-            <option value="in_negotiation">In Negotiation</option>
-            <option value="deferred">Deferred</option>
-            <option value="accepted_risk">Accepted Risk</option>
-            <option value="resolved">Resolved</option>
-            <option value="not_applicable">Not Applicable</option>
+            <option value="">Alle Status</option>
+            <option value="open">Offen</option>
+            <option value="in_review">In Prüfung</option>
+            <option value="in_negotiation">In Verhandlung</option>
+            <option value="deferred">Zurückgestellt</option>
+            <option value="accepted_risk">Risiko akzeptiert</option>
+            <option value="resolved">Erledigt</option>
+            <option value="not_applicable">Nicht anwendbar</option>
           </select>
           <input
             className="filter-input"
-            placeholder="Filter by topic…"
+            placeholder="Nach Thema filtern…"
             value={filterTopic}
             onChange={(e) => setFilterTopic(e.target.value)}
           />
-          <span className="filter-count">{total} finding{total !== 1 ? "s" : ""}</span>
+          <span className="filter-count">{total} Befund{total !== 1 ? "e" : ""}</span>
         </div>
 
-        {error && <div className="error-box" style={{ marginTop: "1rem" }}>{error}</div>}
-        {loading && <div className="loading" style={{ marginTop: "1rem" }}>Loading…</div>}
+        {error   && <div className="error-box" style={{ marginTop: "1rem" }}>{error}</div>}
+        {loading && <div className="loading"   style={{ marginTop: "1rem" }}>Laden…</div>}
 
         {!loading && sorted.length > 0 && (
           <div className="section">
@@ -563,15 +528,15 @@ function FindingsContent({
               <table className="table findings-queue">
                 <thead>
                   <tr>
-                    <th>Priority</th>
-                    <th>Clause</th>
-                    <th>Preview</th>
-                    <th>Topic</th>
-                    <th>Severity</th>
-                    <th>Recommended action</th>
-                    <th>AI</th>
+                    <th>Priorität</th>
+                    <th>Klausel</th>
+                    <th>Vorschau</th>
+                    <th>Thema</th>
+                    <th>Schwere</th>
+                    <th>Empfohlene Maßnahme</th>
+                    <th>KI</th>
                     <th>Status</th>
-                    <th>Owner</th>
+                    <th>Verantwortlich</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -594,7 +559,7 @@ function FindingsContent({
 
         {!loading && sorted.length === 0 && !error && (
           <div className="empty-state" style={{ marginTop: "2rem" }}>
-            No findings match the current filters.
+            Keine Befunde für den aktuellen Filter.
           </div>
         )}
       </main>

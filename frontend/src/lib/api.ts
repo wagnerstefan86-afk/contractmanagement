@@ -517,10 +517,10 @@ export const READINESS_ORDER: ApprovalReadiness[] = [
 ];
 
 export const READINESS_LABEL: Record<ApprovalReadiness, string> = {
-  blocked:                        "Blocked",
-  review_required:                "Review Required",
-  ready_for_conditional_approval: "Ready for Conditional Approval",
-  ready_for_approval:             "Ready for Approval",
+  blocked:                        "Blockiert",
+  review_required:                "Prüfung erforderlich",
+  ready_for_conditional_approval: "Bedingt freigabefähig",
+  ready_for_approval:             "Freigabefähig",
 };
 
 export const READINESS_BADGE: Record<ApprovalReadiness, string> = {

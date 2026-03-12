@@ -9,7 +9,9 @@ Reads:
   stage8_remediation_proposals.json (problem summaries, suggested clauses)
 
 Merging rule:
-  Clauses sharing the same finding_type receive one merged action.
+  Clauses sharing the same (finding_type, topic) receive one merged action.
+  This produces thematically separated, reviewer-meaningful findings rather
+  than one giant action per finding type.
   Priority of a merged action = highest priority among its clauses.
   VALID clauses are excluded.
 
@@ -106,38 +108,35 @@ def build_action_plan(
                     "finding":  fi,
                 })
 
-    # ── Group non-VALID clauses by finding_type ───────────────────────────────
-    groups: dict[str, list[str]] = defaultdict(list)    # finding_type → [clause_id]
+    # ── Group non-VALID clauses by (finding_type, topic) ─────────────────────
+    # One action per thematic (type, topic) pair — reviewer-meaningful separation.
+    groups: dict[tuple[str, str], list[str]] = defaultdict(list)
     for clause_id, rec in trace_idx.items():
         obligation = rec.get("obligation_assessment", "VALID")
         if obligation == "VALID":
             continue
-        groups[obligation].append(clause_id)
+        topic = score_idx.get(clause_id, {}).get("topic") or "OTHER"
+        groups[(obligation, topic)].append(clause_id)
 
     # ── Build one action per group ────────────────────────────────────────────
     actions: list[dict] = []
 
-    # Sort groups: HIGH-containing groups first
-    def _group_priority(finding_type: str) -> tuple:
-        clause_ids = groups[finding_type]
+    # Sort groups: HIGH-containing groups first, then by type, then topic
+    def _group_priority(key: tuple[str, str]) -> tuple:
+        clause_ids = groups[key]
         priorities = [score_idx[c]["priority"] for c in clause_ids if c in score_idx]
         best = _max_priority(*priorities) if priorities else "LOW"
-        return (PRI_ORDER.get(best, 99), finding_type)
+        return (PRI_ORDER.get(best, 99), key[0], key[1])
 
-    for finding_type in sorted(groups, key=_group_priority):
-        clause_ids = sorted(groups[finding_type])   # stable ordering
+    for (finding_type, primary_topic) in sorted(groups, key=_group_priority):
+        clause_ids = sorted(groups[(finding_type, primary_topic)])   # stable ordering
 
         # ── Gather per-clause data ─────────────────────────────────────────
         scored_clauses = [score_idx[c] for c in clause_ids if c in score_idx]
-        topics_seen:  list[str] = []
-        seen_set:     set[str]  = set()
-        for sc in scored_clauses:
-            t = sc.get("topic")
-            if t and t not in seen_set:
-                topics_seen.append(t)
-                seen_set.add(t)
+        # Each group has exactly one topic; no secondary topic merging needed
+        topics_seen: list[str] = [primary_topic]
 
-        action_priority = _max_priority(*(sc["priority"] for sc in scored_clauses))
+        action_priority = _max_priority(*(sc["priority"] for sc in scored_clauses)) if scored_clauses else "LOW"
 
         risk_ref: dict[str, float] = {
             sc["clause_id"]: sc["risk_score"] for sc in scored_clauses
@@ -187,20 +186,21 @@ def build_action_plan(
         suggested_clause   = primary_rem.get("suggested_clause", "")
 
         # ── Owner role ────────────────────────────────────────────────────
-        primary_topic = topics_seen[0] if topics_seen else "OTHER"
         owner = OWNER_ROLE.get(primary_topic, "Legal / Compliance Officer")
+        secondary_owners: list[str] = []   # single-topic groups have no secondary owner
 
-        # Secondary owner if multi-topic spans different domains
-        secondary_topics = topics_seen[1:] if len(topics_seen) > 1 else []
-        secondary_owners = list(dict.fromkeys(
-            OWNER_ROLE.get(t, "") for t in secondary_topics
-            if OWNER_ROLE.get(t, "") and OWNER_ROLE.get(t, "") != owner
-        ))
+        # Include topic in label so actions with same finding_type are distinguishable
+        topic_fmt = _fmt_topic(primary_topic)
+        finding_label_with_topic = (
+            f"{FINDING_LABEL.get(finding_type, finding_type)} — {topic_fmt}"
+            if primary_topic != "OTHER" else
+            FINDING_LABEL.get(finding_type, finding_type)
+        )
 
         actions.append({
             "action_id":               None,   # assigned after sort
             "finding_type":            finding_type,
-            "finding_label":           FINDING_LABEL.get(finding_type, finding_type),
+            "finding_label":           finding_label_with_topic,
             "topic":                   topics_seen,
             "priority":                action_priority,
             "affected_clauses":        clause_ids,
