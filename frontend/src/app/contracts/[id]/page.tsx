@@ -106,9 +106,15 @@ function riskBadge(risk: string | null) {
 
 function AnalysisProgress({ jobStatus }: { jobStatus: AnalysisStatusOut }) {
   const { status, current_stage, started_at, completed_at, error_message } = jobStatus;
-  const isActive  = status === "pending" || status === "running";
-  const isDone    = status === "completed";
-  const isFailed  = status === "failed";
+  // Safety: if the backend reports stage="done" while status is still "running",
+  // the run has finished but the terminal commit was delayed or the row is stale.
+  // Treat it as completed in the UI so the spinner doesn't spin forever.
+  const effectiveStatus = (status === "running" && current_stage === "done")
+    ? "completed"
+    : status;
+  const isActive  = effectiveStatus === "pending" || effectiveStatus === "running";
+  const isDone    = effectiveStatus === "completed";
+  const isFailed  = effectiveStatus === "failed";
   const pct       = isDone ? 100 : progressPct(current_stage);
   const stageLabel = current_stage ? STAGE_LABELS[current_stage] ?? current_stage : null;
 
@@ -124,7 +130,7 @@ function AnalysisProgress({ jobStatus }: { jobStatus: AnalysisStatusOut }) {
             {isFailed && "Analysis failed"}
             {isActive && (stageLabel ?? "Starting…")}
           </span>
-          <span className={statusBadge(status)}>{status}</span>
+          <span className={statusBadge(effectiveStatus)}>{effectiveStatus}</span>
         </div>
 
         {isActive && stageLabel && (
@@ -694,8 +700,15 @@ function ContractDetailContent({
   const [vUploadErr,  setVUploadErr] = useState("");
   const [vUploading,  setVUploading] = useState(false);
 
-  // Polling is active while status is pending or running
-  const isJobActive = jobStatus?.status === "pending" || jobStatus?.status === "running";
+  // Polling is active while status is pending or running.
+  // Extra guard: stage="done" with status="running" means the run finished but the
+  // terminal commit was lost (e.g. server crash after stage callback, before final commit).
+  // Treat that combination as terminal so the UI does not poll forever.
+  const _effectiveJobStatus =
+    jobStatus?.status === "running" && jobStatus?.current_stage === "done"
+      ? "completed"
+      : jobStatus?.status;
+  const isJobActive = _effectiveJobStatus === "pending" || _effectiveJobStatus === "running";
 
   // ── Initial data load ──────────────────────────────────────────────────────
 
@@ -755,9 +768,14 @@ function ContractDetailContent({
   const pollStatus = useCallback(async () => {
     try {
       const s = await getContractStatus(contractId);
-      setJobStatus(s);
-      // Refresh analyses, workflow, and history whenever a run completes
-      if (s.status === "completed" || s.status === "failed") {
+      // Normalise stuck state: stage=done + status=running → treat as completed
+      // so the polling condition (isJobActive) immediately becomes false.
+      const normalised = (s.status === "running" && s.current_stage === "done")
+        ? { ...s, status: "completed" as typeof s.status }
+        : s;
+      setJobStatus(normalised);
+      // Refresh analyses, workflow, and history whenever a run reaches a terminal state
+      if (normalised.status === "completed" || normalised.status === "failed") {
         const [list, wf, hist] = await Promise.all([
           listAnalyses(contractId).catch(() => [] as AnalysisOut[]),
           getWorkflow(contractId).catch(() => null),

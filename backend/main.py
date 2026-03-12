@@ -63,12 +63,15 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import logging
 import os
 import shutil
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+log = logging.getLogger("infosec.backend")
 
 import aiofiles
 from fastapi import (
@@ -201,6 +204,10 @@ def _startup() -> None:
     ANALYSES_DIR.mkdir(parents=True, exist_ok=True)
     # Migrate: add columns/tables introduced in v2.1+ if they don't exist yet
     _migrate_tables()
+    # Mark any analysis runs that are still "running" or "pending" from a
+    # previous server process as "failed" — they cannot be resumed, and
+    # leaving them in a non-terminal state would cause the UI to poll forever.
+    _recover_stale_runs()
 
 
 def _migrate_tables() -> None:
@@ -408,6 +415,53 @@ def _migrate_tables() -> None:
         conn.commit()
 
 
+def _recover_stale_runs() -> None:
+    """
+    On server startup, mark any analysis run that is still in a non-terminal
+    state ("pending" or "running") as "failed".
+
+    These runs were orphaned by a previous server crash or clean shutdown while
+    a background task was in progress.  They cannot be resumed, and leaving them
+    in a non-terminal state causes the frontend to poll indefinitely.
+
+    Called once from the startup handler — safe to run even with an empty DB.
+    """
+    from .database import SessionLocal
+    db = SessionLocal()
+    try:
+        stale = (
+            db.query(Analysis)
+            .filter(Analysis.status.in_(["pending", "running"]))
+            .all()
+        )
+        if not stale:
+            return
+        now = _utcnow()
+        for row in stale:
+            log.warning(
+                "analysis.stale_recovered analysis_id=%d contract_id=%s "
+                "was_status=%s – marking failed on startup",
+                row.id, row.contract_id, row.status,
+            )
+            row.status        = "failed"
+            row.current_stage = None
+            row.error_message = (
+                "Analysis was interrupted by a server restart and cannot be resumed. "
+                "Please re-run the analysis."
+            )
+            row.completed_at  = now
+        db.commit()
+        log.info("analysis.stale_recovery_done count=%d", len(stale))
+    except Exception as exc:
+        log.error("analysis.stale_recovery_error error=%s", exc)
+        try:
+            db.rollback()
+        except Exception:
+            pass
+    finally:
+        db.close()
+
+
 # ── Shared helpers ────────────────────────────────────────────────────────────
 
 def _utcnow() -> datetime:
@@ -559,18 +613,40 @@ def _bg_analyze(
     version_id:    int | None  = None,
     customer_id:   int | None  = None,
 ) -> None:
+    """
+    Background task: run the full analysis pipeline and persist the terminal state.
+
+    Lifecycle guarantees
+    --------------------
+    Every code path commits one of exactly two terminal states to the DB:
+      - status = "completed", current_stage = "done"
+      - status = "failed",    current_stage = None
+
+    The outer except-all clause ensures that even an unhandled exception
+    (e.g. OOM, unexpected RuntimeError) results in a "failed" commit rather
+    than leaving the row stuck in "running" indefinitely.
+
+    Post-processing steps (contract/version status update, finding-review
+    generation) are isolated in their own try/except blocks so they cannot
+    prevent the terminal-state commit from reaching the DB.
+    """
     from .database import SessionLocal
     db = SessionLocal()
     try:
         analysis = db.query(Analysis).filter(Analysis.id == analysis_id).first()
         if analysis is None:
+            log.warning(
+                "analysis.lifecycle analysis_id=%d not found – aborting background task",
+                analysis_id,
+            )
             return
+
         analysis.status     = "running"
         analysis.started_at = _utcnow()
         if version_id:
             analysis.version_id = version_id
 
-        # ── Record org_profile snapshot hash (file written by pipeline) ───────
+        # ── Record org_profile snapshot hash ──────────────────────────────────
         if org_profile:
             snapshot_json = json.dumps(org_profile, sort_keys=True, ensure_ascii=False)
             analysis.org_profile_snapshot_path = str(output_dir / "org_profile.json")
@@ -579,7 +655,12 @@ def _bg_analyze(
             ).hexdigest()[:16]
 
         db.commit()
+        log.info(
+            "analysis.started analysis_id=%d contract_id=%s version_id=%s",
+            analysis_id, contract_id, version_id,
+        )
 
+        # ── Stage-progress callback ────────────────────────────────────────────
         def _stage_cb(stage: str) -> None:
             """Persist current_stage to DB so the polling endpoint reflects it."""
             try:
@@ -587,8 +668,15 @@ def _bg_analyze(
                     {"current_stage": stage}
                 )
                 db.commit()
-            except Exception:
-                pass
+                log.debug(
+                    "analysis.stage_changed analysis_id=%d contract_id=%s stage=%s",
+                    analysis_id, contract_id, stage,
+                )
+            except Exception as _e:
+                log.warning(
+                    "analysis.stage_cb_failed analysis_id=%d stage=%s error=%s",
+                    analysis_id, stage, _e,
+                )
 
         # ── Build LLM overrides from DB-backed admin config ───────────────────
         llm_overrides: dict = {}
@@ -609,9 +697,17 @@ def _bg_analyze(
                     "timeout":     cfg.timeout_seconds,
                     "app_enabled": cfg.app_llm_enabled,
                 }
-            except Exception:
-                pass  # DB read failed — pipeline will use env-var defaults
+                log.info(
+                    "analysis.llm_config analysis_id=%d provider=%s model=%s ai_enabled=%s",
+                    analysis_id, cfg.provider, cfg.effective_model, cfg.app_llm_enabled,
+                )
+            except Exception as _e:
+                log.warning(
+                    "analysis.llm_config_read_failed analysis_id=%d error=%s – using env defaults",
+                    analysis_id, _e,
+                )
 
+        # ── Run the analysis pipeline ──────────────────────────────────────────
         result = analyze_contract(
             contract_file=contract_file,
             output_dir=output_dir,
@@ -621,9 +717,17 @@ def _bg_analyze(
             llm_overrides=llm_overrides,
         )
 
-        analysis.completed_at = _utcnow()
+        # ── Persist terminal state ─────────────────────────────────────────────
+        # IMPORTANT: set analysis.status / current_stage and call db.commit()
+        # unconditionally here, BEFORE any post-processing steps.  Post-processing
+        # steps (contract status, version status, finding reviews) run afterwards
+        # in isolated try/except blocks so they cannot interfere with this commit.
+
+        now = _utcnow()
+        analysis.completed_at = now
+
         if result.ok:
-            m = result.report.get("metadata", {})
+            m = result.report.get("metadata", {}) if result.report else {}
             analysis.status              = "completed"
             analysis.current_stage       = "done"
             analysis.overall_risk        = m.get("overall_risk")
@@ -634,40 +738,123 @@ def _bg_analyze(
             analysis.low_risk_clauses    = m.get("low_risk_clauses")
             analysis.outputs_ready       = True
             analysis.error_message       = None
-            contract = db.query(Contract).filter(
-                Contract.contract_id == contract_id
-            ).first()
-            if contract:
-                contract.status     = "analyzed"
-                contract.updated_at = _utcnow()
-                # Auto-advance review_status when still in pipeline-controlled states
-                if contract.review_status in ("uploaded", "ingested"):
-                    old_rs = contract.review_status
-                    contract.review_status = "analysis_completed"
-                    _emit_workflow_event(
-                        db, contract_id,
-                        new_status="analysis_completed", old_status=old_rs,
-                        notes="Auto-advanced after successful analysis",
-                    )
-            # Also advance the version's review_status
-            if version_id:
-                ver = db.query(ContractVersion).filter(ContractVersion.id == version_id).first()
-                if ver and ver.review_status in ("uploaded", "ingested"):
-                    ver.review_status = "analysis_completed"
-            # Auto-generate finding_review rows
-            if version_id:
-                _generate_finding_reviews(
-                    db=db,
-                    contract_id=contract_id,
-                    version_id=version_id,
-                    analysis_id=analysis_id,
-                    output_dir=output_dir,
-                )
         else:
             analysis.status        = "failed"
             analysis.current_stage = None
             analysis.error_message = result.error
+
+        # ── Commit terminal state — this MUST succeed ──────────────────────────
         db.commit()
+
+        if result.ok:
+            log.info(
+                "analysis.completed analysis_id=%d contract_id=%s version_id=%s "
+                "risk=%s clauses=%s findings=%s",
+                analysis_id, contract_id, version_id,
+                analysis.overall_risk, analysis.total_clauses, analysis.total_findings,
+            )
+        else:
+            log.warning(
+                "analysis.failed analysis_id=%d contract_id=%s version_id=%s error=%s",
+                analysis_id, contract_id, version_id, result.error,
+            )
+
+        # ── Post-processing (isolated — failures here must NOT change terminal state) ──
+
+        if result.ok:
+            # Update contract-level status
+            try:
+                contract = db.query(Contract).filter(
+                    Contract.contract_id == contract_id
+                ).first()
+                if contract:
+                    contract.status     = "analyzed"
+                    contract.updated_at = now
+                    if contract.review_status in ("uploaded", "ingested"):
+                        old_rs = contract.review_status
+                        contract.review_status = "analysis_completed"
+                        _emit_workflow_event(
+                            db, contract_id,
+                            new_status="analysis_completed", old_status=old_rs,
+                            notes="Auto-advanced after successful analysis",
+                        )
+                db.commit()
+            except Exception as _e:
+                log.warning(
+                    "analysis.post_contract_status_failed analysis_id=%d error=%s",
+                    analysis_id, _e,
+                )
+                try:
+                    db.rollback()
+                except Exception:
+                    pass
+
+            # Update version-level status
+            try:
+                if version_id:
+                    ver = db.query(ContractVersion).filter(
+                        ContractVersion.id == version_id
+                    ).first()
+                    if ver and ver.review_status in ("uploaded", "ingested"):
+                        ver.review_status = "analysis_completed"
+                    db.commit()
+            except Exception as _e:
+                log.warning(
+                    "analysis.post_version_status_failed analysis_id=%d version_id=%s error=%s",
+                    analysis_id, version_id, _e,
+                )
+                try:
+                    db.rollback()
+                except Exception:
+                    pass
+
+            # Generate finding-review rows
+            try:
+                if version_id:
+                    _generate_finding_reviews(
+                        db=db,
+                        contract_id=contract_id,
+                        version_id=version_id,
+                        analysis_id=analysis_id,
+                        output_dir=output_dir,
+                    )
+            except Exception as _e:
+                log.warning(
+                    "analysis.post_finding_reviews_failed analysis_id=%d version_id=%s error=%s",
+                    analysis_id, version_id, _e,
+                )
+                try:
+                    db.rollback()
+                except Exception:
+                    pass
+
+    except Exception as exc:
+        # ── Safety net: catch any unhandled exception and mark run as failed ───
+        # This block should normally never be reached because analyze_contract()
+        # is documented as never-raises.  It handles programmer errors, OOM, etc.
+        log.error(
+            "analysis.unhandled_exception analysis_id=%d contract_id=%s error=%s",
+            analysis_id, contract_id, exc,
+            exc_info=True,
+        )
+        try:
+            db.rollback()
+            row = db.query(Analysis).filter(Analysis.id == analysis_id).first()
+            if row and row.status not in ("completed", "failed"):
+                row.status        = "failed"
+                row.current_stage = None
+                row.error_message = f"Unexpected internal error: {exc}"
+                row.completed_at  = _utcnow()
+                db.commit()
+                log.info(
+                    "analysis.emergency_failed analysis_id=%d contract_id=%s",
+                    analysis_id, contract_id,
+                )
+        except Exception as _inner:
+            log.error(
+                "analysis.emergency_commit_failed analysis_id=%d error=%s",
+                analysis_id, _inner,
+            )
     finally:
         db.close()
 
