@@ -187,6 +187,17 @@ const REVIEW_STATUSES: ReviewStatus[] = [
   "analysis_completed", "under_review", "in_negotiation",
   "approved", "rejected", "archived",
 ];
+
+const REVIEW_STATUS_CLASS: Record<ReviewStatus, string> = {
+  uploaded:             "badge badge--gray",
+  ingested:             "badge badge--gray",
+  analysis_completed:   "badge badge--blue",
+  under_review:         "badge badge--yellow",
+  in_negotiation:       "badge badge--yellow",
+  approved:             "badge badge--green",
+  rejected:             "badge badge--red",
+  archived:             "badge badge--gray",
+};
 const ADMIN_ONLY_STATUSES: ReviewStatus[] = ["approved", "rejected", "archived"];
 
 const REVIEW_STATUS_LABEL: Record<ReviewStatus, string> = {
@@ -198,17 +209,6 @@ const REVIEW_STATUS_LABEL: Record<ReviewStatus, string> = {
   approved:             "Approved",
   rejected:             "Rejected",
   archived:             "Archived",
-};
-
-const REVIEW_STATUS_CLASS: Record<ReviewStatus, string> = {
-  uploaded:             "badge badge--gray",
-  ingested:             "badge badge--gray",
-  analysis_completed:   "badge badge--blue",
-  under_review:         "badge badge--yellow",
-  in_negotiation:       "badge badge--yellow",
-  approved:             "badge badge--green",
-  rejected:             "badge badge--red",
-  archived:             "badge badge--gray",
 };
 
 const DECISION_OPTIONS: { value: ReviewDecision; label: string }[] = [
@@ -888,12 +888,15 @@ function ContractDetailContent({
     </div>
   );
 
+  // Current version ID for clause/findings links
+  const currentVid = contract?.current_version_id;
+
   return (
     <div className="page">
       <Nav user={user} />
       <main className="main">
 
-        {/* Header */}
+        {/* ── Header ──────────────────────────────────────────────────────── */}
         <div className="page-header">
           <div>
             <Link href="/contracts" className="breadcrumb">← Contracts</Link>
@@ -901,8 +904,111 @@ function ContractDetailContent({
           </div>
         </div>
 
-        {/* Contract info */}
-        <div className="detail-grid">
+        {/* ── 1. Review summary ────────────────────────────────────────────── */}
+        {workflow && (
+          <div className="review-summary-bar" style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center", marginBottom: "1rem", padding: "0.75rem 1rem", background: "var(--color-surface)", borderRadius: "0.5rem", border: "1px solid var(--color-border)" }}>
+            <span className="text-muted" style={{ fontSize: "0.85rem" }}>Review status:</span>
+            <span className={REVIEW_STATUS_CLASS[workflow.review_status]}>
+              {REVIEW_STATUS_LABEL[workflow.review_status]}
+            </span>
+            {readiness && (
+              <>
+                <span className="text-muted" style={{ fontSize: "0.85rem", marginLeft: "0.25rem" }}>Readiness:</span>
+                <span className={READINESS_BADGE[readiness.approval_readiness as ApprovalReadiness]}>
+                  {READINESS_LABEL[readiness.approval_readiness as ApprovalReadiness]}
+                </span>
+                {readiness.counts.high_open > 0 && (
+                  <span className="badge badge--red">{readiness.counts.high_open} HIGH open</span>
+                )}
+                {readiness.counts.medium_open > 0 && (
+                  <span className="badge badge--yellow">{readiness.counts.medium_open} MED open</span>
+                )}
+              </>
+            )}
+            {currentVid && outputsReady && (
+              <div style={{ marginLeft: "auto", display: "flex", gap: "0.5rem" }}>
+                <Link href={`/contracts/${contractId}/versions/${currentVid}/findings`} className="btn btn-sm btn-outline">
+                  Findings
+                </Link>
+                <Link href={`/contracts/${contractId}/versions/${currentVid}/clauses`} className="btn btn-sm btn-outline">
+                  Clauses
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── 2. Action row ────────────────────────────────────────────────── */}
+        <div className="action-row" style={{ marginBottom: "1rem" }}>
+          {canAnalyze && (
+            <button
+              className="btn btn-primary"
+              onClick={handleAnalyze}
+              disabled={isRunning || profileMissing}
+              title={
+                profileMissing
+                  ? "Configure a compliance profile before running analysis"
+                  : isRunning ? "Analysis in progress" : undefined
+              }
+            >
+              {triggering ? "Starting…" : isJobActive ? "Analysis in progress…" : jobStatus ? "Re-run analysis" : "Run analysis"}
+            </button>
+          )}
+          <Link
+            href={outputsReady ? `/contracts/${contractId}/report` : "#"}
+            className={`btn ${outputsReady ? "btn-outline" : "btn-ghost"}`}
+            aria-disabled={!outputsReady}
+            onClick={(e) => { if (!outputsReady) e.preventDefault(); }}
+            title={outputsReady ? undefined : "Analysis not ready yet"}
+          >
+            Risk report {!outputsReady && <span className="btn-lock">🔒</span>}
+          </Link>
+          <Link
+            href={outputsReady ? `/contracts/${contractId}/negotiation` : "#"}
+            className={`btn ${outputsReady ? "btn-outline" : "btn-ghost"}`}
+            aria-disabled={!outputsReady}
+            onClick={(e) => { if (!outputsReady) e.preventDefault(); }}
+            title={outputsReady ? undefined : "Analysis not ready yet"}
+          >
+            Negotiation package {!outputsReady && <span className="btn-lock">🔒</span>}
+          </Link>
+          {currentVid && outputsReady && (
+            <Link
+              href={`/contracts/${contractId}/versions/${currentVid}/findings`}
+              className="btn btn-outline"
+            >
+              Review findings
+            </Link>
+          )}
+        </div>
+
+        {actError && (
+          <div className="error-box" style={{ marginBottom: "0.75rem" }}>{actError}</div>
+        )}
+
+        {/* ── 3. Workflow panel ─────────────────────────────────────────────── */}
+        <WorkflowPanel
+          workflow={workflow}
+          canEdit={canEditWorkflow && !isArchived}
+          isAdmin={isAdmin}
+          hasCompletedAnalysis={analyses.some((a) => a.status === "completed")}
+          latestRisk={analyses.find((a) => a.status === "completed")?.overall_risk ?? null}
+          readiness={readiness}
+          saving={wfSaving}
+          saveError={wfError}
+          saveSuccess={wfSuccess}
+          onSave={handleWorkflowSave}
+        />
+
+        {/* ── 4. Analysis progress ──────────────────────────────────────────── */}
+        {jobStatus && (
+          <div style={{ marginTop: "1.5rem" }}>
+            <AnalysisProgress jobStatus={jobStatus} />
+          </div>
+        )}
+
+        {/* ── 5. Contract details + analysis results ──────────────────────── */}
+        <div className="detail-grid" style={{ marginTop: "1.5rem" }}>
           <div className="detail-card">
             <h3>Contract details</h3>
             <table className="detail-table">
@@ -922,7 +1028,6 @@ function ContractDetailContent({
             </table>
           </div>
 
-          {/* Analysis summary (shown once completed) */}
           {jobStatus?.status === "completed" && analyses[0] && (
             <div className="detail-card">
               <h3>Analysis results</h3>
@@ -930,11 +1035,7 @@ function ContractDetailContent({
                 <tbody>
                   <tr>
                     <th>Overall risk</th>
-                    <td>
-                      <span className={riskBadge(analyses[0].overall_risk)}>
-                        {analyses[0].overall_risk ?? "—"}
-                      </span>
-                    </td>
+                    <td><span className={riskBadge(analyses[0].overall_risk)}>{analyses[0].overall_risk ?? "—"}</span></td>
                   </tr>
                   <tr><th>Total clauses</th><td>{analyses[0].total_clauses ?? "—"}</td></tr>
                   <tr><th>Total findings</th><td>{analyses[0].total_findings ?? "—"}</td></tr>
@@ -952,9 +1053,9 @@ function ContractDetailContent({
           )}
         </div>
 
-        {/* Compliance profile — blocking banner if missing, info strip if set */}
+        {/* ── 6. Compliance profile ──────────────────────────────────────────── */}
         {profileMissing ? (
-          <div className="warn-box" style={{ marginBottom: "1rem" }}>
+          <div className="warn-box" style={{ margin: "1rem 0" }}>
             <strong>No compliance profile configured.</strong>{" "}
             Analysis cannot be started until a compliance profile is set up.{" "}
             <a href="/settings/customer-profile">Configure profile →</a>
@@ -980,82 +1081,7 @@ function ContractDetailContent({
           </div>
         )}
 
-        {/* Progress panel — shown whenever a job exists */}
-        {jobStatus && <AnalysisProgress jobStatus={jobStatus} />}
-
-        {/* Action row */}
-        <div className="action-row" style={{ marginTop: "1.25rem" }}>
-          {canAnalyze && (
-            <button
-              className="btn btn-primary"
-              onClick={handleAnalyze}
-              disabled={isRunning || profileMissing}
-              title={
-                profileMissing
-                  ? "Configure a compliance profile before running analysis"
-                  : isRunning
-                    ? "Analysis in progress"
-                    : undefined
-              }
-            >
-              {triggering
-                ? "Starting…"
-                : isJobActive
-                  ? "Analysis in progress…"
-                  : jobStatus
-                    ? "Re-run analysis"
-                    : "Run analysis"}
-            </button>
-          )}
-
-          <Link
-            href={outputsReady ? `/contracts/${contractId}/report` : "#"}
-            className={`btn ${outputsReady ? "btn-outline" : "btn-ghost"}`}
-            aria-disabled={!outputsReady}
-            onClick={(e) => { if (!outputsReady) e.preventDefault(); }}
-            title={outputsReady ? undefined : "Analysis not ready yet"}
-          >
-            Risk report {!outputsReady && <span className="btn-lock">🔒</span>}
-          </Link>
-
-          <Link
-            href={outputsReady ? `/contracts/${contractId}/negotiation` : "#"}
-            className={`btn ${outputsReady ? "btn-outline" : "btn-ghost"}`}
-            aria-disabled={!outputsReady}
-            onClick={(e) => { if (!outputsReady) e.preventDefault(); }}
-            title={outputsReady ? undefined : "Analysis not ready yet"}
-          >
-            Negotiation package {!outputsReady && <span className="btn-lock">🔒</span>}
-          </Link>
-        </div>
-
-        {actError && (
-          <div className="error-box" style={{ marginTop: "0.75rem" }}>{actError}</div>
-        )}
-
-        {/* ── Workflow panel ──────────────────────────────────────────────── */}
-        <WorkflowPanel
-          workflow={workflow}
-          canEdit={canEditWorkflow && !isArchived}
-          isAdmin={isAdmin}
-          hasCompletedAnalysis={analyses.some((a) => a.status === "completed")}
-          latestRisk={analyses.find((a) => a.status === "completed")?.overall_risk ?? null}
-          readiness={readiness}
-          saving={wfSaving}
-          saveError={wfError}
-          saveSuccess={wfSuccess}
-          onSave={handleWorkflowSave}
-        />
-
-        {/* ── History timeline ────────────────────────────────────────────── */}
-        {history && (history.workflow_events.length > 0 || history.analyses.length > 0) && (
-          <div className="section" style={{ marginTop: "1.5rem" }}>
-            <h2>Timeline</h2>
-            <HistoryTimeline history={history} />
-          </div>
-        )}
-
-        {/* ── Versions panel ──────────────────────────────────────────────── */}
+        {/* ── 7. Versions panel ─────────────────────────────────────────────── */}
         <VersionsPanel
           contractId={contractId}
           versions={versions}
@@ -1066,20 +1092,23 @@ function ContractDetailContent({
           uploadError={vUploadErr}
         />
 
-        {/* Analysis history */}
+        {/* ── 8. History timeline ───────────────────────────────────────────── */}
+        {history && (history.workflow_events.length > 0 || history.analyses.length > 0) && (
+          <div className="section" style={{ marginTop: "1.5rem" }}>
+            <h2>Timeline</h2>
+            <HistoryTimeline history={history} />
+          </div>
+        )}
+
+        {/* ── 9. Analysis history ───────────────────────────────────────────── */}
         {analyses.length > 0 && (
           <div className="section" style={{ marginTop: "2rem" }}>
             <h2>Analysis history</h2>
             <table className="table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Status</th>
-                  <th>Stage</th>
-                  <th>Overall risk</th>
-                  <th>Findings</th>
-                  <th>Started</th>
-                  <th>Completed</th>
+                  <th>ID</th><th>Status</th><th>Stage</th>
+                  <th>Overall risk</th><th>Findings</th><th>Started</th><th>Completed</th>
                 </tr>
               </thead>
               <tbody>

@@ -92,6 +92,10 @@ from .config import (
     CONTRACTS_DIR,
     JWT_EXPIRY_HOURS,
     MAX_FILE_BYTES,
+    LLM_ENABLED,
+    LLM_PROVIDER,
+    LLM_MODEL,
+    LLM_TIMEOUT_SECONDS,
 )
 from .database import Base, engine, get_db
 from .deps import (
@@ -1467,6 +1471,27 @@ def get_risk_summary(
 @app.get("/health", tags=["meta"])
 def health_check() -> dict:
     return {"status": "ok", "timestamp": _utcnow().isoformat()}
+
+
+@app.get("/admin/llm-config", tags=["admin"], summary="Get current LLM configuration (ADMIN only)")
+def get_llm_config(current_user: User = Depends(require_admin)) -> dict:
+    """Returns the active LLM configuration. The API key itself is never returned — only
+    whether one is configured. Changes require restarting the service with updated
+    environment variables."""
+    key_configured = bool(
+        os.environ.get("LLM_API_KEY")
+        or os.environ.get("ANTHROPIC_API_KEY")
+        or os.environ.get("OPENAI_API_KEY")
+    )
+    default_model = "claude-opus-4-6" if LLM_PROVIDER == "anthropic" else "gpt-4o"
+    return {
+        "llm_enabled":     LLM_ENABLED,
+        "provider":        LLM_PROVIDER,
+        "model":           LLM_MODEL or None,
+        "effective_model": LLM_MODEL or default_model,
+        "timeout_seconds": LLM_TIMEOUT_SECONDS,
+        "key_configured":  key_configured,
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

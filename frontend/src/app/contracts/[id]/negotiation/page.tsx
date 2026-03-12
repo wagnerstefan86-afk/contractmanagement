@@ -5,57 +5,146 @@ import Link from "next/link";
 import AuthGuard from "@/components/AuthGuard";
 import Nav from "@/components/Nav";
 import { SessionUser } from "@/lib/session";
-import { getNegotiation, NegotiationOut } from "@/lib/api";
+import {
+  getNegotiation,
+  getContract,
+  updateFinding,
+  NegotiationOut,
+  ContractOut,
+  FindingStatus,
+} from "@/lib/api";
 
 function priorityClass(priority: string) {
   const p = priority?.toLowerCase();
-  if (p === "high") return "card-priority card-priority--high";
+  if (p === "high")   return "card-priority card-priority--high";
   if (p === "medium") return "card-priority card-priority--medium";
   return "card-priority card-priority--low";
 }
 
 function priorityBadge(priority: string) {
   const p = priority?.toLowerCase();
-  if (p === "high") return "badge badge--red";
+  if (p === "high")   return "badge badge--red";
   if (p === "medium") return "badge badge--yellow";
   return "badge badge--green";
 }
 
+const REVIEWER_DECISIONS: { label: string; value: FindingStatus; description: string }[] = [
+  { label: "Accept risk",             value: "accepted_risk",  description: "Risk accepted — no contract change needed" },
+  { label: "Request contract change", value: "in_negotiation", description: "Request vendor to amend this clause" },
+  { label: "Escalate to legal",       value: "in_review",      description: "Flag for legal team review" },
+  { label: "Customer responsibility", value: "not_applicable", description: "Responsibility accepted on our side" },
+  { label: "Not applicable",          value: "not_applicable", description: "Finding does not apply to our context" },
+  { label: "Needs clarification",     value: "deferred",       description: "Defer pending further information" },
+  { label: "Resolved",                value: "resolved",       description: "Issue has been resolved" },
+];
+
 interface RegulatoryBasisItem {
-  sr_id?: string;
-  framework?: string;
-  article?: string;
-  obligation?: string;
-  penalty?: string;
-  match_type?: string;
-  confidence?: number;
-  regulation?: string;
+  sr_id?: string; framework?: string; article?: string;
+  obligation?: string; penalty?: string;
 }
 
 interface ClauseExcerpt {
-  clause_id?: string;
-  page?: number;
-  text?: string;
+  clause_id?: string; page?: number; text?: string;
 }
 
 interface NegItem {
-  negotiation_id?: string;
-  action_id?: string;
-  topic?: string | string[];
-  priority?: string;
-  affected_clauses?: string[];
-  problem_summary?: string;
-  regulatory_basis?: string | RegulatoryBasisItem[];
+  negotiation_id?:          string;
+  action_id?:               string;
+  topic?:                   string | string[];
+  priority?:                string;
+  affected_clauses?:        string[];
+  problem_summary?:         string;
+  regulatory_basis?:        string | RegulatoryBasisItem[];
   recommended_clause_text?: string;
-  negotiation_argument?: string;
-  fallback_option?: string;
-  owner_role?: string;
-  estimated_effort?: string;
+  negotiation_argument?:    string;
+  fallback_option?:         string;
+  owner_role?:              string;
+  estimated_effort?:        string;
   expected_risk_reduction?: string;
   current_clause_excerpts?: (string | ClauseExcerpt)[];
 }
 
-function NegCard({ item }: { item: NegItem }) {
+function ReviewerDecisionPanel({
+  item, contractId, versionId, isViewer,
+}: {
+  item: NegItem; contractId: string; versionId: number | null; isViewer: boolean;
+}) {
+  const findingKey = item.action_id ?? item.negotiation_id;
+  const [decision,  setDecision]  = useState<FindingStatus | "">("");
+  const [notes,     setNotes]     = useState("");
+  const [saving,    setSaving]    = useState(false);
+  const [saved,     setSaved]     = useState(false);
+  const [saveError, setSaveError] = useState("");
+
+  if (!findingKey || !versionId || isViewer) return null;
+
+  async function handleRecord() {
+    if (!decision || !findingKey || !versionId) return;
+    setSaving(true);
+    setSaveError("");
+    try {
+      await updateFinding(contractId, versionId, findingKey, {
+        status: decision,
+        disposition_reason: notes || undefined,
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e: unknown) {
+      setSaveError(e instanceof Error ? e.message : "Failed to record decision.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="neg-section" style={{ borderTop: "2px solid var(--color-border)", paddingTop: "0.75rem", marginTop: "0.75rem" }}>
+      <h4>Reviewer decision</h4>
+      {saved && <div className="success-box" style={{ marginBottom: "0.5rem" }}>Decision recorded.</div>}
+      {saveError && <div className="error-box" style={{ marginBottom: "0.5rem" }}>{saveError}</div>}
+      <div className="form-group" style={{ marginBottom: "0.5rem" }}>
+        <select
+          className="filter-select"
+          value={decision}
+          onChange={(e) => setDecision(e.target.value as FindingStatus)}
+          disabled={saving}
+          style={{ width: "100%" }}
+        >
+          <option value="">— Select decision —</option>
+          {REVIEWER_DECISIONS.map((d) => (
+            <option key={`${d.label}-${d.value}`} value={d.value}>{d.label}</option>
+          ))}
+        </select>
+        {decision && (
+          <p style={{ fontSize: "0.8rem", color: "var(--color-muted)", marginTop: "0.25rem" }}>
+            {REVIEWER_DECISIONS.find((d) => d.value === decision)?.description}
+          </p>
+        )}
+      </div>
+      <textarea
+        className="workflow-notes"
+        rows={2}
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        disabled={saving}
+        placeholder="Internal notes (optional)…"
+        style={{ marginBottom: "0.5rem" }}
+      />
+      <button
+        className="btn btn-sm btn-primary"
+        onClick={handleRecord}
+        disabled={!decision || saving}
+      >
+        {saving ? "Saving…" : "Record decision"}
+      </button>
+    </div>
+  );
+}
+
+function NegCard({
+  item, contractId, versionId, isViewer,
+}: {
+  item: NegItem; contractId: string; versionId: number | null; isViewer: boolean;
+}) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -87,13 +176,10 @@ function NegCard({ item }: { item: NegItem }) {
                           {rb.obligation && <p>{rb.obligation}</p>}
                           {rb.penalty && <p className="penalty-note"><em>Penalty: {rb.penalty}</em></p>}
                         </>
-                      ) : (
-                        <p>{rb}</p>
-                      )}
+                      ) : <p>{rb}</p>}
                     </div>
                   ))
-                : <p>{item.regulatory_basis}</p>
-              }
+                : <p>{item.regulatory_basis}</p>}
             </div>
           )}
 
@@ -115,7 +201,7 @@ function NegCard({ item }: { item: NegItem }) {
 
           {item.recommended_clause_text && (
             <div className="neg-section">
-              <h4>Recommended clause text</h4>
+              <h4>Proposed clause wording</h4>
               <blockquote className="clause-recommended">{item.recommended_clause_text}</blockquote>
             </div>
           )}
@@ -130,23 +216,24 @@ function NegCard({ item }: { item: NegItem }) {
           {item.fallback_option && (
             <div className="neg-section">
               <h4>Fallback option</h4>
-              <p>{item.fallback_option}</p>
+              <p className="text-muted">{item.fallback_option}</p>
             </div>
           )}
 
           <div className="neg-meta-row">
-            {item.estimated_effort && (
-              <span className="meta-chip">Effort: {item.estimated_effort}</span>
-            )}
-            {item.expected_risk_reduction && (
-              <span className="meta-chip">Risk reduction: {item.expected_risk_reduction}</span>
-            )}
+            {item.estimated_effort && <span className="meta-chip">Effort: {item.estimated_effort}</span>}
+            {item.expected_risk_reduction && <span className="meta-chip">Risk reduction: {item.expected_risk_reduction}</span>}
             {item.affected_clauses && item.affected_clauses.length > 0 && (
-              <span className="meta-chip">
-                Clauses: {item.affected_clauses.join(", ")}
-              </span>
+              <span className="meta-chip">Clauses: {item.affected_clauses.join(", ")}</span>
             )}
           </div>
+
+          <ReviewerDecisionPanel
+            item={item}
+            contractId={contractId}
+            versionId={versionId}
+            isViewer={isViewer}
+          />
         </div>
       )}
     </div>
@@ -154,27 +241,34 @@ function NegCard({ item }: { item: NegItem }) {
 }
 
 function NegotiationContent({ user, contractId }: { user: SessionUser; contractId: string }) {
-  const [data, setData] = useState<NegotiationOut | null>(null);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"ALL" | "HIGH" | "MEDIUM" | "LOW">("ALL");
+  const [data,     setData]     = useState<NegotiationOut | null>(null);
+  const [contract, setContract] = useState<ContractOut | null>(null);
+  const [error,    setError]    = useState("");
+  const [loading,  setLoading]  = useState(true);
+  const [filter,   setFilter]   = useState<"ALL" | "HIGH" | "MEDIUM" | "LOW">("ALL");
+
+  const isViewer = user.role === "VIEWER";
 
   useEffect(() => {
-    getNegotiation(contractId)
-      .then(setData)
+    Promise.all([
+      getNegotiation(contractId),
+      getContract(contractId).catch(() => null),
+    ])
+      .then(([neg, c]) => { setData(neg); setContract(c); })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [contractId]);
 
   if (loading) return <div className="page"><Nav user={user} /><main className="main"><div className="loading">Loading…</div></main></div>;
-  if (error) return <div className="page"><Nav user={user} /><main className="main"><div className="error-box">{error}</div></main></div>;
-  if (!data) return null;
+  if (error)   return <div className="page"><Nav user={user} /><main className="main"><div className="error-box">{error}</div></main></div>;
+  if (!data)   return null;
 
-  const pkg = data.package;
-  const items = (pkg.negotiation_items ?? []) as NegItem[];
+  const pkg      = data.package;
+  const items    = (pkg.negotiation_items ?? []) as NegItem[];
   const filtered = filter === "ALL" ? items : items.filter(
     (it) => it.priority?.toUpperCase() === filter
   );
+  const versionId = contract?.current_version_id ?? null;
 
   return (
     <div className="page">
@@ -184,39 +278,40 @@ function NegotiationContent({ user, contractId }: { user: SessionUser; contractI
           <div>
             <Link href={`/contracts/${contractId}`} className="breadcrumb">← {contractId}</Link>
             <h1>Negotiation Package</h1>
+            <p className="page-subtitle">
+              Expand items to view proposed wording and record reviewer decisions.
+            </p>
           </div>
           <Link href={`/contracts/${contractId}/report`} className="btn btn-outline">
             ← Risk report
           </Link>
         </div>
 
-        {/* Summary */}
         <div className="stats-grid">
           <div className="stat-card">
             <div className="stat-label">Total items</div>
-            <div className="stat-value">{pkg.total_items as number ?? items.length}</div>
+            <div className="stat-value">{(pkg.total_items as number) ?? items.length}</div>
           </div>
           <div className="stat-card">
             <div className="stat-label">High priority</div>
             <div className="stat-value">
-              <span className="badge badge--red">{pkg.high_priority as number ?? 0}</span>
+              <span className="badge badge--red">{(pkg.high_priority as number) ?? 0}</span>
             </div>
           </div>
           <div className="stat-card">
             <div className="stat-label">Medium priority</div>
             <div className="stat-value">
-              <span className="badge badge--yellow">{pkg.medium_priority as number ?? 0}</span>
+              <span className="badge badge--yellow">{(pkg.medium_priority as number) ?? 0}</span>
             </div>
           </div>
           <div className="stat-card">
             <div className="stat-label">Low priority</div>
             <div className="stat-value">
-              <span className="badge badge--green">{pkg.low_priority as number ?? 0}</span>
+              <span className="badge badge--green">{(pkg.low_priority as number) ?? 0}</span>
             </div>
           </div>
         </div>
 
-        {/* Frameworks */}
         {Array.isArray(pkg.frameworks_referenced) && (pkg.frameworks_referenced as string[]).length > 0 && (
           <div className="tag-list" style={{ marginBottom: "1.5rem" }}>
             {(pkg.frameworks_referenced as string[]).map((f) => (
@@ -225,7 +320,6 @@ function NegotiationContent({ user, contractId }: { user: SessionUser; contractI
           </div>
         )}
 
-        {/* Filter */}
         <div className="filter-row">
           {(["ALL", "HIGH", "MEDIUM", "LOW"] as const).map((f) => (
             <button
@@ -239,10 +333,21 @@ function NegotiationContent({ user, contractId }: { user: SessionUser; contractI
           <span className="filter-count">{filtered.length} item{filtered.length !== 1 ? "s" : ""}</span>
         </div>
 
-        {/* Items */}
+        {!isViewer && versionId && (
+          <div className="info-box" style={{ marginBottom: "1rem" }}>
+            Expand each item and use <strong>Reviewer decision</strong> to record your position.
+          </div>
+        )}
+
         <div className="neg-list">
           {filtered.map((item, i) => (
-            <NegCard key={item.negotiation_id ?? i} item={item} />
+            <NegCard
+              key={item.negotiation_id ?? i}
+              item={item}
+              contractId={contractId}
+              versionId={versionId}
+              isViewer={isViewer}
+            />
           ))}
           {filtered.length === 0 && (
             <div className="empty-state">No items for this filter.</div>

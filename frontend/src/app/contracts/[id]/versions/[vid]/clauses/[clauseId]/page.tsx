@@ -163,7 +163,7 @@ function ClauseDetailContent({
           </div>
         )}
 
-        {/* SR Matches */}
+        {/* SR Matches with AI metadata */}
         {detail.sr_matches.length > 0 ? (
           <div className="section">
             <h2>Regulatory matches ({detail.sr_matches.length})</h2>
@@ -172,7 +172,7 @@ function ClauseDetailContent({
                 <thead>
                   <tr>
                     <th>SR ID</th><th>Framework</th><th>Match type</th>
-                    <th>Confidence</th><th>Title</th><th>Evidence</th>
+                    <th>Confidence</th><th>AI assessment</th><th>Title</th><th>Evidence</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -182,6 +182,24 @@ function ClauseDetailContent({
                       <td><span className="tag">{m.framework}</span></td>
                       <td><span className={matchBadge(m.match_type)}>{m.match_type.replace(/_/g, " ")}</span></td>
                       <td>{(m.match_confidence * 100).toFixed(0)}%</td>
+                      <td>
+                        {m.confidence_bucket && (
+                          <span className="meta-chip" style={{ fontSize: "0.8rem" }}>
+                            {m.confidence_bucket}
+                          </span>
+                        )}
+                        {m.review_priority && (
+                          <span className={priorityBadge(m.review_priority)} style={{ marginLeft: "0.25rem" }}>
+                            {m.review_priority}
+                          </span>
+                        )}
+                        {m.decision_delta && m.decision_delta !== "none" && (
+                          <span className="badge badge--yellow" style={{ marginLeft: "0.25rem", fontSize: "0.75rem" }} title="AI assessment differs from deterministic baseline">
+                            delta: {m.decision_delta}
+                          </span>
+                        )}
+                        {!m.confidence_bucket && !m.review_priority && <span className="text-muted">—</span>}
+                      </td>
                       <td>{m.sr_title ?? "—"}</td>
                       <td className="preview-cell">{m.extracted_evidence ?? "—"}</td>
                     </tr>
@@ -189,6 +207,43 @@ function ClauseDetailContent({
                 </tbody>
               </table>
             </div>
+
+            {/* AI metadata detail — expandable per match */}
+            {detail.sr_matches.some((m) => m.ai_metadata) && (
+              <details style={{ marginTop: "0.75rem" }}>
+                <summary style={{ cursor: "pointer", fontSize: "0.85rem", color: "var(--color-primary)" }}>
+                  AI metadata details
+                </summary>
+                <div style={{ marginTop: "0.5rem" }}>
+                  {detail.sr_matches.filter((m) => m.ai_metadata).map((m: SRMatchOut) => {
+                    const ai = m.ai_metadata as Record<string, unknown>;
+                    return (
+                      <div key={m.sr_id} style={{ marginBottom: "0.75rem", padding: "0.5rem", background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: "0.375rem" }}>
+                        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.25rem" }}>
+                          <span className="mono" style={{ fontSize: "0.8rem" }}>{m.sr_id}</span>
+                          {ai.provider != null && <span className="tag" style={{ fontSize: "0.75rem" }}>{String(ai.provider)}</span>}
+                          {ai.model != null && <span className="tag" style={{ fontSize: "0.75rem" }}>{String(ai.model)}</span>}
+                          {ai.llm_used === true && <span className="badge badge--blue" style={{ fontSize: "0.75rem" }}>AI used</span>}
+                          {ai.llm_used === false && <span className="badge badge--gray" style={{ fontSize: "0.75rem" }}>deterministic</span>}
+                          {ai.confidence != null && <span className="meta-chip" style={{ fontSize: "0.75rem" }}>confidence: {String(ai.confidence)}</span>}
+                        </div>
+                        {m.baseline_result && (
+                          <div style={{ fontSize: "0.8rem", color: "var(--color-muted)" }}>
+                            Baseline: <strong>{m.baseline_result}</strong>
+                            {m.decision_delta && m.decision_delta !== "none" && (
+                              <> · Delta: <strong style={{ color: "var(--color-warning)" }}>{m.decision_delta}</strong></>
+                            )}
+                          </div>
+                        )}
+                        {m.match_reasoning && (
+                          <p style={{ fontSize: "0.8rem", marginTop: "0.25rem", color: "var(--color-muted)" }}>{m.match_reasoning}</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </details>
+            )}
           </div>
         ) : (
           <div className="section">

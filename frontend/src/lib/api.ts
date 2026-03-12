@@ -890,3 +890,17 @@ export interface RiskSummaryOut {
 export function getRiskSummary(): Promise<RiskSummaryOut> {
   return request<RiskSummaryOut>("/dashboard/risk-summary");
 }
+
+// ── Admin: LLM config ─────────────────────────────────────────────────────────
+
+export interface LLMConfigOut {
+  llm_enabled:     boolean;
+  provider:        string;
+  model:           string | null;
+  timeout_seconds: number;
+  key_configured:  boolean;
+}
+
+export function getLLMConfig(): Promise<LLMConfigOut> {
+  return request<LLMConfigOut>("/admin/llm-config");
+}

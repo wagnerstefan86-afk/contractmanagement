@@ -7,9 +7,7 @@ import { register } from "@/lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState({
-    email: "", password: "", name: "", customer_id: "",
-  });
+  const [form, setForm] = useState({ email: "", password: "", name: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -20,14 +18,9 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    const cid = parseInt(form.customer_id, 10);
-    if (isNaN(cid) || cid < 1) {
-      setError("Customer ID must be a positive integer.");
-      return;
-    }
     setLoading(true);
     try {
-      await register(form.email, form.password, form.name, cid);
+      await register(form.email, form.password, form.name, 1);
       router.push("/login?registered=1");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Registration failed.");
@@ -39,7 +32,7 @@ export default function RegisterPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h1>ContractAI</h1>
+        <h1>InfoSec Review</h1>
         <h2>Create account</h2>
         {error && <div className="error-box">{error}</div>}
         <form onSubmit={handleSubmit}>
@@ -57,14 +50,6 @@ export default function RegisterPage() {
             <label htmlFor="password">Password <span className="hint">(min 8 chars)</span></label>
             <input id="password" name="password" type="password" value={form.password}
               onChange={handleChange} required minLength={8} />
-          </div>
-          <div className="field">
-            <label htmlFor="customer_id">
-              Customer / Tenant ID
-              <span className="hint"> (ask your admin)</span>
-            </label>
-            <input id="customer_id" name="customer_id" type="number" value={form.customer_id}
-              onChange={handleChange} required min={1} />
           </div>
           <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
             {loading ? "Creating account…" : "Create account"}
