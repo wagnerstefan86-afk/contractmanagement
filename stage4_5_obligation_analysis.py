@@ -57,6 +57,10 @@ try:
         OBLIGATION_OUTPUT_SCHEMA,
         PROMPT_VERSION_OBLIGATION,
         build_obligation_user_message,
+        HOLISTIC_SCAN_SYSTEM_PROMPT,
+        HOLISTIC_SCAN_OUTPUT_SCHEMA,
+        PROMPT_VERSION_HOLISTIC,
+        build_holistic_user_message,
     )
     from llm.tracing import (
         confidence_bucket,
@@ -304,6 +308,7 @@ def _rule_classify(text: str) -> dict:
 
 LLM_CONFIDENCE_THRESHOLD     = 0.75   # LLM overrides rule when confidence >= this
 AI_NEW_DETECTION_THRESHOLD   = 0.60   # AI may create NEW finding on VALID clause >= this
+HOLISTIC_CONFIDENCE_THRESHOLD = 0.55  # Holistic scan: exploratory, lower bar accepted
 
 
 def _llm_classify_batch(
@@ -490,6 +495,142 @@ def _merge_multi(
 
 
 # ---------------------------------------------------------------------------
+# Pass 3: LLM Holistic Contract Scan
+# ---------------------------------------------------------------------------
+
+def _find_page(clauses: list[dict], clause_id: str) -> Optional[int]:
+    return next((c.get("page") for c in clauses if c["clause_id"] == clause_id), None)
+
+
+def _find_layout(clauses: list[dict], clause_id: str) -> Optional[str]:
+    return next((c.get("layout_type") for c in clauses if c["clause_id"] == clause_id), None)
+
+
+def _llm_holistic_scan(
+    clauses:  list[dict],
+    provider: "BaseLLMProvider",
+) -> list[dict]:
+    """
+    Single LLM call on the FULL contract text.
+
+    The LLM acts as a senior IS compliance expert reading the entire contract
+    and independently identifying every information security obligation topic
+    that creates risk for the provider — including topics in sections that the
+    per-clause analysis may have underweighted.
+
+    Returns a list of raw topic dicts from the LLM (may be empty on failure).
+    """
+    if not LLM_MODULE_AVAILABLE:
+        return []
+
+    log.info(
+        f"  Holistic scan: sending {len(clauses)} clause(s) as full contract "
+        f"({sum(len(c.get('text','')) for c in clauses)} chars total)…"
+    )
+
+    user_msg = build_holistic_user_message(clauses, HOLISTIC_SCAN_OUTPUT_SCHEMA)
+
+    try:
+        response = provider.complete_structured(
+            system_prompt  = HOLISTIC_SCAN_SYSTEM_PROMPT,
+            user_message   = user_msg,
+            json_schema    = HOLISTIC_SCAN_OUTPUT_SCHEMA,
+            prompt_version = PROMPT_VERSION_HOLISTIC,
+            max_tokens     = 3000,
+        )
+    except RuntimeError as exc:
+        log.warning(f"  Holistic scan: unrecoverable LLM error — skipping. ({exc})")
+        return []
+
+    if response is None:
+        log.warning("  Holistic scan: LLM call failed after retries — skipping.")
+        return []
+
+    topics = response.content.get("topics", [])
+    log.info(f"  Holistic scan: {len(topics)} topic(s) identified across full contract.")
+    for t in topics:
+        log.info(
+            f"    {t.get('source_clause_id','?')} {t.get('assessment','?')} "
+            f"[{t.get('severity','?')}] {t.get('sub_topic','')} conf={t.get('confidence',0):.2f}"
+        )
+    return topics
+
+
+def _apply_holistic_findings(
+    output:          list[dict],
+    holistic_topics: list[dict],
+    clauses:         list[dict],
+    provider:        "BaseLLMProvider",
+) -> list[dict]:
+    """
+    Merge holistic findings into the per-clause output list.
+
+    Dedup rule: if (clause_id, assessment) is already in the output AND it came
+    from an LLM-based source ("llm" or "ai_new_detection"), skip the holistic
+    finding to avoid duplicates.  Rule-based findings are supplemented.
+    """
+    existing_llm_keys = {
+        (r["clause_id"], r["assessment"])
+        for r in output
+        if r.get("_source") in ("llm", "ai_new_detection")
+    }
+
+    new_findings: list[dict] = []
+    for topic in holistic_topics:
+        clause_id  = topic.get("source_clause_id", "")
+        assessment = topic.get("assessment", "VALID")
+        conf       = topic.get("confidence", 0.0)
+
+        # Reject VALID, below threshold, or already covered by per-clause LLM
+        if assessment == "VALID":
+            continue
+        if conf < HOLISTIC_CONFIDENCE_THRESHOLD:
+            log.debug(f"  Holistic skip (low conf {conf:.2f}): {clause_id} {assessment}")
+            continue
+        if (clause_id, assessment) in existing_llm_keys:
+            log.debug(f"  Holistic skip (already found): {clause_id} {assessment}")
+            continue
+
+        log.info(
+            f"  Holistic new finding: {clause_id} {assessment} "
+            f"[{topic.get('severity')}] sub={topic.get('sub_topic','')} conf={conf:.2f}"
+        )
+
+        conf_bkt = confidence_bucket(conf) if LLM_MODULE_AVAILABLE else None
+
+        new_findings.append({
+            "clause_id":          clause_id,
+            "page":               _find_page(clauses, clause_id),
+            "layout_type":        _find_layout(clauses, clause_id),
+            "assessment":         assessment,
+            "severity":           topic["severity"],
+            "sub_topic":          topic.get("sub_topic", ""),
+            "reason":             topic["reason"],
+            "recommended_action": topic["recommended_action"],
+            "evidence_phrases":   [topic.get("evidence_phrase", "")],
+            "_confidence":        round(conf, 3),
+            "_source":            "llm_holistic",
+            "_ai_metadata": {
+                "llm_used":       True,
+                "provider":       provider.provider_name,
+                "model":          provider.model_name,
+                "prompt_version": PROMPT_VERSION_HOLISTIC if LLM_MODULE_AVAILABLE else None,
+                "confidence":     round(conf, 3),
+                "detection_type": "holistic_scan",
+            },
+            "_baseline_result":   None,
+            "_decision_delta":    "new_holistic",
+            "_confidence_bucket": conf_bkt,
+            "_review_priority":   review_priority_obligation(assessment, topic["severity"], conf_bkt),
+            "_ai_trace":          None,
+        })
+
+    if new_findings:
+        log.info(f"  Holistic scan: {len(new_findings)} new finding(s) added to output.")
+    return output + new_findings
+
+
+# ---------------------------------------------------------------------------
 # I/O helpers
 # ---------------------------------------------------------------------------
 
@@ -626,6 +767,15 @@ def run(
                 "_review_priority":   priority,
                 "_ai_trace":          trace,
             })
+
+    # ── Pass 3: LLM holistic full-contract scan ───────────────────────────
+    if provider is not None and LLM_MODULE_AVAILABLE:
+        log.info("Pass 3: LLM holistic contract scan (full contract text)…")
+        holistic_topics = _llm_holistic_scan(clauses, provider)
+        if holistic_topics:
+            output = _apply_holistic_findings(output, holistic_topics, clauses, provider)
+    else:
+        log.info("Pass 3: Holistic scan skipped (no LLM provider).")
 
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)

@@ -163,6 +163,108 @@ def build_obligation_user_message(clause: dict, output_schema: dict) -> str:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# STAGE 4.5 — Holistic Contract Scan (Pass 3)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+PROMPT_VERSION_HOLISTIC = "holistic_scan_v1"
+
+HOLISTIC_SCAN_SYSTEM_PROMPT = """You are a senior information security compliance expert reviewing
+a complete IT service contract on behalf of the SERVICE PROVIDER.
+
+Your task: read the ENTIRE contract and independently identify ALL information security
+obligation topics that create legal or operational risk for the provider.
+
+DO NOT limit yourself to sections explicitly labelled "Security" or "Compliance".
+Scan every clause for hidden risks. Specifically look for:
+
+1. NON_TRANSFERABLE_REGULATION — Customer attempts to shift their statutory regulatory
+   obligations (NIS2, DORA, GDPR controller duties, BaFin filings) to the provider.
+2. OPERATIONAL_RISK — Technically impossible or commercially unreasonable obligations:
+   unrealistic notification windows, unlimited audit access, real-time data feeds,
+   scope defined unilaterally by the customer, unlimited liability exposure.
+3. SCOPE_UNDEFINED — References to "applicable law", "relevant standards",
+   "requirements as determined by authorities from time to time" without naming them.
+4. AMBIGUOUS_REQUIREMENT — Vague language: "best efforts", "appropriate measures",
+   "state of the art", "industry best practices", without measurable criteria.
+5. CUSTOMER_RESPONSIBILITY — Obligations that legally belong to the data controller
+   (customer): classifying personal data, performing DPIAs, defining retention periods,
+   determining legal basis for processing.
+
+Each finding must be a DISTINCT issue — a different clause, a different risk vector,
+or a different legal problem. Do NOT create duplicate findings.
+
+Output fields per finding:
+- source_clause_id: the clause ID where this obligation appears (e.g. "CL-005")
+- assessment: one of the 5 types above (never VALID — only report problems)
+- severity: HIGH (legal/regulatory exposure), MEDIUM (operational), LOW (minor)
+- sub_topic: short snake_case label for this specific aspect (e.g. "audit_access",
+             "subprocessor_liability", "bcdr_rto_undefined", "dsar_processor_duty")
+- reason: one concise sentence identifying the specific legal or operational problem
+- recommended_action: one actionable sentence for the provider's legal/contract team
+- evidence_phrase: a short verbatim phrase from the contract that triggered this finding
+- confidence: 0.0–1.0
+
+LANGUAGE RULE: Write all text fields in the same language as the contract."""
+
+_HOLISTIC_TOPIC_SCHEMA: dict = {
+    "type": "object",
+    "properties": {
+        "source_clause_id": {"type": "string"},
+        "assessment": {
+            "type": "string",
+            "enum": [
+                "AMBIGUOUS_REQUIREMENT",
+                "NON_TRANSFERABLE_REGULATION",
+                "OPERATIONAL_RISK",
+                "SCOPE_UNDEFINED",
+                "CUSTOMER_RESPONSIBILITY",
+            ],
+        },
+        "severity":           {"type": "string", "enum": ["HIGH", "MEDIUM", "LOW"]},
+        "sub_topic":          {"type": "string"},
+        "reason":             {"type": "string"},
+        "recommended_action": {"type": "string"},
+        "evidence_phrase":    {"type": "string"},
+        "confidence":         {"type": "number"},
+    },
+    "required": [
+        "source_clause_id", "assessment", "severity", "sub_topic",
+        "reason", "recommended_action", "evidence_phrase", "confidence",
+    ],
+    "additionalProperties": False,
+}
+
+HOLISTIC_SCAN_OUTPUT_SCHEMA: dict = {
+    "type": "object",
+    "properties": {
+        "topics": {
+            "type":     "array",
+            "maxItems": 20,
+            "items":    _HOLISTIC_TOPIC_SCHEMA,
+        }
+    },
+    "required": ["topics"],
+    "additionalProperties": False,
+}
+
+
+def build_holistic_user_message(clauses: list[dict], output_schema: dict) -> str:
+    import json
+    sections = []
+    for c in clauses:
+        header = f"=== {c['clause_id']} (page {c.get('page', '?')}, {c.get('layout_type', 'paragraph')}) ==="
+        sections.append(f"{header}\n{c['text']}")
+    contract_text = "\n\n".join(sections)
+    return (
+        f"CONTRACT TEXT:\n\n{contract_text}\n\n"
+        f"---\n"
+        f"Now identify ALL information security obligation topics in this contract "
+        f"that create risk for the SERVICE PROVIDER.\n\n"
+        f"Output schema:\n{json.dumps(output_schema, indent=2)}"
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # STAGE 5 — Clause-to-SR Matching
 # ═══════════════════════════════════════════════════════════════════════════════
 
