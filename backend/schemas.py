@@ -733,23 +733,61 @@ class ClosureBundleOut(BaseModel):
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class LLMConfigOut(BaseModel):
-    """Two-level LLM configuration status."""
-    # Level A — system capability (from environment)
-    system_llm_enabled:  bool    # LLM_ENABLED env var
-    key_configured:      bool    # whether an API key is present
+    """
+    Three-level LLM configuration status.
+
+    Level A  — system env-var capability  (LLM_ENABLED)
+    Level B  — DB-backed admin config     (provider, model, key, timeout)
+    Computed — effective flags            (provider_configured, effective_enabled)
+    """
+    # ── Level A: system env-var ──────────────────────────────────────────────
+    system_llm_enabled:  bool          # LLM_ENABLED env var
+
+    # ── Level B: DB-backed admin config ─────────────────────────────────────
+    # effective provider: DB setting overrides LLM_PROVIDER env var
     provider:            str
+    # effective model: DB setting overrides LLM_MODEL env var (None = use default)
     model:               str | None
-    effective_model:     str
-    timeout_seconds:     int
-    # Level B — application setting (persisted in DB)
-    app_llm_enabled:     bool    # admin-controlled toggle
-    # Effective status = system AND app
+    effective_model:     str           # resolved model name
+    timeout_seconds:     int           # effective timeout (DB or env default)
+    app_llm_enabled:     bool          # admin-controlled on/off toggle
+    # True when an API key is stored in DB or present in env vars
+    key_configured:      bool
+
+    # ── Computed ─────────────────────────────────────────────────────────────
+    # provider_configured = key_configured (key is all that's needed beyond provider name)
+    provider_configured: bool
+    # effective_enabled = system_llm_enabled AND provider_configured AND app_llm_enabled
     effective_enabled:   bool
 
 
-class LLMAppSettingUpdate(BaseModel):
-    """Body for PATCH /admin/llm-config."""
-    app_llm_enabled: bool
+class LLMConfigUpdate(BaseModel):
+    """
+    Body for PATCH /admin/llm-config.
+    All fields are optional — only supplied fields are updated.
+
+    api_key is write-only: it is stored in the DB but never echoed back
+    in responses.  Pass an empty string "" to clear the stored key.
+    """
+    app_llm_enabled: bool | None = None
+    provider:        str  | None = None   # "openai" | "anthropic"
+    model:           str  | None = None
+    api_key:         str  | None = None   # write-only; never returned
+    timeout_seconds: int  | None = None
+
+
+# Keep the old name as an alias so existing code that imports it still compiles
+LLMAppSettingUpdate = LLMConfigUpdate
+
+
+class LLMTestResult(BaseModel):
+    """Result of POST /admin/llm-config/test."""
+    success:   bool
+    # status codes: ok | auth_failed | provider_unavailable | invalid_model | missing_key | unknown_error
+    status:    str
+    message:   str
+    provider:  str | None = None
+    model:     str | None = None
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

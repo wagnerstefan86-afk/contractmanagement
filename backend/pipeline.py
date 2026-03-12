@@ -318,6 +318,7 @@ def analyze_contract(
     contract_id:    str,
     org_profile:    dict,
     stage_callback: Callable[[str], None] | None = None,
+    llm_overrides:  dict | None = None,
 ) -> AnalysisResult:
     """
     Full pipeline orchestrator:
@@ -378,10 +379,19 @@ def analyze_contract(
         )
 
         # ── Initialise LLM provider (shared across stages 4.5, 5, 8) ─────────
+        # llm_overrides carries DB-backed admin config (provider, model, api_key,
+        # timeout, app_enabled).  Falls back to env-var defaults when not supplied.
         llm_provider: Optional[Any] = None
+        _overrides = llm_overrides or {}
         try:
             from llm.config import get_llm_provider as _get_llm
-            llm_provider = _get_llm()
+            if _overrides.get("app_enabled", True):
+                llm_provider = _get_llm(
+                    provider_override = _overrides.get("provider") or None,
+                    model_override    = _overrides.get("model")    or None,
+                    api_key_override  = _overrides.get("api_key")  or None,
+                )
+            # else: app_enabled=False → stay None → deterministic fallback
         except Exception:
             pass  # LLM unavailable — all stages fall back to deterministic
 

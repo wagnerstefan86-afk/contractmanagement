@@ -138,6 +138,8 @@ from .schemas import (
     HistoryOut,
     LLMAppSettingUpdate,
     LLMConfigOut,
+    LLMConfigUpdate,
+    LLMTestResult,
     LoginIn,
     NegotiationItemOut,
     NegotiationOut,
@@ -555,6 +557,7 @@ def _bg_analyze(
     contract_id:   str,
     org_profile:   dict | None = None,
     version_id:    int | None  = None,
+    customer_id:   int | None  = None,
 ) -> None:
     from .database import SessionLocal
     db = SessionLocal()
@@ -587,12 +590,35 @@ def _bg_analyze(
             except Exception:
                 pass
 
+        # ── Build LLM overrides from DB-backed admin config ───────────────────
+        llm_overrides: dict = {}
+        if customer_id is not None:
+            try:
+                cfg = _build_llm_config_out(customer_id, db)
+                db_api_key = _get_app_setting(customer_id, "llm.api_key", db)
+                env_key = (
+                    os.environ.get("LLM_API_KEY")
+                    or (os.environ.get("ANTHROPIC_API_KEY") if cfg.provider == "anthropic" else None)
+                    or (os.environ.get("OPENAI_API_KEY")    if cfg.provider == "openai"    else None)
+                    or ""
+                )
+                llm_overrides = {
+                    "provider":    cfg.provider,
+                    "model":       cfg.effective_model,
+                    "api_key":     db_api_key or env_key,
+                    "timeout":     cfg.timeout_seconds,
+                    "app_enabled": cfg.app_llm_enabled,
+                }
+            except Exception:
+                pass  # DB read failed — pipeline will use env-var defaults
+
         result = analyze_contract(
             contract_file=contract_file,
             output_dir=output_dir,
             contract_id=contract_id,
             org_profile=org_profile,
             stage_callback=_stage_cb,
+            llm_overrides=llm_overrides,
         )
 
         analysis.completed_at = _utcnow()
@@ -1598,65 +1624,251 @@ def health_check() -> dict:
     return {"status": "ok", "timestamp": _utcnow().isoformat()}
 
 
+def _build_llm_config_out(customer_id: int, db: "Session") -> LLMConfigOut:
+    """
+    Assemble the full LLMConfigOut for a customer.
+
+    Priority:
+      provider / model / timeout — DB setting overrides env var
+      api_key                    — DB key overrides env var; never returned in response
+      app_enabled                — DB setting only (defaults True)
+    """
+    _DEFAULT_MODELS = {"anthropic": "claude-opus-4-6", "openai": "gpt-4o"}
+
+    db_provider = _get_app_setting(customer_id, "llm.provider", db) or LLM_PROVIDER
+    db_model    = _get_app_setting(customer_id, "llm.model",    db) or (LLM_MODEL or None)
+    db_timeout_raw = _get_app_setting(customer_id, "llm.timeout_seconds", db)
+    db_timeout  = int(db_timeout_raw) if db_timeout_raw else LLM_TIMEOUT_SECONDS
+
+    # Key: DB-stored key takes priority; env vars are fallback
+    db_api_key   = _get_app_setting(customer_id, "llm.api_key", db)
+    env_key_present = bool(
+        os.environ.get("LLM_API_KEY")
+        or os.environ.get("ANTHROPIC_API_KEY")
+        or os.environ.get("OPENAI_API_KEY")
+    )
+    key_configured = bool(db_api_key) or env_key_present
+
+    effective_model = db_model or _DEFAULT_MODELS.get(db_provider, "gpt-4o")
+
+    app_setting_raw = _get_app_setting(customer_id, "llm.app_enabled", db)
+    app_llm_enabled = (app_setting_raw != "false") if app_setting_raw is not None else True
+
+    provider_configured = key_configured
+    effective_enabled   = LLM_ENABLED and provider_configured and app_llm_enabled
+
+    return LLMConfigOut(
+        system_llm_enabled  = LLM_ENABLED,
+        provider            = db_provider,
+        model               = db_model,
+        effective_model     = effective_model,
+        timeout_seconds     = db_timeout,
+        app_llm_enabled     = app_llm_enabled,
+        key_configured      = key_configured,
+        provider_configured = provider_configured,
+        effective_enabled   = effective_enabled,
+    )
+
+
 @app.get(
     "/admin/llm-config",
     response_model=LLMConfigOut,
     tags=["admin"],
-    summary="Get two-level LLM configuration (ADMIN only)",
+    summary="Get full LLM configuration (ADMIN only)",
 )
 def get_llm_config(
     current_user: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ) -> LLMConfigOut:
     """
-    Returns the two-level LLM configuration:
-    - Level A (system): env-var capability
-    - Level B (app): admin-controlled operational toggle stored in DB
-    - Effective: system AND app
+    Returns the three-level LLM configuration:
+    - Level A (system): env-var capability (LLM_ENABLED)
+    - Level B (DB): provider, model, API key presence, timeout, app toggle
+    - Effective: computed from levels A + B
+    API key is never included in the response — only key_configured (bool).
     """
-    key_configured = bool(
-        os.environ.get("LLM_API_KEY")
-        or os.environ.get("ANTHROPIC_API_KEY")
-        or os.environ.get("OPENAI_API_KEY")
-    )
-    default_model    = "claude-opus-4-6" if LLM_PROVIDER == "anthropic" else "gpt-4o"
-    system_capable   = LLM_ENABLED and key_configured
-
-    # App-level setting defaults to True (enabled) unless explicitly disabled
-    app_setting_raw  = _get_app_setting(current_user.customer_id, "llm.app_enabled", db)
-    app_llm_enabled  = (app_setting_raw != "false") if app_setting_raw is not None else True
-
-    return LLMConfigOut(
-        system_llm_enabled = LLM_ENABLED,
-        key_configured     = key_configured,
-        provider           = LLM_PROVIDER,
-        model              = LLM_MODEL or None,
-        effective_model    = LLM_MODEL or default_model,
-        timeout_seconds    = LLM_TIMEOUT_SECONDS,
-        app_llm_enabled    = app_llm_enabled,
-        effective_enabled  = system_capable and app_llm_enabled,
-    )
+    return _build_llm_config_out(current_user.customer_id, db)
 
 
 @app.patch(
     "/admin/llm-config",
     response_model=LLMConfigOut,
     tags=["admin"],
-    summary="Update app-level LLM operational toggle (ADMIN only)",
+    summary="Update LLM configuration (ADMIN only)",
 )
 def update_llm_config(
-    body: LLMAppSettingUpdate,
+    body: LLMConfigUpdate,
     current_user: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ) -> LLMConfigOut:
-    """Toggle the application-level LLM enabled switch. Does not change env vars."""
-    _set_app_setting(
-        current_user.customer_id,
-        "llm.app_enabled",
-        "true" if body.app_llm_enabled else "false",
-        db,
+    """
+    Persist one or more LLM config fields.  Only supplied (non-None) fields are
+    written.  Pass api_key="" to explicitly clear a stored key.
+
+    api_key is write-only: it is stored encrypted-at-rest in the DB setting
+    and is never echoed back in this or any other response.
+    """
+    cid = current_user.customer_id
+
+    if body.app_llm_enabled is not None:
+        _set_app_setting(cid, "llm.app_enabled",
+                         "true" if body.app_llm_enabled else "false", db)
+
+    if body.provider is not None:
+        allowed = {"openai", "anthropic"}
+        if body.provider not in allowed:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"provider must be one of {sorted(allowed)}",
+            )
+        _set_app_setting(cid, "llm.provider", body.provider, db)
+
+    if body.model is not None:
+        # Empty string means "use default"
+        _set_app_setting(cid, "llm.model", body.model.strip() or "", db)
+
+    if body.api_key is not None:
+        # Empty string clears the stored key
+        _set_app_setting(cid, "llm.api_key", body.api_key.strip(), db)
+
+    if body.timeout_seconds is not None:
+        if body.timeout_seconds < 5 or body.timeout_seconds > 300:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="timeout_seconds must be between 5 and 300",
+            )
+        _set_app_setting(cid, "llm.timeout_seconds", str(body.timeout_seconds), db)
+
+    return _build_llm_config_out(cid, db)
+
+
+@app.post(
+    "/admin/llm-config/test",
+    response_model=LLMTestResult,
+    tags=["admin"],
+    summary="Test the configured LLM provider connection (ADMIN only)",
+)
+def test_llm_config(
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> LLMTestResult:
+    """
+    Validates the active LLM provider by sending a minimal test prompt.
+    Does not run a full analysis.
+
+    Returns one of: ok | auth_failed | provider_unavailable | missing_key | unknown_error
+    """
+    cid = current_user.customer_id
+    cfg = _build_llm_config_out(cid, db)
+
+    if not LLM_ENABLED:
+        return LLMTestResult(
+            success=False,
+            status="provider_unavailable",
+            message="LLM_ENABLED=false — the LLM feature is disabled at the system level.",
+        )
+
+    if not cfg.key_configured:
+        return LLMTestResult(
+            success=False,
+            status="missing_key",
+            message=f"No API key configured for provider '{cfg.provider}'. "
+                    "Save a key via the LLM Config page first.",
+            provider=cfg.provider,
+        )
+
+    # Resolve the effective API key (DB key takes priority over env vars)
+    api_key = _get_app_setting(cid, "llm.api_key", db)
+    if not api_key:
+        api_key = (
+            os.environ.get("LLM_API_KEY")
+            or (os.environ.get("ANTHROPIC_API_KEY") if cfg.provider == "anthropic" else None)
+            or (os.environ.get("OPENAI_API_KEY")    if cfg.provider == "openai"    else None)
+            or ""
+        )
+
+    try:
+        from llm.config import get_llm_provider as _get_llm
+        provider_inst = _get_llm(
+            provider_override = cfg.provider,
+            model_override    = cfg.effective_model,
+            api_key_override  = api_key,
+        )
+    except Exception as exc:
+        return LLMTestResult(
+            success=False,
+            status="provider_unavailable",
+            message=f"Provider initialisation failed: {exc}",
+            provider=cfg.provider,
+            model=cfg.effective_model,
+        )
+
+    if provider_inst is None:
+        return LLMTestResult(
+            success=False,
+            status="provider_unavailable",
+            message="Provider could not be initialised (library not installed or key missing).",
+            provider=cfg.provider,
+            model=cfg.effective_model,
+        )
+
+    # Send a minimal structured prompt as a connectivity/auth probe
+    _TEST_SCHEMA = {
+        "type": "object",
+        "properties": {"ok": {"type": "boolean"}},
+        "required": ["ok"],
+        "additionalProperties": False,
+    }
+    try:
+        response = provider_inst.complete_structured(
+            system_prompt  = "You are a connectivity test assistant.",
+            user_message   = "Reply with JSON: {\"ok\": true}",
+            json_schema    = _TEST_SCHEMA,
+            prompt_version = "test-v1",
+            max_tokens     = 64,
+        )
+    except RuntimeError as exc:
+        err = str(exc).lower()
+        if "auth" in err or "authentication" in err or "api key" in err or "invalid_api_key" in err:
+            return LLMTestResult(
+                success=False,
+                status="auth_failed",
+                message=f"Authentication failed: {exc}",
+                provider=cfg.provider,
+                model=cfg.effective_model,
+            )
+        return LLMTestResult(
+            success=False,
+            status="provider_unavailable",
+            message=str(exc),
+            provider=cfg.provider,
+            model=cfg.effective_model,
+        )
+    except Exception as exc:
+        return LLMTestResult(
+            success=False,
+            status="unknown_error",
+            message=f"Unexpected error: {exc}",
+            provider=cfg.provider,
+            model=cfg.effective_model,
+        )
+
+    if response is None:
+        return LLMTestResult(
+            success=False,
+            status="provider_unavailable",
+            message="Provider returned no response after retries.",
+            provider=cfg.provider,
+            model=cfg.effective_model,
+        )
+
+    return LLMTestResult(
+        success=True,
+        status="ok",
+        message=f"Connection successful — {cfg.provider} / {cfg.effective_model} responded.",
+        provider=cfg.provider,
+        model=cfg.effective_model,
     )
-    return get_llm_config(current_user, db)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -2453,6 +2665,7 @@ def analyze(
         contract_id=contract.contract_id,
         org_profile=org_profile,
         version_id=contract.current_version_id,
+        customer_id=current_user.customer_id,
     )
     return analysis
 
@@ -2868,6 +3081,7 @@ def analyze_version(
         contract_id=contract_id,
         org_profile=org_profile,
         version_id=version_id,
+        customer_id=current_user.customer_id,
     )
     return analysis
 

@@ -900,26 +900,47 @@ export function getRiskSummary(): Promise<RiskSummaryOut> {
 // ── Admin: LLM config ─────────────────────────────────────────────────────────
 
 export interface LLMConfigOut {
-  // Level A — system capability (from environment)
-  system_llm_enabled: boolean;
-  key_configured:     boolean;
-  provider:           string;
-  model:              string | null;
-  effective_model:    string;
-  timeout_seconds:    number;
-  // Level B — application setting (persisted in DB)
-  app_llm_enabled:    boolean;
-  // Effective = system AND app
-  effective_enabled:  boolean;
+  // Level A — system env-var
+  system_llm_enabled:  boolean;
+  // Level B — DB-backed admin config
+  provider:            string;
+  model:               string | null;
+  effective_model:     string;
+  timeout_seconds:     number;
+  app_llm_enabled:     boolean;
+  key_configured:      boolean;
+  // Computed
+  provider_configured: boolean;
+  effective_enabled:   boolean;
+}
+
+export interface LLMConfigUpdate {
+  app_llm_enabled?: boolean;
+  provider?:        string;   // "openai" | "anthropic"
+  model?:           string;
+  api_key?:         string;   // write-only
+  timeout_seconds?: number;
+}
+
+export interface LLMTestResult {
+  success:  boolean;
+  status:   string;
+  message:  string;
+  provider: string | null;
+  model:    string | null;
 }
 
 export function getLLMConfig(): Promise<LLMConfigOut> {
   return request<LLMConfigOut>("/admin/llm-config");
 }
 
-export function updateLLMConfig(app_llm_enabled: boolean): Promise<LLMConfigOut> {
+export function updateLLMConfig(update: LLMConfigUpdate): Promise<LLMConfigOut> {
   return request<LLMConfigOut>("/admin/llm-config", {
     method: "PATCH",
-    body: JSON.stringify({ app_llm_enabled }),
+    body: JSON.stringify(update),
   });
+}
+
+export function testLLMConfig(): Promise<LLMTestResult> {
+  return request<LLMTestResult>("/admin/llm-config/test", { method: "POST" });
 }

@@ -390,6 +390,15 @@ function FindingRow({
             ? <span style={{ fontSize: "0.82rem" }}>{finding.recommended_action.slice(0, 120)}{finding.recommended_action.length > 120 ? "…" : ""}</span>
             : <span className="text-muted">—</span>}
         </td>
+        {/* AI used */}
+        <td style={{ whiteSpace: "nowrap" }}>
+          {finding.ai_used === true  && <span className="badge badge--blue"  style={{ fontSize: "0.7rem" }}>AI</span>}
+          {finding.ai_used === false && <span className="badge badge--gray"  style={{ fontSize: "0.7rem" }}>det.</span>}
+          {finding.ai_used == null   && <span className="text-muted"        style={{ fontSize: "0.7rem" }}>—</span>}
+          {finding.confidence_bucket && (
+            <span className="meta-chip" style={{ fontSize: "0.7rem", marginLeft: "0.25rem" }}>{finding.confidence_bucket}</span>
+          )}
+        </td>
         {/* Status */}
         <td>
           <span className={statusBadge(finding.status)}>{statusLabel(finding.status)}</span>
@@ -560,6 +569,7 @@ function FindingsContent({
                     <th>Topic</th>
                     <th>Severity</th>
                     <th>Recommended action</th>
+                    <th>AI</th>
                     <th>Status</th>
                     <th>Owner</th>
                     <th></th>
