@@ -404,6 +404,15 @@ class AnalysisStatusOut(BaseModel):
     error_message:               str | None
     outputs_ready:               bool
     org_profile_version_hash:    str | None
+    pipeline_log:                str | None = None
+
+
+class AnalysisLogOut(BaseModel):
+    """Pipeline log output for a single analysis run."""
+    analysis_id:  int
+    contract_id:  str
+    status:       str
+    pipeline_log: str | None
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

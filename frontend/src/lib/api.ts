@@ -809,6 +809,14 @@ export interface AnalysisStatusOut {
   error_message: string | null;
   outputs_ready: boolean;
   org_profile_version_hash: string | null;
+  pipeline_log: string | null;
+}
+
+export interface AnalysisLogOut {
+  analysis_id: number;
+  contract_id: string;
+  status: AnalysisStatus;
+  pipeline_log: string | null;
 }
 
 export function triggerAnalysis(contractId: string): Promise<AnalysisOut> {
@@ -826,6 +834,15 @@ export function getAnalysisStatus(
 
 export function getContractStatus(contractId: string): Promise<AnalysisStatusOut> {
   return request<AnalysisStatusOut>(`/contracts/${contractId}/status`);
+}
+
+export function getAnalysisLogs(
+  contractId: string,
+  analysisId: number,
+): Promise<AnalysisLogOut> {
+  return request<AnalysisLogOut>(
+    `/contracts/${contractId}/analyses/${analysisId}/logs`,
+  );
 }
 
 export function listAnalyses(contractId: string): Promise<AnalysisOut[]> {

@@ -181,6 +181,45 @@ function AnalysisProgress({ jobStatus }: { jobStatus: AnalysisStatusOut }) {
   );
 }
 
+// ── Pipeline log panel ────────────────────────────────────────────────────────
+
+function PipelineLogPanel({ log }: { log: string | null | undefined }) {
+  const [open, setOpen] = useState(false);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when new log lines arrive
+  useEffect(() => {
+    if (open && bodyRef.current) {
+      bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+    }
+  }, [open, log]);
+
+  return (
+    <div className="log-panel">
+      <button
+        className="log-panel-toggle"
+        onClick={() => setOpen((v) => !v)}
+        type="button"
+      >
+        <span className={`log-chevron ${open ? "log-chevron--open" : ""}`}>&#9654;</span>
+        Pipeline Log
+        {log && <span className="text-muted" style={{ fontWeight: 400, marginLeft: "auto" }}>
+          {log.split("\n").length} lines
+        </span>}
+      </button>
+      {open && (
+        log ? (
+          <div className="log-panel-body" ref={bodyRef}>
+            <pre>{log}</pre>
+          </div>
+        ) : (
+          <div className="log-panel-empty">No log output yet.</div>
+        )
+      )}
+    </div>
+  );
+}
+
 // ── Workflow constants ─────────────────────────────────────────────────────────
 
 const REVIEW_STATUSES: ReviewStatus[] = [
@@ -728,6 +767,8 @@ function ContractDetailContent({
         // Seed jobStatus from the latest analysis if one exists
         if (analysesList.length > 0) {
           const latest = analysesList[0];
+          // Seed from analysis list first; the full status (incl. pipeline_log)
+          // will be loaded via the status polling endpoint.
           setJobStatus({
             analysis_id:              latest.id,
             contract_id:              latest.contract_id,
@@ -738,7 +779,14 @@ function ContractDetailContent({
             error_message:            latest.error_message,
             outputs_ready:            latest.outputs_ready,
             org_profile_version_hash: null,
+            pipeline_log:             null,
           });
+          // Immediately fetch full status (with pipeline_log) for completed analyses
+          if (latest.status === "completed" || latest.status === "failed") {
+            getContractStatus(contractId)
+              .then(setJobStatus)
+              .catch(() => null);
+          }
         }
       } catch (err: unknown) {
         if (!cancelled) setPageError(err instanceof Error ? err.message : "Failed to load.");
@@ -791,6 +839,7 @@ function ContractDetailContent({
         error_message:            a.error_message,
         outputs_ready:            a.outputs_ready,
         org_profile_version_hash: null,
+        pipeline_log:             null,
       });
     } catch (err: unknown) {
       if (err instanceof ForbiddenError) {
@@ -982,6 +1031,9 @@ function ContractDetailContent({
 
         {/* Progress panel — shown whenever a job exists */}
         {jobStatus && <AnalysisProgress jobStatus={jobStatus} />}
+
+        {/* Pipeline log viewer — shown whenever a job exists */}
+        {jobStatus && <PipelineLogPanel log={jobStatus.pipeline_log} />}
 
         {/* Action row */}
         <div className="action-row" style={{ marginTop: "1.25rem" }}>

@@ -206,6 +206,7 @@ class Analysis(Base):
     org_profile_version_hash:    Mapped[str|None]  = mapped_column(String(64))
     output_dir:                  Mapped[str]       = mapped_column(String(1024), nullable=False)
     error_message:               Mapped[str|None]  = mapped_column(Text)
+    pipeline_log:                Mapped[str|None]  = mapped_column(Text)
     started_at:         Mapped[datetime|None] = mapped_column(DateTime(timezone=True))
     completed_at:       Mapped[datetime|None] = mapped_column(DateTime(timezone=True))
     created_at:         Mapped[datetime]      = mapped_column(DateTime(timezone=True), default=_utcnow)

@@ -115,6 +115,7 @@ from .schemas import (
     ADMIN_ONLY_STATUSES,
     ANALYST_FINDING_STATUSES,
     ANALYST_SETTABLE_STATUSES,
+    AnalysisLogOut,
     AnalysisOut,
     AnalysisStatusOut,
     ApprovalReadinessOut,
@@ -536,6 +537,32 @@ def _bg_analyze(
 ) -> None:
     from .database import SessionLocal
     db = SessionLocal()
+
+    # ── Capture pipeline log messages into a buffer ──────────────────────────
+    import logging as _logging
+
+    class _LogCapture(_logging.Handler):
+        """Collects formatted log records for later persistence."""
+        def __init__(self) -> None:
+            super().__init__(level=_logging.DEBUG)
+            self.records: list[str] = []
+
+        def emit(self, record: _logging.LogRecord) -> None:
+            try:
+                self.records.append(self.format(record))
+            except Exception:
+                pass
+
+    log_capture = _LogCapture()
+    log_capture.setFormatter(_logging.Formatter(
+        "%(asctime)s [%(name)s] %(levelname)s  %(message)s", datefmt="%H:%M:%S"
+    ))
+    # Attach to the pipeline and llm loggers
+    _pipeline_logger = _logging.getLogger("pipeline")
+    _llm_logger      = _logging.getLogger("llm")
+    _pipeline_logger.addHandler(log_capture)
+    _llm_logger.addHandler(log_capture)
+
     try:
         analysis = db.query(Analysis).filter(Analysis.id == analysis_id).first()
         if analysis is None:
@@ -556,10 +583,10 @@ def _bg_analyze(
         db.commit()
 
         def _stage_cb(stage: str) -> None:
-            """Persist current_stage to DB so the polling endpoint reflects it."""
+            """Persist current_stage and latest log lines to DB."""
             try:
                 db.query(Analysis).filter(Analysis.id == analysis_id).update(
-                    {"current_stage": stage}
+                    {"current_stage": stage, "pipeline_log": "\n".join(log_capture.records)}
                 )
                 db.commit()
             except Exception:
@@ -572,6 +599,9 @@ def _bg_analyze(
             org_profile=org_profile,
             stage_callback=_stage_cb,
         )
+
+        # ── Persist final log ─────────────────────────────────────────────────
+        analysis.pipeline_log = "\n".join(log_capture.records)
 
         # ── Finalise analysis status ──────────────────────────────────────────
         # This MUST commit even if post-processing (finding_reviews, workflow
@@ -652,10 +682,13 @@ def _bg_analyze(
                 analysis.current_stage = None
                 analysis.completed_at  = _utcnow()
                 analysis.error_message = f"Internal error: {exc}"
+                analysis.pipeline_log  = "\n".join(log_capture.records)
                 db.commit()
         except Exception:
             pass
     finally:
+        _pipeline_logger.removeHandler(log_capture)
+        _llm_logger.removeHandler(log_capture)
         db.close()
 
 
@@ -2370,6 +2403,39 @@ def get_analysis_status(
         "error_message":            analysis.error_message,
         "outputs_ready":            analysis.outputs_ready,
         "org_profile_version_hash": analysis.org_profile_version_hash,
+        "pipeline_log":             analysis.pipeline_log,
+    }
+
+
+@app.get(
+    "/contracts/{contract_id}/analyses/{analysis_id}/logs",
+    response_model=AnalysisLogOut,
+    tags=["analysis"],
+    summary="Get pipeline logs for an analysis run (tenant-scoped)",
+)
+def get_analysis_logs(
+    analysis_id: int,
+    contract:    Contract = Depends(get_tenant_contract),
+    db:          Session  = Depends(get_db),
+) -> dict:
+    analysis = (
+        db.query(Analysis)
+        .filter(
+            Analysis.id          == analysis_id,
+            Analysis.contract_id == contract.contract_id,
+        )
+        .first()
+    )
+    if analysis is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Analysis id={analysis_id} not found for contract '{contract.contract_id}'.",
+        )
+    return {
+        "analysis_id":  analysis.id,
+        "contract_id":  analysis.contract_id,
+        "status":       analysis.status,
+        "pipeline_log": analysis.pipeline_log,
     }
 
 
@@ -2408,6 +2474,7 @@ def get_contract_analysis_status(
         "error_message":            analysis.error_message,
         "outputs_ready":            analysis.outputs_ready,
         "org_profile_version_hash": analysis.org_profile_version_hash,
+        "pipeline_log":             analysis.pipeline_log,
     }
 
 
