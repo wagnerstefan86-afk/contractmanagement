@@ -728,3 +728,57 @@ class ClosureBundleOut(BaseModel):
 
 class ErrorOut(BaseModel):
     detail: str
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# LLM SETTINGS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class LLMSettingsOut(BaseModel):
+    """Response for GET /settings/llm — API key is masked."""
+    llm_enabled:      bool
+    provider:         str
+    model:            str
+    api_key_masked:   str
+    timeout_seconds:  int
+
+
+class LLMSettingsIn(BaseModel):
+    """Request body for PUT /settings/llm.  api_key="" means 'keep existing'."""
+    llm_enabled:      bool
+    provider:         str
+    model:            str  = ""
+    api_key:          str  = ""
+    timeout_seconds:  int  = Field(default=60, ge=1, le=600)
+
+    @field_validator("provider")
+    @classmethod
+    def _provider_valid(cls, v: str) -> str:
+        v = v.strip().lower()
+        if v not in ("anthropic", "openai"):
+            raise ValueError("Provider must be 'anthropic' or 'openai'.")
+        return v
+
+
+class LLMTestIn(BaseModel):
+    """Request body for POST /settings/llm/test."""
+    provider:         str
+    api_key:          str
+    model:            str  = ""
+    timeout_seconds:  int  = Field(default=60, ge=1, le=600)
+
+    @field_validator("provider")
+    @classmethod
+    def _provider_valid(cls, v: str) -> str:
+        v = v.strip().lower()
+        if v not in ("anthropic", "openai"):
+            raise ValueError("Provider must be 'anthropic' or 'openai'.")
+        return v
+
+
+class LLMTestOut(BaseModel):
+    """Response for POST /settings/llm/test."""
+    success:  bool
+    message:  str
+    provider: str
+    model:    str

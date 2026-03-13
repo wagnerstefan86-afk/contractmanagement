@@ -28,6 +28,9 @@ export default function Nav({ user }: Props) {
           <Link href="/contracts/upload">Upload</Link>
         )}
         <Link href="/settings/customer-profile">Settings</Link>
+        {user.role === "ADMIN" && (
+          <Link href="/settings/llm">LLM Config</Link>
+        )}
       </div>
       <div className="nav-user">
         <span className="role-badge role-badge--{user.role.toLowerCase()}">{user.role}</span>

@@ -890,3 +890,53 @@ export interface RiskSummaryOut {
 export function getRiskSummary(): Promise<RiskSummaryOut> {
   return request<RiskSummaryOut>("/dashboard/risk-summary");
 }
+
+// ── LLM Settings ─────────────────────────────────────────────────────────────
+
+export interface LLMSettingsOut {
+  llm_enabled:     boolean;
+  provider:        string;
+  model:           string;
+  api_key_masked:  string;
+  timeout_seconds: number;
+}
+
+export interface LLMSettingsIn {
+  llm_enabled:     boolean;
+  provider:        string;
+  model:           string;
+  api_key:         string;
+  timeout_seconds: number;
+}
+
+export interface LLMTestIn {
+  provider:        string;
+  api_key:         string;
+  model:           string;
+  timeout_seconds: number;
+}
+
+export interface LLMTestOut {
+  success:  boolean;
+  message:  string;
+  provider: string;
+  model:    string;
+}
+
+export function getLLMSettings(): Promise<LLMSettingsOut> {
+  return request<LLMSettingsOut>("/settings/llm");
+}
+
+export function updateLLMSettings(settings: LLMSettingsIn): Promise<LLMSettingsOut> {
+  return request<LLMSettingsOut>("/settings/llm", {
+    method: "PUT",
+    body: JSON.stringify(settings),
+  });
+}
+
+export function testLLMConnection(params: LLMTestIn): Promise<LLMTestOut> {
+  return request<LLMTestOut>("/settings/llm/test", {
+    method: "POST",
+    body: JSON.stringify(params),
+  });
+}

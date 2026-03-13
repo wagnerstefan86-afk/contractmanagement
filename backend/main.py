@@ -153,6 +153,10 @@ from .schemas import (
     VersionListOut,
     WorkflowEventOut,
     WorkflowOut,
+    LLMSettingsIn,
+    LLMSettingsOut,
+    LLMTestIn,
+    LLMTestOut,
 )
 
 # ── App bootstrap ─────────────────────────────────────────────────────────────
@@ -3461,3 +3465,210 @@ def update_finding(
     db.commit()
     db.refresh(fr)
     return _finding_review_out(fr)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# LLM SETTINGS  (ADMIN-only, global)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+_LLM_ENV_KEYS = (
+    "LLM_ENABLED", "LLM_PROVIDER", "LLM_MODEL",
+    "LLM_API_KEY", "LLM_TIMEOUT_SECONDS",
+)
+
+
+def _mask_api_key(key: str) -> str:
+    """Return masked version of an API key (last 4 chars visible)."""
+    if not key:
+        return ""
+    if len(key) <= 4:
+        return "****"
+    return "\u2022" * 8 + key[-4:]
+
+
+def _read_current_llm_settings() -> dict[str, Any]:
+    """Read current LLM settings from os.environ."""
+    import backend.config as _config
+    provider = os.getenv("LLM_PROVIDER", "anthropic").strip().lower()
+    # Resolve the active API key the same way llm/config.py does
+    api_key = os.getenv("LLM_API_KEY", "")
+    if not api_key:
+        if provider == "anthropic":
+            api_key = os.getenv("ANTHROPIC_API_KEY", "")
+        elif provider == "openai":
+            api_key = os.getenv("OPENAI_API_KEY", "")
+    return {
+        "llm_enabled":     _config.LLM_ENABLED,
+        "provider":        provider,
+        "model":           os.getenv("LLM_MODEL", ""),
+        "api_key_masked":  _mask_api_key(api_key),
+        "timeout_seconds": _config.LLM_TIMEOUT_SECONDS,
+    }
+
+
+import re as _re
+import tempfile as _tempfile
+
+
+def _write_env_file(updates: dict[str, str]) -> None:
+    """
+    Update (or create) the project .env file with the given key-value pairs.
+    Preserves all non-LLM entries and comments.  Atomic write via temp-file + rename.
+    """
+    from .config import PROJECT_DIR
+    env_path = PROJECT_DIR / ".env"
+
+    lines: list[str] = []
+    if env_path.exists():
+        lines = env_path.read_text().splitlines(keepends=True)
+
+    remaining = dict(updates)
+    new_lines: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        # Match KEY=... (possibly with leading export)
+        m = _re.match(r"^(?:export\s+)?([A-Z_][A-Z0-9_]*)=", stripped)
+        if m and m.group(1) in remaining:
+            key = m.group(1)
+            new_lines.append(f"{key}={remaining.pop(key)}\n")
+        else:
+            new_lines.append(line if line.endswith("\n") else line + "\n")
+
+    # Append keys that were not already in the file
+    for key, val in remaining.items():
+        new_lines.append(f"{key}={val}\n")
+
+    # Atomic write
+    fd, tmp_path = _tempfile.mkstemp(
+        dir=str(env_path.parent), prefix=".env.tmp.", suffix=""
+    )
+    try:
+        with os.fdopen(fd, "w") as f:
+            f.writelines(new_lines)
+        os.replace(tmp_path, str(env_path))
+    except BaseException:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
+
+
+@app.get(
+    "/settings/llm",
+    response_model=LLMSettingsOut,
+    tags=["settings"],
+    summary="Get current LLM configuration",
+    description="**ADMIN role required.**  Returns the current LLM settings.  The API key is masked.",
+)
+def get_llm_settings(
+    current_user: User = Depends(require_admin),
+) -> dict:
+    return _read_current_llm_settings()
+
+
+@app.put(
+    "/settings/llm",
+    response_model=LLMSettingsOut,
+    tags=["settings"],
+    summary="Update LLM configuration",
+    description=(
+        "**ADMIN role required.**  Saves LLM settings to the .env file and "
+        "updates the running process.  Leave `api_key` empty to keep the existing key."
+    ),
+)
+def update_llm_settings(
+    body:         LLMSettingsIn,
+    current_user: User = Depends(require_admin),
+) -> dict:
+    import backend.config as _config
+
+    env_updates: dict[str, str] = {
+        "LLM_ENABLED":         str(body.llm_enabled).lower(),
+        "LLM_PROVIDER":        body.provider,
+        "LLM_MODEL":           body.model,
+        "LLM_TIMEOUT_SECONDS": str(body.timeout_seconds),
+    }
+    if body.api_key:
+        env_updates["LLM_API_KEY"] = body.api_key
+
+    _write_env_file(env_updates)
+
+    # Hot-reload: update os.environ
+    for k, v in env_updates.items():
+        os.environ[k] = v
+
+    # Hot-reload: update module-level cached values
+    _config.LLM_ENABLED = body.llm_enabled
+    _config.LLM_PROVIDER = body.provider
+    _config.LLM_MODEL = body.model
+    _config.LLM_TIMEOUT_SECONDS = body.timeout_seconds
+
+    return _read_current_llm_settings()
+
+
+@app.post(
+    "/settings/llm/test",
+    response_model=LLMTestOut,
+    tags=["settings"],
+    summary="Test LLM connection",
+    description=(
+        "**ADMIN role required.**  Tests the LLM connection with the provided settings "
+        "(without saving).  Makes a minimal API call to verify the key and provider work."
+    ),
+)
+def test_llm_connection(
+    body:         LLMTestIn,
+    current_user: User = Depends(require_admin),
+) -> dict:
+    from llm.config import get_llm_provider, _DEFAULT_MODELS
+
+    model = body.model or _DEFAULT_MODELS.get(body.provider, "")
+    try:
+        provider = get_llm_provider(
+            provider_override=body.provider,
+            model_override=model,
+            api_key_override=body.api_key,
+        )
+    except Exception as exc:
+        return {
+            "success": False,
+            "message": f"Failed to initialise provider: {exc}",
+            "provider": body.provider,
+            "model": model,
+        }
+
+    if provider is None:
+        return {
+            "success": False,
+            "message": "Provider could not be initialised.  Check that the provider library is installed and the API key is set.",
+            "provider": body.provider,
+            "model": model,
+        }
+
+    # Attempt a minimal LLM call
+    try:
+        result = provider.complete_structured(
+            system_prompt="You are a connection test. Respond with exactly the JSON requested.",
+            user_message='Respond with: {"status": "ok"}',
+            json_schema={
+                "type": "object",
+                "properties": {"status": {"type": "string"}},
+                "required": ["status"],
+            },
+            prompt_version="connection_test_v1",
+            max_tokens=64,
+        )
+        return {
+            "success": True,
+            "message": "Connection successful.",
+            "provider": body.provider,
+            "model": model,
+        }
+    except Exception as exc:
+        return {
+            "success": False,
+            "message": f"API call failed: {exc}",
+            "provider": body.provider,
+            "model": model,
+        }
