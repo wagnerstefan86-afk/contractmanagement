@@ -63,12 +63,20 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import logging
 import os
 import shutil
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+# Configure root logger so pipeline / llm.config messages are visible
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(name)s] %(levelname)s  %(message)s",
+    datefmt="%H:%M:%S",
+)
 
 import aiofiles
 from fastapi import (

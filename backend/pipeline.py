@@ -19,13 +19,17 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import logging
 import sys
+import time
 import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Optional
 
 from .config import PROJECT_DIR
+
+log = logging.getLogger("pipeline")
 
 # Ensure the project root is in sys.path so stage modules can import llm.*
 if str(PROJECT_DIR) not in sys.path:
@@ -338,6 +342,8 @@ def analyze_contract(
     Safe to call from a background task; never raises.
     Returns an AnalysisResult with error set on failure.
     """
+    t_pipeline = time.monotonic()
+
     def _cb(stage: str) -> None:
         if stage_callback:
             try:
@@ -361,38 +367,53 @@ def analyze_contract(
     compliance_path  = output_dir / f"stage6_compliance_{contract_id}.json"
     remediation_path = output_dir / "stage8_remediation_proposals.json"
 
+    log.info("═══ Pipeline START for %s ═══  file=%s", contract_id, contract_file.name)
+
     try:
         # ── Stage 16: Ingestion ───────────────────────────────────────────────
         _cb("stage16_ingestion")
+        t0 = time.monotonic()
         ing = ingest_contract(contract_file, output_dir)
+        elapsed = time.monotonic() - t0
         if not ing.ok:
+            log.error("  Stage 16 FAILED (%.2fs): %s", elapsed, ing.error)
             return AnalysisResult(report=None, error=ing.error)
+        log.info("  Stage 16 Ingestion       OK  %.2fs  clauses=%d", elapsed, len(ing.clauses))
 
         # ── Stage 3: Contract Classification ─────────────────────────────────
         _cb("stage3_classification")
+        t0 = time.monotonic()
         _stage3.run(
             input_path   = str(clauses_path),
             contract_id  = contract_id,
             output_path  = str(metadata_path),
             skip_llm     = False,
         )
+        log.info("  Stage 3  Classification  OK  %.2fs", time.monotonic() - t0)
 
         # ── Initialise LLM provider (shared across stages 4.5, 5, 8) ─────────
         llm_provider: Optional[Any] = None
         try:
             from llm.config import get_llm_provider as _get_llm
             llm_provider = _get_llm()
-        except Exception:
-            pass  # LLM unavailable — all stages fall back to deterministic
+        except Exception as llm_exc:
+            log.warning("  LLM init failed: %s", llm_exc)
+
+        if llm_provider is not None:
+            log.info("  LLM provider: %s  model=%s", type(llm_provider).__name__, getattr(llm_provider, 'model', '?'))
+        else:
+            log.warning("  LLM provider: None — all stages will use DETERMINISTIC fallback")
 
         # ── Stage 4.5: Obligation Analysis ────────────────────────────────────
         _cb("stage4_5_obligation_analysis")
+        t0 = time.monotonic()
         _stage4_5.run(
             input_path    = str(clauses_path),
             output_path   = str(obligations_path),
             include_valid = False,
             llm_provider  = llm_provider,
         )
+        log.info("  Stage 4.5 Obligations    OK  %.2fs  (LLM=%s)", time.monotonic() - t0, llm_provider is not None)
 
         # ── Write org_profile.json for use by stage 5 & 6 ────────────────────
         org_profile_path.write_text(
@@ -402,6 +423,7 @@ def analyze_contract(
 
         # ── Stage 5: Clause-to-SR Matching ────────────────────────────────────
         _cb("stage5_clause_matching")
+        t0 = time.monotonic()
         _stage5.run(
             org_profile_path = str(org_profile_path),
             metadata_path    = str(metadata_path),
@@ -409,9 +431,11 @@ def analyze_contract(
             output_path      = str(matches_path),
             llm_provider     = llm_provider,
         )
+        log.info("  Stage 5  Matching        OK  %.2fs  (LLM=%s)", time.monotonic() - t0, llm_provider is not None)
 
         # ── Stage 6: Compliance Report ────────────────────────────────────────
         _cb("stage6_compliance")
+        t0 = time.monotonic()
         clause_matches, stage45, org, metadata = _stage6.load_inputs(
             clause_matches_path = str(matches_path),
             stage45_path        = str(obligations_path),
@@ -423,9 +447,11 @@ def analyze_contract(
             json.dumps(compliance_report, indent=2, ensure_ascii=False),
             encoding="utf-8",
         )
+        log.info("  Stage 6  Compliance      OK  %.2fs", time.monotonic() - t0)
 
         # ── Stage 8: Remediation Proposals ───────────────────────────────────
         _cb("stage8_remediation")
+        t0 = time.monotonic()
         clause_index     = _stage8._build_clause_index(str(clauses_path))
         obligations_data = json.loads(obligations_path.read_text(encoding="utf-8"))
         findings         = _stage8.extract_findings(compliance_report, obligations_data)
@@ -440,6 +466,8 @@ def analyze_contract(
             json.dumps(proposals, indent=2, ensure_ascii=False),
             encoding="utf-8",
         )
+        log.info("  Stage 8  Remediation     OK  %.2fs  findings=%d proposals=%d (LLM=%s)",
+                 time.monotonic() - t0, len(findings), len(proposals), llm_provider is not None)
 
     except (IngestionError, PipelineError):
         raise
@@ -449,6 +477,7 @@ def analyze_contract(
             error=f"Stage aborted (exit code {exc.code})",
         )
     except Exception as exc:
+        log.error("  Pipeline preparation FAILED: %s", exc, exc_info=True)
         return AnalysisResult(
             report=None,
             error=f"Pipeline preparation failed: {exc}\n" + traceback.format_exc(),
@@ -463,9 +492,14 @@ def analyze_contract(
         "obligations":    obligations_path,
     }
     try:
+        t0 = time.monotonic()
         report = run_audit_pipeline(paths, contract_id, output_dir,
                                     stage_callback=stage_callback)
+        log.info("  Stages 9-14 Audit        OK  %.2fs", time.monotonic() - t0)
         _cb("done")
+        total = time.monotonic() - t_pipeline
+        log.info("═══ Pipeline DONE for %s ═══  total=%.2fs", contract_id, total)
         return AnalysisResult(report=report, error=None)
     except PipelineError as exc:
+        log.error("  Stages 9-14 FAILED: %s", exc)
         return AnalysisResult(report=None, error=str(exc))
