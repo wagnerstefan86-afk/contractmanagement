@@ -3655,10 +3655,18 @@ def test_llm_connection(
                 "type": "object",
                 "properties": {"status": {"type": "string"}},
                 "required": ["status"],
+                "additionalProperties": False,
             },
             prompt_version="connection_test_v1",
             max_tokens=64,
         )
+        if result is None:
+            return {
+                "success": False,
+                "message": "Provider returned no response after retries. Check API key, model name, and provider status.",
+                "provider": body.provider,
+                "model": model,
+            }
         return {
             "success": True,
             "message": "Connection successful.",
