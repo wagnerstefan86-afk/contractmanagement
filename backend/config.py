@@ -12,6 +12,10 @@ from pathlib import Path
 # ── Project root (the directory that contains contract_audit.py) ──────────────
 PROJECT_DIR = Path(__file__).resolve().parent.parent   # /home/user
 
+# ── Load .env file (if it exists) before reading any config values ────────────
+from dotenv import load_dotenv
+load_dotenv(PROJECT_DIR / ".env", override=False)
+
 # ── Storage roots ─────────────────────────────────────────────────────────────
 CONTRACTS_DIR = PROJECT_DIR / "contracts"   # uploaded contract files
 ANALYSES_DIR  = PROJECT_DIR / "analyses"   # pipeline output per contract

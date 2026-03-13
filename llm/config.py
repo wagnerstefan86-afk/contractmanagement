@@ -20,7 +20,12 @@ from __future__ import annotations
 
 import logging
 import os
+from pathlib import Path
 from typing import Optional
+
+# Ensure .env is loaded even when llm.config is imported directly (e.g. by CLI stage scripts)
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=False)
 
 log = logging.getLogger("llm.config")
 

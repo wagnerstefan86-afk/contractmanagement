@@ -1,6 +1,9 @@
 # Contract Analysis Platform — Python dependencies
 # Install with: pip install -r requirements.txt
 
+# ── Configuration ──────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0
+
 # ── Web framework ──────────────────────────────────────────────────────────────
 fastapi>=0.111.0
 uvicorn[standard]>=0.29.0
