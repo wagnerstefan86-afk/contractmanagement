@@ -555,7 +555,7 @@ def _bg_analyze(
                 )
                 db.commit()
             except Exception:
-                pass
+                db.rollback()  # keep session usable after failures (e.g. SQLite lock)
 
         result = analyze_contract(
             contract_file=contract_file,
@@ -565,9 +565,13 @@ def _bg_analyze(
             stage_callback=_stage_cb,
         )
 
+        # ── Finalise analysis status ──────────────────────────────────────────
+        # This MUST commit even if post-processing (finding_reviews, workflow
+        # events, etc.) fails — otherwise the analysis stays "running" forever
+        # while current_stage is already "done", causing the UI to spin.
         analysis.completed_at = _utcnow()
         if result.ok:
-            m = result.report.get("metadata", {})
+            m = result.report.get("metadata", {}) if result.report else {}
             analysis.status              = "completed"
             analysis.current_stage       = "done"
             analysis.overall_risk        = m.get("overall_risk")
@@ -578,40 +582,71 @@ def _bg_analyze(
             analysis.low_risk_clauses    = m.get("low_risk_clauses")
             analysis.outputs_ready       = True
             analysis.error_message       = None
-            contract = db.query(Contract).filter(
-                Contract.contract_id == contract_id
-            ).first()
-            if contract:
-                contract.status     = "analyzed"
-                contract.updated_at = _utcnow()
-                # Auto-advance review_status when still in pipeline-controlled states
-                if contract.review_status in ("uploaded", "ingested"):
-                    old_rs = contract.review_status
-                    contract.review_status = "analysis_completed"
-                    _emit_workflow_event(
-                        db, contract_id,
-                        new_status="analysis_completed", old_status=old_rs,
-                        notes="Auto-advanced after successful analysis",
+            # Commit the core status FIRST so the UI sees "completed"
+            db.commit()
+
+            # Post-processing: update contract/version status, generate reviews.
+            # Failures here must not revert the analysis to "running".
+            try:
+                contract = db.query(Contract).filter(
+                    Contract.contract_id == contract_id
+                ).first()
+                if contract:
+                    contract.status     = "analyzed"
+                    contract.updated_at = _utcnow()
+                    # Auto-advance review_status when still in pipeline-controlled states
+                    if contract.review_status in ("uploaded", "ingested"):
+                        old_rs = contract.review_status
+                        contract.review_status = "analysis_completed"
+                        _emit_workflow_event(
+                            db, contract_id,
+                            new_status="analysis_completed", old_status=old_rs,
+                            notes="Auto-advanced after successful analysis",
+                        )
+                # Also advance the version's review_status
+                if version_id:
+                    ver = db.query(ContractVersion).filter(ContractVersion.id == version_id).first()
+                    if ver and ver.review_status in ("uploaded", "ingested"):
+                        ver.review_status = "analysis_completed"
+                # Auto-generate finding_review rows
+                if version_id:
+                    _generate_finding_reviews(
+                        db=db,
+                        contract_id=contract_id,
+                        version_id=version_id,
+                        analysis_id=analysis_id,
+                        output_dir=output_dir,
                     )
-            # Also advance the version's review_status
-            if version_id:
-                ver = db.query(ContractVersion).filter(ContractVersion.id == version_id).first()
-                if ver and ver.review_status in ("uploaded", "ingested"):
-                    ver.review_status = "analysis_completed"
-            # Auto-generate finding_review rows
-            if version_id:
-                _generate_finding_reviews(
-                    db=db,
-                    contract_id=contract_id,
-                    version_id=version_id,
-                    analysis_id=analysis_id,
-                    output_dir=output_dir,
+                db.commit()
+            except Exception as post_exc:
+                import logging as _logging
+                _logging.getLogger(__name__).error(
+                    "Post-analysis processing failed for analysis %s: %s",
+                    analysis_id, post_exc, exc_info=True,
                 )
+                db.rollback()
         else:
             analysis.status        = "failed"
             analysis.current_stage = None
             analysis.error_message = result.error
-        db.commit()
+            db.commit()
+    except Exception as exc:
+        # Last-resort: ensure analysis never stays stuck on "running"
+        import logging as _logging
+        _logging.getLogger(__name__).error(
+            "Background analysis %s crashed: %s", analysis_id, exc, exc_info=True,
+        )
+        try:
+            db.rollback()
+            analysis = db.query(Analysis).filter(Analysis.id == analysis_id).first()
+            if analysis and analysis.status == "running":
+                analysis.status        = "failed"
+                analysis.current_stage = None
+                analysis.completed_at  = _utcnow()
+                analysis.error_message = f"Internal error: {exc}"
+                db.commit()
+        except Exception:
+            pass
     finally:
         db.close()
 
