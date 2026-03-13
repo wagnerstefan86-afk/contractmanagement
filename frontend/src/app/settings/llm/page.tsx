@@ -33,8 +33,15 @@ function LLMSettingsContent({ user }: { user: SessionUser }) {
 
   const [config,  setConfig]  = useState<LLMConfigOut | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState("");
-  const [saved,   setSaved]   = useState(false);
+  const [error,   setError]   = useState("");          // page-level load error only
+
+  // Toggle state (separate from provider form)
+  const [toggleError,  setToggleError]  = useState("");
+  const [toggleSaved,  setToggleSaved]  = useState(false);
+
+  // Provider form state
+  const [formError,    setFormError]    = useState("");
+  const [formSaved,    setFormSaved]    = useState(false);
 
   // Edit form state
   const [editProvider,  setEditProvider]  = useState("");
@@ -62,14 +69,14 @@ function LLMSettingsContent({ user }: { user: SessionUser }) {
   // ── Toggle app-level switch ──────────────────────────────────────────────────
   async function handleToggle(newVal: boolean) {
     if (!config) return;
-    setSaving(true); setError(""); setSaved(false);
+    setSaving(true); setToggleError(""); setToggleSaved(false);
     try {
       const updated = await updateLLMConfig({ app_llm_enabled: newVal });
       setConfig(updated);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      setToggleSaved(true);
+      setTimeout(() => setToggleSaved(false), 3000);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Save failed.");
+      setToggleError(e instanceof Error ? e.message : "Save failed.");
     } finally {
       setSaving(false);
     }
@@ -78,7 +85,7 @@ function LLMSettingsContent({ user }: { user: SessionUser }) {
   // ── Save provider / model / key / timeout ────────────────────────────────────
   async function handleSaveProviderConfig(e: React.FormEvent) {
     e.preventDefault();
-    setSaving(true); setError(""); setSaved(false); setTestResult(null);
+    setSaving(true); setFormError(""); setFormSaved(false); setTestResult(null);
     try {
       const patch: Record<string, unknown> = {
         provider:        editProvider,
@@ -92,10 +99,10 @@ function LLMSettingsContent({ user }: { user: SessionUser }) {
       const updated = await updateLLMConfig(patch);
       setConfig(updated);
       setEditApiKey("");   // clear after save — never echo back
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      setFormSaved(true);
+      setTimeout(() => setFormSaved(false), 4000);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Save failed.");
+      setFormError(e instanceof Error ? e.message : "Save failed.");
     } finally {
       setSaving(false);
     }
@@ -151,7 +158,6 @@ function LLMSettingsContent({ user }: { user: SessionUser }) {
         </div>
 
         {error && <div className="error-box" style={{ marginBottom: "1rem" }}>{error}</div>}
-        {saved && <div className="success-box" style={{ marginBottom: "1rem" }}>Settings saved.</div>}
 
         {/* ── Effective status overview ─────────────────────────────────────── */}
         <div className="section">
@@ -223,7 +229,7 @@ function LLMSettingsContent({ user }: { user: SessionUser }) {
             <p className="page-subtitle" style={{ marginBottom: "1rem" }}>
               Enable or disable AI-assisted analysis for all users without changing provider settings.
             </p>
-            <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+            <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
               <button
                 className={`btn ${config.app_llm_enabled ? "btn-primary" : "btn-outline"}`}
                 onClick={() => handleToggle(true)}
@@ -239,7 +245,15 @@ function LLMSettingsContent({ user }: { user: SessionUser }) {
                 Disable AI analysis
               </button>
               {saving && <span className="text-muted" style={{ fontSize: "0.85rem" }}>Saving…</span>}
+              {toggleSaved && !saving && (
+                <span style={{ color: "var(--color-success, #16a34a)", fontSize: "0.85rem", fontWeight: 500 }}>
+                  ✓ Saved
+                </span>
+              )}
             </div>
+            {toggleError && (
+              <div className="error-box" style={{ marginTop: "0.75rem" }}>{toggleError}</div>
+            )}
           </div>
         )}
 
@@ -339,11 +353,19 @@ function LLMSettingsContent({ user }: { user: SessionUser }) {
                 />
               </div>
 
-              <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+              <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
                 <button type="submit" className="btn btn-primary" disabled={saving}>
                   {saving ? "Saving…" : "Save provider config"}
                 </button>
+                {formSaved && !saving && (
+                  <span style={{ color: "var(--color-success, #16a34a)", fontSize: "0.85rem", fontWeight: 500 }}>
+                    ✓ Settings saved
+                  </span>
+                )}
               </div>
+              {formError && (
+                <div className="error-box" style={{ marginTop: "0.75rem" }}>{formError}</div>
+              )}
             </form>
           </div>
         )}
