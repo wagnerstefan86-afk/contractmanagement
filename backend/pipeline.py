@@ -68,7 +68,7 @@ class IngestionError(RuntimeError):
     """Raised when stage16 fails for any reason."""
 
 
-def run_ingestion(contract_file: Path, output_dir: Path) -> list[dict]:
+def run_ingestion(contract_file: Path, output_dir: Path, llm_provider: Any = None) -> list[dict]:
     """
     Run stage16 on *contract_file* and write stage4_clauses.json into
     *output_dir*.
@@ -87,7 +87,7 @@ def run_ingestion(contract_file: Path, output_dir: Path) -> list[dict]:
     clauses_path = output_dir / "stage4_clauses.json"
 
     try:
-        clauses = _ingestion.ingest(contract_file)
+        clauses = _ingestion.ingest(contract_file, llm_provider=llm_provider)
     except Exception as exc:
         raise IngestionError(f"Stage16 ingestion failed: {exc}") from exc
 
@@ -261,13 +261,13 @@ class AnalysisResult:
         return self.error is None
 
 
-def ingest_contract(contract_file: Path, output_dir: Path) -> IngestionResult:
+def ingest_contract(contract_file: Path, output_dir: Path, llm_provider: Any = None) -> IngestionResult:
     """
     Top-level ingestion wrapper — safe to call from a background task.
     Never raises; returns an IngestionResult with error set on failure.
     """
     try:
-        clauses = run_ingestion(contract_file, output_dir)
+        clauses = run_ingestion(contract_file, output_dir, llm_provider=llm_provider)
         return IngestionResult(clauses=clauses, error=None)
     except IngestionError as exc:
         return IngestionResult(clauses=None, error=str(exc))
@@ -363,26 +363,10 @@ def analyze_contract(
     remediation_path = output_dir / "stage8_remediation_proposals.json"
 
     try:
-        # ── Stage 16: Ingestion ───────────────────────────────────────────────
-        _cb("stage16_ingestion")
-        ing = ingest_contract(contract_file, output_dir)
-        if not ing.ok:
-            return AnalysisResult(report=None, error=ing.error)
-
-        # ── Stage 3: Contract Classification ─────────────────────────────────
-        _overrides = llm_overrides or {}
-        _cb("stage3_classification")
-        _stage3.run(
-            input_path   = str(clauses_path),
-            contract_id  = contract_id,
-            output_path  = str(metadata_path),
-            skip_llm     = False,
-            api_key      = _overrides.get("api_key") or None,
-        )
-
-        # ── Initialise LLM provider (shared across stages 4.5, 5, 8) ─────────
+        # ── Initialise LLM provider (shared across all LLM stages incl. 16) ──
         # llm_overrides carries DB-backed admin config (provider, model, api_key,
         # timeout, app_enabled).  Falls back to env-var defaults when not supplied.
+        _overrides = llm_overrides or {}
         llm_provider: Optional[Any] = None
         try:
             from llm.config import get_llm_provider as _get_llm
@@ -395,6 +379,22 @@ def analyze_contract(
             # else: app_enabled=False → stay None → deterministic fallback
         except Exception:
             pass  # LLM unavailable — all stages fall back to deterministic
+
+        # ── Stage 16: Ingestion (LLM-assisted segmentation when available) ───
+        _cb("stage16_ingestion")
+        ing = ingest_contract(contract_file, output_dir, llm_provider=llm_provider)
+        if not ing.ok:
+            return AnalysisResult(report=None, error=ing.error)
+
+        # ── Stage 3: Contract Classification ─────────────────────────────────
+        _cb("stage3_classification")
+        _stage3.run(
+            input_path   = str(clauses_path),
+            contract_id  = contract_id,
+            output_path  = str(metadata_path),
+            skip_llm     = False,
+            api_key      = _overrides.get("api_key") or None,
+        )
 
         # ── Stage 4.5: Obligation Analysis ────────────────────────────────────
         _cb("stage4_5_obligation_analysis")

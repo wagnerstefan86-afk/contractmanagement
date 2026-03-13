@@ -89,14 +89,18 @@ CAPS_WORD_RATIO   = 0.70     # fraction of uppercase words → ALL-CAPS heading
 # Regex patterns
 _RE_NUMBERED_HDG = regex.compile(
     r"""
-    ^\s*                         # optional leading space
+    ^\s*                              # optional leading space
     (?:
-        (?:\d{1,2}\.){1,4}\d{0,2}   # 1.  /  1.1  /  1.2.3  /  1.2.3.4
+        §\s*\d{1,3}[a-z]?            # § 1  § 25b  § 1a  (German paragraphs)
+        |
+        Art(?:icle|\.?)\s*\d{1,3}    # Article 1  Art. 5  Art 12  (intl contracts)
+        |
+        (?:\d{1,2}\.){1,4}\d{0,2}    # 1.  /  1.1  /  1.2.3  /  1.2.3.4
         |
         [IVXLCDM]{1,6}\.             # roman numerals  I.  II.  XIV.
     )
-    \s{1,4}                      # separator
-    [A-ZÜÄÖÑ\"]                  # starts with uppercase
+    [\s\-–]{0,4}                     # separator (space, dash, en-dash)
+    [A-ZÜÄÖÑA-Z\"]                   # starts with uppercase (incl. German Umlauts)
     """,
     regex.VERBOSE | regex.MULTILINE,
 )
@@ -804,20 +808,119 @@ def build_output(candidates: list[ClauseCandidate]) -> list[dict]:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# LLM-ASSISTED SEGMENTATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Maximum characters of raw text to send in a single LLM segmentation call.
+# GPT-4o / GPT-4.5 support 128K tokens; ~90K chars is a safe limit (~60K tokens).
+_LLM_SEG_CHUNK_CHARS = 90_000
+_LLM_SEG_OVERLAP_CHARS = 4_000   # overlap between chunks to avoid splitting a §
+
+
+def _llm_segment_clauses(raw_text: str, llm_provider: object) -> list[dict] | None:
+    """
+    Use the configured LLM to identify all InfoSec/compliance-relevant passages
+    in *raw_text*.  Returns a list of clause dicts or None on failure.
+
+    Each returned dict has: clause_id, page, layout_type, text,
+    category, relevance_reason.
+    """
+    try:
+        from llm.prompts import (
+            SEGMENTATION_SYSTEM_PROMPT,
+            SEGMENTATION_OUTPUT_SCHEMA,
+            PROMPT_VERSION_SEGMENTATION,
+            build_segmentation_user_message,
+        )
+    except ImportError:
+        return None
+
+    # ── Split into chunks if the text is very long ────────────────────────────
+    chunks: list[str] = []
+    if len(raw_text) <= _LLM_SEG_CHUNK_CHARS:
+        chunks = [raw_text]
+    else:
+        start = 0
+        while start < len(raw_text):
+            end = start + _LLM_SEG_CHUNK_CHARS
+            chunks.append(raw_text[start:end])
+            start = end - _LLM_SEG_OVERLAP_CHARS
+
+    all_segments: list[dict] = []
+    for chunk in chunks:
+        user_msg = build_segmentation_user_message(chunk)
+        try:
+            response = llm_provider.complete_structured(
+                system_prompt  = SEGMENTATION_SYSTEM_PROMPT,
+                user_message   = user_msg,
+                json_schema    = SEGMENTATION_OUTPUT_SCHEMA,
+                prompt_version = PROMPT_VERSION_SEGMENTATION,
+                max_tokens     = 4096,
+            )
+        except Exception:
+            return None  # any LLM error → fall back to rule-based
+
+        if response is None:
+            return None
+
+        segments = (response.content or {}).get("segments", [])
+        if not isinstance(segments, list):
+            return None
+        all_segments.extend(segments)
+
+    if not all_segments:
+        return None
+
+    # ── Build clause dicts compatible with stage4_clauses.json schema ─────────
+    clauses: list[dict] = []
+    seen_texts: set[str] = set()
+    seq = 1
+    for seg in all_segments:
+        text = _normalise(str(seg.get("text", "")).strip())
+        if len(text) < MIN_CLAUSE_CHARS:
+            continue
+        # De-duplicate overlapping chunks that may produce the same passage twice
+        key = text[:120]
+        if key in seen_texts:
+            continue
+        seen_texts.add(key)
+
+        category = seg.get("category") or "other_relevant"
+        clauses.append({
+            "clause_id":        f"CL-{seq:03d}",
+            "page":             int(seg.get("page_hint") or 1),
+            "layout_type":      category,          # reuse layout_type slot for category
+            "text":             text,
+            "category":         category,
+            "relevance_reason": str(seg.get("relevance_reason") or ""),
+        })
+        seq += 1
+
+    return clauses if clauses else None
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # PUBLIC API
 # ═══════════════════════════════════════════════════════════════════════════════
 
 SUPPORTED_FORMATS = {".pdf", ".docx", ".txt"}
 
 
-def ingest(contract_path: str | Path) -> list[dict]:
+def ingest(contract_path: str | Path, llm_provider: object = None) -> list[dict]:
     """
     Main entry point.  Convert a contract file to the stage4_clauses.json list.
+
+    When *llm_provider* is supplied the LLM performs intelligent segmentation:
+    it reads the full contract text and returns all InfoSec/compliance-relevant
+    passages regardless of document structure (§, Article, numbered sections…).
+    Falls back to rule-based heading segmentation when the LLM is unavailable.
 
     Parameters
     ----------
     contract_path : str | Path
         Path to the contract file (.pdf, .docx, or .txt)
+    llm_provider : BaseLLMProvider | None
+        Configured LLM provider for intelligent segmentation (optional).
 
     Returns
     -------
@@ -854,7 +957,15 @@ def ingest(contract_path: str | Path) -> list[dict]:
     for b in blocks:
         b.text = _normalise(b.text)
 
-    # ── 3. Segment into clause candidates ─────────────────────────────────────
+    # ── 3a. LLM-assisted segmentation (preferred) ─────────────────────────────
+    if llm_provider is not None:
+        raw_text = "\n\n".join(b.text for b in blocks if b.text.strip())
+        llm_clauses = _llm_segment_clauses(raw_text, llm_provider)
+        if llm_clauses:
+            return llm_clauses
+        # LLM returned nothing useful → fall through to rule-based
+
+    # ── 3b. Rule-based segmentation (fallback) ────────────────────────────────
     candidates = segment_clauses(blocks)
 
     # ── 4. Build and return output ─────────────────────────────────────────────

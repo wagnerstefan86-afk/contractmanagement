@@ -153,11 +153,18 @@ OBLIGATION_OUTPUT_SCHEMA: dict = {
 
 
 def build_obligation_user_message(clause: dict, output_schema: dict) -> str:
+    category_line = ""
+    if clause.get("category"):
+        category_line = f"Pre-classified category: {clause['category']}"
+        if clause.get("relevance_reason"):
+            category_line += f" ({clause['relevance_reason']})"
+        category_line += "\n"
     return (
         f"Clause ID: {clause['clause_id']} | "
         f"Page: {clause.get('page')} | "
-        f"Layout: {clause.get('layout_type')}\n\n"
-        f"Text:\n{clause['text']}\n\n"
+        f"Layout: {clause.get('layout_type')}\n"
+        f"{category_line}"
+        f"\nText:\n{clause['text']}\n\n"
         f"Output schema:\n{__import__('json').dumps(output_schema, indent=2)}"
     )
 
@@ -423,4 +430,94 @@ def build_remediation_user_message(
         f"Rule-based problem summary (refine this for the specific clause):\n"
         f"{rule_proposal['problem_summary']}\n\n"
         f"Generate a remediation proposal specific to this clause."
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STAGE 16 — LLM-assisted Contract Segmentation
+# ═══════════════════════════════════════════════════════════════════════════════
+
+PROMPT_VERSION_SEGMENTATION = "segmentation_v1"
+
+SEGMENTATION_SYSTEM_PROMPT = """You are a contract analysis expert specialising in \
+information security, IT outsourcing, and regulatory compliance.
+
+Your task: read the full contract text and identify ALL passages that are relevant \
+from an InfoSec or regulatory compliance perspective.
+
+Relevant topics include (but are not limited to):
+- Information security obligations, security standards, certifications (ISO 27001, SOC2…)
+- IT outsourcing rules and subcontracting restrictions
+- Data protection and privacy (GDPR, BDSG…)
+- Audit rights and access obligations
+- Incident management, breach notification, SLAs
+- Liability, indemnification, and penalties
+- Regulatory compliance references (DORA, BAIT, KWG § 25b, NIS2, MaRisk…)
+- Termination, exit provisions, and data return with security implications
+- Scope and responsibility definitions affecting security
+
+Rules:
+1. Return ALL relevant passages — do not summarise or paraphrase. Use the EXACT verbatim \
+text from the contract.
+2. Group all sub-paragraphs of the same § or Article into a single segment.
+3. Ignore purely administrative clauses (signatures, payment terms, delivery addresses) \
+unless they have a security/compliance angle.
+4. If the document language is German, still return category and relevance_reason in English.
+5. page_hint: best estimate of the page number (1-indexed); use 1 if unknown."""
+
+SEGMENTATION_OUTPUT_SCHEMA: dict = {
+    "type": "object",
+    "required": ["segments"],
+    "additionalProperties": False,
+    "properties": {
+        "segments": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["text", "category", "relevance_reason"],
+                "additionalProperties": False,
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "description": "Verbatim passage from the contract"
+                    },
+                    "category": {
+                        "type": "string",
+                        "enum": [
+                            "outsourcing_regulation",
+                            "data_security",
+                            "audit_rights",
+                            "incident_management",
+                            "liability",
+                            "sla",
+                            "exit_provision",
+                            "regulatory_reference",
+                            "scope",
+                            "other_relevant",
+                        ],
+                        "description": "InfoSec/compliance category of this passage"
+                    },
+                    "relevance_reason": {
+                        "type": "string",
+                        "description": "One sentence explaining why this passage is infosec/regulatory relevant"
+                    },
+                    "page_hint": {
+                        "type": "integer",
+                        "description": "Best estimate of page number (1-indexed)",
+                        "default": 1,
+                    },
+                },
+            },
+        }
+    },
+}
+
+
+def build_segmentation_user_message(raw_text: str) -> str:
+    return (
+        "Please analyse the following contract and identify all passages relevant to "
+        "information security, IT outsourcing, and regulatory compliance.\n\n"
+        "--- CONTRACT TEXT START ---\n"
+        f"{raw_text}\n"
+        "--- CONTRACT TEXT END ---"
     )
